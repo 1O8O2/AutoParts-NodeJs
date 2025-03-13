@@ -1,0 +1,78 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    title Thông tin tài khoản
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css', integrity='sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==', crossorigin='anonymous', referrerpolicy='no-referrer')
+    link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', rel='stylesheet', integrity='sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC', crossorigin='anonymous')
+    link(href='/css/profile.css', rel='stylesheet')
+  body
+    .sidebar
+      form(method='POST', action='/AutoParts/account/edit', data-oc-toggle='ajax')
+        img#user_icon(src='https://i.pinimg.com/474x/89/90/48/899048ab0cc455154006fdb9676964b3.jpg', width='100px', height='100px', alt='')
+        p
+          input(type='hidden', name='cartId', value=customer.cartId, required)
+        p.input-field
+          label Họ và tên
+          input(type='text', name='fullName', value=customer.fullName, disabled, required)
+        p.input-field
+          label Số điện thoại
+          input(type='tel', name='phone', value=customer.phone, disabled, required)
+        p.input-field
+          label Địa chỉ
+          input(type='text', name='address', value=customer.address, disabled, required)
+        p
+          label Trạng thái
+          if customer.status === 'Active'
+            label(style='color: green;') Đang hoạt động
+          else if customer.status === 'Inactive'
+            label Ngưng hoạt động
+          input(type='hidden', name='status', value=customer.status, required)
+        .buttons
+          button.button.edit-btn#edit-btn(type='submit') Chỉnh sửa
+      .menu
+        a.order.choosed
+          i.fa-solid.fa-box-open
+          | Thông tin đơn hàng
+        a.setting
+          i.fa-solid.fa-lock
+          | Đổi mật khẩu
+        a(href='/')
+          i.fa-solid.fa-house
+          | Trang chủ
+        a.delete-btn(href='/logout')
+          i.fa-solid.fa-right-from-bracket
+          | Đăng xuất
+    .content
+      .orders
+        header.header
+          h1 Lịch sử đơn hàng
+        each order in orders
+          .order-item(data-order=order)
+            p
+              strong Mã đơn hàng: 
+              | #{order.orderId}
+            p
+              strong Ngày: 
+              | #{order.orderDate}
+            p
+              strong Tổng tiền: 
+              | #{order.totalCost}
+            p
+              strong Trạng thái: 
+              | #{order.status}
+            a.button.nav-btn(href=`/order?orderId=${order.orderId}`) Xem chi tiết đơn hàng
+      form.change-password.hide(action='/AutoParts/account/changepass', method='post')
+        h3 Đổi mật khẩu
+        .form-item
+          input(type='password', name='pass', placeholder='Mật khẩu hiện tại', required)
+          i.fa-solid.fa-eye
+          i.fa-solid.fa-eye-slash
+        .form-item
+          input(type='password', name='newpass', placeholder='Mật khẩu mới', required)
+          i.fa-solid.fa-eye
+          i.fa-solid.fa-eye-slash
+        .form-item
+          input(type='password', placeholder='Xác nhận mật khẩu mới', required)
+        button Cập nhật
+    script(src='/js/profile.js')

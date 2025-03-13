@@ -1,0 +1,46 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    title Autopart
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css', integrity='sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==', crossorigin='anonymous', referrerpolicy='no-referrer')
+    link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', rel='stylesheet', integrity='sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC', crossorigin='anonymous')
+    link(href='/css/dashboard.css', rel='stylesheet')
+    link(href='/css/base.css', rel='stylesheet')
+    link(rel='icon', type='image/x-icon', href='https://down-bs-vn.img.susercontent.com/vn-11134216-7ras8-m2ko7nkbfksm02_tn.webp')
+
+  body
+    .wrapper#dashboard
+      include ./mixins/header.pug
+
+      .banner
+        img(src='https://html.themability.com/autoelite/assets/images/banners/mainbanner1.png', alt='main-img')
+
+      .cat-container
+        .categories#categories
+          .categories_title
+            h1.part-name Danh mục
+          .categories_list
+            - const categories = ['Động cơ', 'Động cơ', 'Động cơ', 'Động cơ', 'Động cơ', 'Động cơ']
+            each category, index in categories
+              .categories_list-item
+                a.item-img(href='#')
+                  img(src=`https://html.themability.com/autoelite/assets/images/categories/${index + 1}.png`, alt='')
+                span.item-title #{category}
+
+        .list-card
+          .products_title
+            h1.part-name#products Sản phẩm nổi bật
+          .products_list
+            each product in products
+              .card(style='width: 16rem;')
+                a(href=`/autopart/product/detailproduct.htm?productId=${product.productId}`)
+                  img.card-img-top(src=product.imageUrls, alt='...')
+                .card-body
+                  h5.card-title #{product.productName}
+                  p.card-text #{product.description}
+                  p Giá bán: #{product.salePrice}đ
+          div
+            a(href='/autopart/product/search.htm?keyword=') Xem tất cả
+
+      include ./mixins/footer.pug

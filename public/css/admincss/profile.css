@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .wrapper{
+       		display: flex;
+       		margin-left: 200px;
+       		padding-top: 120px;
+    	}
+        .container {
+            width: 80%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .info {
+            margin: 20px 0;
+        }
+        .info label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .info span {
+            display: block;
+            margin-bottom: 15px;
+        }
