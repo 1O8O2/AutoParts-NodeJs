@@ -25,7 +25,7 @@ const {loginAuth} = require('./middlewares/loginAuth.middleware')
 
 app.use('/AutoParts', dashboardRoute);
 app.use('/AutoParts/blog', blogRoute);
-app.use('/AutoParts/account', loginAuth, accountRoute);
+app.use('/AutoParts/account',accountRoute);
 
 
 // Sequelize database setup

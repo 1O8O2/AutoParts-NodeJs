@@ -9,9 +9,9 @@ router.get('/login', controller.showLogIn);
 router.post('/login', controller.logIn);
 router.post('/register', controller.register);
 router.get('/register', controller.showRegister);
-router.get('/profile', controller.showProfile);
-router.post('/edit', controller.accountEdit);
-router.post('/changePass', controller.changePassword);
+router.get('/profile',loginAuth, controller.showProfile);
+router.post('/edit', loginAuth,controller.accountEdit);
+router.post('/changePass',loginAuth, controller.changePassword);
 
 
 module.exports = router;

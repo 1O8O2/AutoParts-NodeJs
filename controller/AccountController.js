@@ -1,6 +1,7 @@
 const Account = require('../models/Account');
 const Customer = require('../models/Customer');
 const {Cart, productInCart} = require('../models/Cart');
+const Order = require('../models/Order');
 
 module.exports.register = async(req, res) =>
 {

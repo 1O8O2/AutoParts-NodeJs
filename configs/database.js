@@ -5,7 +5,7 @@ const sequelize = new Sequelize({
     host: 'localhost',         // SQL Server host
     port: 1433,                // Default SQL Server port
     username: 'sa', // SQL Server username
-    password: '10802', // SQL Server password
+    password: '1111', // SQL Server password
     database: 'AutoPartsDB', // Database name
     dialectOptions: {
         options: {
