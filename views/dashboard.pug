@@ -34,7 +34,7 @@ html
           .products_list
             each product in products
               .card(style='width: 16rem;')
-                a(href=`/autopart/product/detailproduct.htm?productId=${product.productId}`)
+                a(href=`/AutoParts/product/productdetail?productId=${product.productId}`)
                   img.card-img-top(src=product.imageUrls, alt='...')
                 .card-body
                   h5.card-title #{product.productName}

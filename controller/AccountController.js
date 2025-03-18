@@ -1,7 +1,7 @@
 const Account = require('../models/Account');
 const Customer = require('../models/Customer');
 const {Cart, productInCart} = require('../models/Cart');
-
+const Order = require('../models/Order')
 module.exports.register = async(req, res) =>
 {
     const { email, password, repassword, phone, address, fullName } = req.body;
@@ -150,6 +150,7 @@ module.exports.accountEdit = async(req, res) =>
     try {
         const {fullName, address} = req.body
         const customer = await Customer.findByPk(acc.phone); 
+        const orderLst = await Order.findAll({ where: { userPhone: acc.phone } }); 
 
         if (customer) {
             const updated = await Customer.update(
@@ -157,11 +158,12 @@ module.exports.accountEdit = async(req, res) =>
                 { where: { phone: customer.phone } }
             );
             console.log(updated); 
-
-            req.session.userName = fullName || customer.fullName;
+            customer.fullName = fullName; // Update local object
+            customer.address = address;
+            req.session.customer =customer;
         }
 
-        return res.render('profile', {customer: customer});
+        return res.render('profile', {customer: customer, orders: orderLst});
     } catch (error) {
         console.error('Error updating profile:', error);
         return res.render('profile', { message: 'Cập nhật thất bại' });
@@ -195,3 +197,8 @@ module.exports.changePassword = async(req, res) =>
     }
 }
 
+module.exports.LogOut = async(req, res) =>
+{
+    delete req.session.user;
+    return res.redirect('/AutoParts')
+}

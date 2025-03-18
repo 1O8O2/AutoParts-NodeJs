@@ -12,6 +12,7 @@ router.get('/register', controller.showRegister);
 router.get('/profile', controller.showProfile);
 router.post('/edit', controller.accountEdit);
 router.post('/changePass', controller.changePassword);
+router.get('/logout', controller.LogOut);
 
 
 module.exports = router;

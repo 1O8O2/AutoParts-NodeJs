@@ -21,11 +21,16 @@ app.use(session({
 const dashboardRoute = require('./routes/client/dashboard.route');
 const blogRoute = require('./routes/client/blog.route');
 const accountRoute = require('./routes/client/account.route')
+const productRoute = require('./routes/client/product.route')
+
 const {loginAuth} = require('./middlewares/loginAuth.middleware')
+
+
 
 app.use('/AutoParts', dashboardRoute);
 app.use('/AutoParts/blog', blogRoute);
-app.use('/AutoParts/account', loginAuth, accountRoute);
+app.use('/AutoParts/account', accountRoute);
+app.use('/AutoParts/product', productRoute)
 
 
 // Sequelize database setup
@@ -61,7 +66,46 @@ const OrderDetail = require('./models/OrderDetail');
 }
 })();
 
+// (async () => {
+//   try {
+//       // Fetch product groups
+//       const pgLst = await ProductGroup.findAll();
+//       const parentGroups = pgLst.filter(pg => !pg.parentGroupId);
+//       const groups = {};
+//       parentGroups.forEach(pg => {
+//           const childGroups = pgLst
+//               .filter(pgr => pgr.parentGroupId && pgr.parentGroupId === pg.productGroupId && pgr.productGroupId !== pg.productGroupId)
+//               .map(pgr => pgr.groupName);
+//           groups[pg.groupName] = childGroups;
+//       });
 
+//       // Fetch brands và blogGroups
+//       const brands = await Brand.findAll();
+//       const blogGroups = await BlogGroup.findAll();
+
+//       // Lưu vào app.locals
+//       app.locals.groups = groups;
+//       app.locals.brands = brands;
+//       app.locals.blogGroups = blogGroups;
+
+//       let cart = { products: ['adsadas'] }; // Default to empty array for consistency
+//       if (acc) {
+//         const cus = await Customer.findByPk(acc.phone);
+//         if (cus) {
+//           const foundCart = await Cart.findByPk(cus.cartId);
+//           console.log(foundCart)
+//           cart = foundCart || { products: ['dsadadasd'] }; // Fallback to empty array if null
+//         }
+//       }
+  
+//       req.session.cart = cart;
+//       console.log("session:",req.session)
+
+//       console.log('Dữ liệu toàn cục đã được tải thành công');
+//   } catch (error) {
+//       console.error('Lỗi khi tải dữ liệu toàn cục:', error);
+//   }
+// })();
 
 
 app.listen(port, () => {
