@@ -1,17 +1,16 @@
-const  Product  = require('../models/Product');
-const  Brand  = require('../models/Brand');
-const  ProductGroup  = require('../models/ProductGroup');
-const Customer = require('../models/Customer')
-const {Cart, productsInCart} = require('../models/Cart')
+const  Product  = require('../../models/Product');
+const  Brand  = require('../../models/Brand');
+const  ProductGroup  = require('../../models/ProductGroup');
+const Customer = require('../../models/Customer')
+const {Cart, productsInCart} = require('../../models/Cart')
 
-
+// [GET] /product/productDetail
 module.exports.showProduct = async (req, res) => {
     try {
         const { productId } = req.query;
-        console.log(productId)
         const product = await Product.findByPk(productId);
         if (!product) {
-            return res.render('productdetail', { message: 'Sản phẩm không tồn tại' });
+            return res.render('client/pages/product/productDetail', { message: 'Sản phẩm không tồn tại' });
         }
 
         const imgUrls = product.imageUrls ? product.imageUrls.split(',') : [];
@@ -19,7 +18,7 @@ module.exports.showProduct = async (req, res) => {
         const group = await ProductGroup.findByPk(product.productGroupId);
         const inStock = product.stock > 0;
 
-        res.render('productdetail', {
+        res.render('client/pages/product/productDetail', {
             product,
             imgUrls,
             brand,
@@ -28,7 +27,6 @@ module.exports.showProduct = async (req, res) => {
             message: req.query.message || null
         });
     } catch (error) {
-        console.error('Error in showProduct:', error);
         res.render('productdetail', { message: 'Đã xảy ra lỗi khi tải sản phẩm' });
     }
 };
@@ -80,10 +78,11 @@ module.exports.addProduct = async (req, res) => {
     }
 };
 
+
 module.exports.deleteProduct = async (req, res) => {
     try {
-        const { productId } = req.query; // From GET params
-        const referer = req.headers.referer || '/AutoParts'; // Fallback to dashboard
+        const { productId } = req.query; 
+        const referer = req.headers.referer || '/AutoParts'; 
 
         const acc = req.session.user;
         if (!acc) {
@@ -105,6 +104,7 @@ module.exports.deleteProduct = async (req, res) => {
     }
 };
 
+// [GET] /product/search
 module.exports.showFilter = async (req, res) => {
     try {
         const key = (req.query.keyword || '').toLowerCase().trim();
@@ -124,10 +124,8 @@ module.exports.showFilter = async (req, res) => {
 
         const brands = await Brand.findAll();
         const categories = await ProductGroup.findAll();
-        console.log(categories)
 
-
-        res.render('filterproduct', {
+        res.render('client/pages/product/filterProduct', {
             keyword: key,
             products: filteredLst,
             brands,
@@ -135,6 +133,6 @@ module.exports.showFilter = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in showFilter:', error);
-        res.render('filterproduct', { message: 'Đã xảy ra lỗi khi tìm kiếm' });
+        res.render('client/pages/product/filterProduct', { message: 'Đã xảy ra lỗi khi tìm kiếm' });
     }
 };

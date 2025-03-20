@@ -20,9 +20,9 @@ div.header
               i.fa-solid.fa-circle-user.logo-account
               span.title-account
                 if !user
-                  | Tài khoản #{cart}
+                  | Tài khoản 
                 else
-                  | #{userName}
+                  | #{user.fullName}
       .header__cart
         .header__cart-wrap
           .header__cart-info

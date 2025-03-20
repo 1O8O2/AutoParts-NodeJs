@@ -11,7 +11,7 @@ html
 
   body
     .wrapper#dashboard
-      include ./mixins/header.pug
+      include ../../partials/header.pug
 
       .banner
         img(src='https://html.themability.com/autoelite/assets/images/banners/mainbanner1.png', alt='main-img')
@@ -41,6 +41,6 @@ html
                   p.card-text #{product.description}
                   p Giá bán: #{product.salePrice}đ
           div
-            a(href='/autopart/product/search.htm?keyword=') Xem tất cả
+            a(href='/AutoParts/product/search?keyword=') Xem tất cả
 
-      include ./mixins/footer.pug
+      include ../../partials/footer.pug
