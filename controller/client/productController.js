@@ -35,17 +35,14 @@ module.exports.addProduct = async (req, res) => {
     try {
         const { productId, quantity } = req.body; // From form data (POST)
 
-        console.log(req.session.user)
-        // Check if user is logged in
-        const acc = req.session.user;
-        if (!acc) {
-            return res.redirect('/AutoParts/account/login');
+        if (!res.locals.user) {
+            return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        const cus = await Customer.findByPk(acc.phone);
-        if (!cus) {
-            return res.redirect('/AutoParts/account/profile'); // Or handle differently
-        }
+        console.log("----------------------------------------------" + res.locals.user.phone)
+
+        const cus = await Customer.findByPk(res.locals.user.phone);
+      
 
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
@@ -69,12 +66,13 @@ module.exports.addProduct = async (req, res) => {
         // Save updated cart (hooks handle ProductsInCart table)
         cart.products = productsInCart;
         await cart.save();
+        res.locals.cart=cart
 
         // Redirect to product detail page
-        res.redirect(`/AutoParts/product/productdetail?productId=${productId}`);
+        res.redirect(`/AutoParts`);
     } catch (error) {
         console.error('Error in addProduct:', error);
-        res.redirect(`/AutoParts/product/productdetail?productId=${req.body.productId}&message=Thêm vào giỏ thất bại`);
+        res.redirect(`/AutoParts&message=Thêm vào giỏ thất bại`);
     }
 };
 
@@ -84,12 +82,11 @@ module.exports.deleteProduct = async (req, res) => {
         const { productId } = req.query; 
         const referer = req.headers.referer || '/AutoParts'; 
 
-        const acc = req.session.user;
-        if (!acc) {
-            return res.redirect('/AutoParts/account/login');
+        if (!res.locals.user) {
+            return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        const cus = await Customer.findOne({ where: { phone: acc.phone } });
+        const cus = await Customer.findOne({ where: { phone: res.locals.user.phone } });
         const cart = await Cart.findByPk(cus.cartId);
         if (cart && cart.products) {
             // Filter out the product to delete

@@ -1,12 +1,12 @@
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize({
-    dialect: process.env.DIALECT,
-    host: process.env.HOST,        
-    port: process.env.DB_PORT,                
-    username: process.env.DB_USER_NAME, 
-    password: process.env.DB_PASS, 
-    database: process.env.DB_NAME, 
+    dialect: 'mssql',
+    host: 'localhost',        
+    port: '1433',                
+    username: 'sa', 
+    password: '10802', 
+    database: 'AutoPartsDB', 
     dialectOptions: {
         options: {
             encrypt: true,           // For Azure SQL, set to false if not needed

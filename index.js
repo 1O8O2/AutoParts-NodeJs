@@ -4,7 +4,7 @@ require("dotenv").config();
 // Connect to ExpressJS
 const express = require('express');
 const app = express();
-const port = process.env.PORT;
+const port = 3000;
 
 // Library to handle Date-Time
 const moment = require("moment");
@@ -41,11 +41,11 @@ route(app);
 // routeAdmin(app);
 
 // If error, show 404 page
-app.get("*", (req, res) => {
-  res.render("client/pages/error/404", {
-      pageTitle: "404 Not Found"
-  })
-});
+// app.get("*", (req, res) => {
+//   res.render("client/pages/error/404", {
+//       pageTitle: "404 Not Found"
+//   })
+// });
 
 // Sequelize database setup
 const sequelize = require('./configs/database');

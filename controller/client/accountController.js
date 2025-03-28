@@ -27,7 +27,7 @@ module.exports.register = async (req, res) => {
         const newCart = await Cart.create({ cartId });
         if (!newCart) {
             req.session.message = 'Không thể thêm tài khoản';
-            return res.render('register', { message: req.session.message });
+            return res.render('client/pages/user/register', { message: req.session.message });
         }
 
         // Create a new Account
@@ -43,7 +43,7 @@ module.exports.register = async (req, res) => {
         });
         if (!newAccount) {
             req.session.message = 'Không thể thêm tài khoản';
-            return res.render('register', { message: req.session.message });
+            return res.render('client/pages/user/register', { message: req.session.message });
         }
         res.cookie("tokenUser", newAccount.token);
 
@@ -62,11 +62,11 @@ module.exports.register = async (req, res) => {
             // Rollback Account if Customer creation fails
             await Account.destroy({ where: { phoneNumber: phone } });
             req.session.message = 'Không thể thêm tài khoản';
-            return res.render('register', { message: req.session.message });
+            return res.render('client/pages/user/register', { message: req.session.message });
         }
     } catch (error) {
         req.session.message = 'Đăng ký thất bại, có lỗi xảy ra';
-        return res.render('register', { message: req.session.message });
+        return res.render('client/pages/user/register', { message: req.session.message });
     }
 }
 

@@ -112,7 +112,7 @@ html
               h3 Tìm kiếm theo từ khóa: "#{keyword}"
           .form-group
             label(for="brand") Hãng
-            select#brand.form-control(name="brand")
+            select#brand-filter.form-control( name="brand")
                 option(value="" selected) Tất cả
                 each b in brands
                   option(value=b.brandId) #{b.brandName}
@@ -120,7 +120,7 @@ html
                   option(value=b.brandId) #{b.brandName}
           .form-group
             label(for="category") Loại hàng
-            select#category.form-control(name="category")
+            select#category-filter.form-control( name="category")
               option(value="" selected) Tất cả
               each group in categories
                 option(value=group.productGroupId) #{group.groupName}

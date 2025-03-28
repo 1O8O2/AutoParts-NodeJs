@@ -1,0 +1,116 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Giỏ hàng
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet" href="/css/cart.css")
+    link(rel="stylesheet" href="/css/base.css")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
+
+  body
+    .card
+      .row
+        .col-md-8.cart
+          .title
+            .row
+              img.cart_logo-img(src="https://down-bs-vn.img.susercontent.com/vn-11134216-7ras8-m2ko7nkbfksm02_tn.webp" alt="home")
+              .col.cart_title
+                h4
+                  b Giỏ hàng
+              div 
+              .col.align-self-center.text-right.text-muted #{selectedProducts.length} món
+          .cart-list
+            each product in selectedProducts
+              .row.border-bottom
+                .row.main.align-items-center
+                  .col-2
+                    img.img-fluid(src="https://html.themability.com/autoelite/assets/images/categories/1.png")
+                  .col
+                    .row.text-muted #{product.product.productId}
+                    .row #{product.product.productName}
+                    input.price(type="hidden" value=product.product.salePrice)
+                    | #{product.product.salePrice} ₫
+                  .col.updateQTY
+                    button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)") -
+                    input.input-updateQTY.quantity(type="number" data-product-id=product.product.productId value=product.amount min="1" max=product.product.stock)
+                    button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
+                  .col
+                    a(href=`/AutoParts/product/productDetail?productId=${product.product.productId}`) Xem chi tiết ->
+          .back-to-shop
+            a(href="/AutoParts")
+              span ←
+              span.text-muted Tiếp tục mua sắm
+        form.col-md-4.summary(action="/AutoParts/order/create" method="post")
+          div
+            h5
+              b HÓA ĐƠN
+          hr
+          .row
+            .col(style="padding-left: 0;") Số lượng: #{cart.products.length}
+            each product in cart.products
+              input(type="hidden" id=product.product.productId name=product.product.productId value=product.amount)
+          .row
+            input(type="text" name="shipAddress" placeholder="Địa chỉ" required)
+          div
+            p Loại vận chuyển
+            select
+              option.text-muted Vận chuyển thường- 20.000 ₫
+              option.text-muted Vận chuyển nhanh- 50.000 ₫
+              option.text-muted Vận chuyển tiết kiệm- 15.000 ₫
+            p Mã khuyến mãi
+            input#code(placeholder="Nhập mã khuyến mãi")
+          .row(style="border-top: 1px solid rgba(0, 0, 0, .1); padding: 2vh 0;")
+            .col TỔNG TIỀN
+            input.col.text-right#total(name="totalCost" value="" readonly)
+            |  ₫
+          button.btn ĐẶT HÀNG
+
+    script.
+      let totalInput = document.getElementById("total");
+      let priceInputs = document.querySelectorAll(".price");
+      let quantityInputs = document.querySelectorAll(".quantity");
+
+      console.log(totalInput, priceInputs, quantityInputs);
+
+      function updateCost() {
+        let total = 0;
+        for(let i = 0; i < priceInputs.length; i++) {
+          let price = parseFloat(priceInputs[i].value);
+          let quantity = parseInt(quantityInputs[i].value);
+          console.log(price, quantity);
+          total += price * quantity;
+        }
+        console.log("update cost", total);
+        totalInput.value = total;
+      }
+      updateCost();
+
+      function updateQuantity(input, delta) {
+        let value = parseInt(input.value) + delta;
+        if (value < 1) {
+          showDialog(input);
+        } else if (value > input.max) {
+          return;
+        } else {
+          input.value = value;
+          updateCost();
+        }
+      }
+
+      function showDialog(input) {
+        const dialogOverlay = document.getElementById('dialog-overlay');
+        dialogOverlay.style.visibility = 'visible';
+        const confirmButton = document.getElementById('confirm-button');
+        confirmButton.onclick = function() {
+          input.closest('.cart-item').remove();
+          dialogOverlay.style.visibility = 'hidden';
+        };
+        const cancelButton = document.getElementById('cancel-button');
+        cancelButton.onclick = function() {
+          dialogOverlay.style.visibility = 'hidden';
+        };
+      }
