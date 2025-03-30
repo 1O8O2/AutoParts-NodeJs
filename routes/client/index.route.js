@@ -1,3 +1,5 @@
+const systemConfig = require('../../configs/system');
+
 // const categoryMiddleware = require("../../middlewares/client/category.middleware");
 const cartMiddleware = require("../../middlewares/client/cart.middleware");
 const userMiddleware = require("../../middlewares/client/user.middleware");
@@ -13,15 +15,16 @@ const orderRoute = require('./order.route')
 
 
 module.exports = (app) => {
+    const PATH_URL = systemConfig.prefixUrl;
+
     // app.use(categoryMiddleware.category);
     app.use(cartMiddleware.cartId); 
     app.use(userMiddleware.infoUser);
     app.use(headerMiddleware.headerInfo);
     // app.use(settingMiddleware.settingGeneral);
 
-    app.use('/AutoParts', dashboardRoute);
-    app.use('/AutoParts/blog', blogRoute);
-    app.use('/AutoParts/account', accountRoute);
-    app.use('/AutoParts/product', productRoute);
-    app.use('/AutoParts/order', orderRoute)
+    app.use(PATH_URL + '', dashboardRoute);
+    app.use(PATH_URL + '/blog', blogRoute);
+    app.use(PATH_URL + '/account', accountRoute);
+    app.use(PATH_URL + '/product', productRoute);
 }

@@ -36,9 +36,9 @@ app.locals.prefixAdmin = systemConfig.prefixAdmin;
 
 // Connect to routes
 const route = require('./routes/client/index.route')
-// const routeAdmin = require('./routes/admin/index.route')
+const routeAdmin = require('./routes/admin/index.route')
 route(app);
-// routeAdmin(app);
+routeAdmin(app);
 
 // If error, show 404 page
 // app.get("*", (req, res) => {
