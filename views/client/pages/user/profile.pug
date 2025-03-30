@@ -37,10 +37,10 @@ html
         a.setting
           i.fa-solid.fa-lock
           | Đổi mật khẩu
-        a(href='/')
+        a(href='/AutoParts')
           i.fa-solid.fa-house
           | Trang chủ
-        a.delete-btn(href='/logout')
+        a.delete-btn(href='/AutoParts/account/logout')
           i.fa-solid.fa-right-from-bracket
           | Đăng xuất
     .content
@@ -61,7 +61,7 @@ html
             p
               strong Trạng thái: 
               | #{order.status}
-            a.button.nav-btn(href=`/order?orderId=${order.orderId}`) Xem chi tiết đơn hàng
+            a.button.nav-btn(href=`/AutoParts/order/detail?orderId=${order.orderId}`) Xem chi tiết đơn hàng
       form.change-password.hide(action='/AutoParts/account/changepass', method='post')
         h3 Đổi mật khẩu
         .form-item

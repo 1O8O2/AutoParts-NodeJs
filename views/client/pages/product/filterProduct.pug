@@ -1,0 +1,140 @@
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    title Tìm kiếm sản phẩm
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous")
+    link(rel="stylesheet" href="/css/base.css")
+    link(rel="stylesheet" href="/css/filterproduct.css")
+    style.
+      body {
+        background-color: #f8f9fa;
+        font-family: 'Arial', sans-serif;
+      }
+      .container_filter {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px;
+        margin-top: 150px;
+      }
+      .sidebar {
+        width: 23%;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: fixed;
+      }
+      .sidebar h2 {
+        margin-bottom: 20px;
+        color: #007bff;
+      }
+      .filter-form {
+        margin-top: 20px;
+      }
+      .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .form-control {
+        border-radius: 4px;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.3s;
+      }
+      .form-control:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+      }
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: background-color 0.3s, border-color 0.3s;
+      }
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .content {
+        width: 80%;
+        margin-left: 30%;
+      }
+      .list-card {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        background-color: #ffffff;
+      }
+      .card:hover {
+        transform: scale(1.05);
+      }
+      .card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+      }
+      .card-body {
+        padding: 15px;
+      }
+      .card-title {
+        font-size: 1.25rem;
+        margin-bottom: 10px;
+        color: #007bff;
+      }
+      .card-text {
+        margin-bottom: 10px;
+      }
+
+  body
+    include ../../partials/header.pug
+
+    .container_filter
+      .sidebar
+        div
+          h2
+            strong Bộ lọc
+        .filter-form
+          .search-form
+            if !keyword || keyword.length === 0
+              h3 Nhập từ khóa để tìm kiếm
+            else
+              h3 Tìm kiếm theo từ khóa: "#{keyword}"
+          .form-group
+            label(for="brand") Hãng
+            select#brand-filter.form-control( name="brand")
+                option(value="" selected) Tất cả
+                each b in brands
+                  option(value=b.brandId) #{b.brandName}
+                else
+                  option(value=b.brandId) #{b.brandName}
+          .form-group
+            label(for="category") Loại hàng
+            select#category-filter.form-control( name="category")
+              option(value="" selected) Tất cả
+              each group in categories
+                option(value=group.productGroupId) #{group.groupName}
+              else
+                  option(value=group.productGroupId) #{group.groupName}
+      .content
+        .list-card
+          each product in products
+            .card(style="width: 18rem;" data-brand=product.brandId data-category=product.productGroupId)
+              a(href=`/AutoParts/product/productdetail?productId=${product.productId}`)
+                img.card-img-top(src=product.imageUrls)
+              .card-body
+                h5.card-title #{product.productName}
+                p.card-text #{product.description}
+                p Giá bán: #{product.salePrice}đ
+
+    script(src="/js/filterproduct.js")

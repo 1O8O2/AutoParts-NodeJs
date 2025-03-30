@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 const OrderDetail = require('./OrderDetail');
 
@@ -26,7 +26,9 @@ const Order = sequelize.define('Order', {
     },
     orderDate: {
         type: DataTypes.DATEONLY, // Maps to java.sql.Date (no time)
-        allowNull: true
+        allowNull: true,
+        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
+
     },
     confirmedBy: {
         type: DataTypes.STRING,
@@ -39,17 +41,18 @@ const Order = sequelize.define('Order', {
     deletedAt: {
         type: DataTypes.DATE, // Maps to Timestamp
         allowNull: true
+        
     },
     createdAt: {
         type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
 
     },
     updatedAt: {
         type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
 
     },
     deleted: {
@@ -79,6 +82,18 @@ const Order = sequelize.define('Order', {
                 }
     }
 });
+
+Order.generateOrderId = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng từ 0-11, cộng 1 và thêm số 0 nếu cần
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `ORD${year}${month}${day}${hours}${minutes}${seconds}`;
+};
 
 // Set up the one-to-many relationship
 Order.hasMany(OrderDetail, { foreignKey: 'orderId', sourceKey: 'orderId' });

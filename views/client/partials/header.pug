@@ -1,0 +1,88 @@
+div.header
+  .header_container.header-inner
+    .header_logo
+      a(href='/AutoParts')
+        img.header_logo-img(src='https://down-bs-vn.img.susercontent.com/vn-11134216-7ras8-m2ko7nkbfksm02_tn.webp', alt='home')
+    .header_search
+      form(action='/AutoParts/product/search', method='get')
+        if !keyword
+          input(type='text', name='keyword', placeholder='Nhập từ khóa tìm kiếm...')
+        else
+          input(type='text', name='keyword', autocomplete='false', value=keyword)
+        span
+          button.search-btn(type='submit')
+            i.fa.fa-search
+    .header-right
+      .header_account
+        a.nav-link.active(href='/AutoParts/account/login', aria-current='page')
+          button.header-right_account(type='button')
+            .header-account_button
+              i.fa-solid.fa-circle-user.logo-account
+              span.title-account
+                if !user
+                  | Tài khoản 
+                else
+                  | #{user.fullName}
+      .header__cart
+        .header__cart-wrap
+          .header__cart-info
+            i.header__cart-icon.fa-solid.fa-cart-shopping
+            span.header__cart-text Giỏ hàng
+            span.header__cart-notice #{cart.products.length}
+          form.header__cart-list(action='/AutoParts/order', method='get')
+            h4.header__cart-heading Sản phẩm đã thêm
+            if cart.products.length === 0
+              p Chưa có sản phẩm nào
+            else
+              ul.header__cart-list-item
+                each product in cart.products
+                  li.header__cart-item
+                    input(type='checkbox', name=product.product.productId, value=product.amount)
+                    img.header__cart-img(src='https://img.freepik.com/free-photo/fashion-portrait-young-elegant-woman_1328-2743.jpg?w=1480&t=st=1701357403~exp=1701358003~hmac=435f00eded774f42e172f48f4be677658485206407baa84eaef2058b11f1431f', alt='')
+                    .header__cart-item-info
+                      .header__cart-item-head
+                        h5.header__cart-item-name #{product.product.productName}
+                        .header__cart-item-wrap
+                          span.header__cart-item-price
+                          span.header__cart-item-multiply x
+                          span.header__cart-item-qnt #{product.amount}
+                      .header__cart-item-body
+                        span.header__cart-item-description
+                          a(href=`/autopart/product/detailproduct.htm?productId=${product.productId}`) #{product.productId}
+                        span.header__cart-item-remove
+                          a(href=`/autopart/product/delete.htm?productId=${product.productId}`) Xóa
+            button.btn.btn--primary.header__cart-view-cart(type='submit') Thanh toán
+  .header_menu
+    ul.header_menu-list
+      li
+        a(href='#dashboard') Trang chủ
+      li
+        a.menu-item(href='#categories')
+          | Danh mục
+          i.fa.fa-angle-down(aria-hidden='true')
+          .items
+            each value, key in groups 
+              h4.item
+                | #{key} 
+                if value.length > 0 
+                  i.fa-solid.fa-arrow-right
+                  .mini-menu
+                    each child in value 
+                      p.mini-item #{child}
+      li
+        a.menu-item(href='#products')
+          | Sản phẩm
+          i.fa.fa-angle-down(aria-hidden='true')
+      li
+        a(href='#contact')
+          | Liên hệ
+          i.fa.fa-angle-down(aria-hidden='true')
+      li
+        a.menu-item#brand(href='#')
+          | Nhãn hàng
+          i.fa.fa-angle-down(aria-hidden='true')
+          .items
+            each brand in brands
+              h4.item #{brand.brandName}
+      li
+        a(href='/AutoParts/blog', target='_blank') Bài viết

@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const brandFilter = document.getElementById('brand');
-    const categoryFilter = document.getElementById('category');
+    const brandFilter = document.getElementById('brand-filter');
+    const categoryFilter = document.getElementById('category-filter');
 	
     const products = document.querySelectorAll('.card')
 	console.log(products)
+	console.log(brandFilter)
+	console.log(categoryFilter)
 
     function filterProducts() {
 		console.log("change")

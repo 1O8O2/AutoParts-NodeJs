@@ -67,7 +67,7 @@ html(lang='en')
 
   body
     header
-      include ./mixins/header.pug 
+      include ../../partials/header.pug 
 
     main
       section#blog-posts
@@ -76,7 +76,7 @@ html(lang='en')
             h2 #{blog.title}
             p.date #{blog.updatedAt}
             p #{blog.description}
-            a(href=`/blog/detail?id=${blog.blogId}`) Xem chi tiết
+            a(href=`/AutoParts/blog/detail/${blog.blogId}`) Xem chi tiết
 
     footer
       p &copy; 2025 Auto Parts Shop

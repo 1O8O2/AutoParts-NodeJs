@@ -1,36 +1,40 @@
-const express = require('express');
-const router = express.Router();
+const Blog = require('../../models/Blog');
+const Employee = require('../../models/Employee');
 
-const Blog = require('../models/Blog');
-const Employee = require('../models/Employee');
-
+// [GET] /blog/
 module.exports.showBlogs = async (req, res) => {
-    try 
-    {
-        const blogs = await Blog.findAll({where :{status: 'Active', deleted: false}});
-        res.render('blog', {blogs: blogs})
-    } 
-      catch (err) 
+  try {
+    const blogs = await Blog.findAll(
       {
-        console.error(err);
-        res.status(500).send('Server error');
+        where: {
+          status: 'Active', 
+          deleted: false
+        }
       }
+    );
+
+    res.render('client/pages/blog/index', {
+      blogs: blogs
+    });
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
 };
 
+// [GET] /blog/detail/:id
 module.exports.showBlogDetail = async (req, res) => {
-    try 
-    {
-        const id = req.query.id
-        const blog = await Blog.findByPk(id);
-        const employee = await Employee.findByPk(blog.createdBy);
-        console.log(employee)
-        res.render('blogdetail', {blog: blog, author: employee.fullName});
-    } 
-      catch (err) 
-      {
-        console.error(err);
-        res.status(500).send('Server error');
-      }
+  try {
+    const id = req.params.id;
+    const blog = await Blog.findByPk(id);
+    const employee = await Employee.findByPk(blog.createdBy);
+    
+    res.render('client/pages/blog/detail', {
+      blog: blog, 
+      author: employee.fullName
+    });
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
 };
 
 // // GET /blog/detail - Show single blog detail
