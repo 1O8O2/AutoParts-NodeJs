@@ -18,6 +18,11 @@ a:focus {
   outline: 0
 }
 
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
 #wrapper {
   display: -webkit-box;
   display: -ms-flexbox;

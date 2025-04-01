@@ -1,0 +1,15 @@
+nav.navbar.navbar-expand.navbar-light.bg-navbar.topbar.mb-4.static-top
+    button#sidebarToggleTop.btn.btn-link.rounded-circle.mr-3
+        i.fa.fa-bars
+
+    .navbar-nav.ml-auto
+        a.nav-link.dropdown-toggle(href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+            img.img-profile.rounded-circle(src="/img/boy.png" style="max-width: 60px")
+            span.ml-2.d-none.d-lg-inline.text-white.small #{user.fullName}
+    .dropdown-menu.dropdown-menu-right.shadow.animated--grow-in(aria-labelledby="userDropdown")
+        a.dropdown-item(href="/autopart/admin/profile.htm")
+            i.fas.fa-user.fa-sm.fa-fw.mr-2.text-gray-400
+            | Trang cá nhân
+        a.dropdown-item(href="/autopart/admin/logout.htm")
+            i.fas.fa-sign-out-alt.fa-sm.fa-fw.mr-2.text-gray-400
+            | Đăng xuất

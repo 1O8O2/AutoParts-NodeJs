@@ -1,0 +1,17 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Autopart Management
+    link(href="/css/adminCss/login.css" rel="stylesheet")
+
+  body
+    div #{msg}
+    .login-container
+      .login-header
+        h1 Đăng nhập hệ thống quản lý
+      form.login-form(action=`${prefixAdmin}/auth/login` method="post")
+        input(type="tel" name="phone" placeholder="Số điện thoại" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required)
+        input(type="password" name="password" placeholder="Mật khẩu" required)
+        button(type="submit") Đăng nhập
