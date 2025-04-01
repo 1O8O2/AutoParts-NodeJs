@@ -1,35 +1,159 @@
-@charset "UTF-8";
+body {
+	font-family: Arial, sans-serif;
+}
+.wrapper {
+	display: flex;
+	margin-left: 200px;
+	padding-top: 120px;
+}
+.container {
+	height: 100vh;
+	margin: 0px;
+	padding: 10px;
+	background-color: #fff;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.user-form {
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    width:80%;
+}
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .wrapper{
-       		display: flex;
-       		margin-left: 200px;
-       		padding-top: 120px;
-    	}
-        .container {
-            width: 80%;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .info {
-            margin: 20px 0;
-        }
-        .info label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .info span {
-            display: block;
-            margin-bottom: 15px;
-        }
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-input {
+    width: 100%;
+    padding: 8px 0;
+    margin :5px;
+    border: none;
+    border-bottom: 1px solid #000;
+    background: transparent;
+    font-size: 16px;
+    color: #333;
+}
+
+.form-input:focus {
+    outline: none;
+    border-bottom: 2px solid #28a745; /* Màu xanh khi focus */
+}
+
+.form-input[readonly] {
+    background: transparent;
+    border-bottom: 1px solid #000;
+    cursor: not-allowed;
+}
+
+.pass-form {
+    display: none; 
+    width: 80%;
+    max-width: 400px; 
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.pass-form h2 {
+    text-align: center; /* Căn giữa tiêu đề */
+    margin-bottom: 20px;
+    font-size: 24px; /* Kích thước chữ tiêu đề */
+    color: #333;
+}
+
+.pass-inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.pass-form input {
+    width: 100%; /* Input chiếm toàn bộ chiều rộng container */
+    margin: 10px 0; /* Khoảng cách giữa các input */
+    padding: 10px;
+    border: 1px solid #ccc; /* Viền giống hình */
+    border-radius: 4px; /* Bo góc nhẹ */
+    font-size: 16px;
+    color: #333;
+}
+
+.pass-form input:focus {
+    outline: none;
+    border-color: #28a745; /* Màu viền khi focus */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
+
+.pass-form #warning {
+    text-align: center;
+    margin: 5px 0;
+}
+
+.pass-actions {
+    display: flex;
+    justify-content: flex-start; /* Căn nút "Xác nhận" sang bên trái */
+    margin-top: 20px;
+}
+
+.pass-form button {
+    width: 100%; /* Nút chiếm toàn bộ chiều rộng container */
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    background-color: #28a745; 
+    color: white;
+}
+
+.pass-form button:hover {
+    background-color: #80ff80;
+}
+#back{
+	display:none;
+}
+
+.form-actions {
+    display: flex;
+    margin: 0 auto;
+}
+ .form-actions *{
+ 	margin:10px;
+ }
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-save {
+    background-color: #1fa140;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: rgb(167, 226, 156);
+}
+
+.btn-change-password {
+    background-color: #ff6f61; /* Màu đỏ nhạt */
+    color: white;
+}
+
+.btn-change-password:hover {
+    background-color: #e65b50;
+}
