@@ -30,4 +30,14 @@ module.exports.loginPost = async (req, res) => {
   }
 };
 
+// [GET] /AutoParts/admin/auth/logout
+module.exports.logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.redirect(`${systemConfig.prefixAdmin}/auth/login`)
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+};
+
 

@@ -18,7 +18,8 @@ const sequelize = new Sequelize({
         min: 0,                 // Min connections
         acquire: 30000,         // Max time to acquire a connection (ms)
         idle: 10000             // Max idle time (ms)
-    }
+    },
+    logging: false
 });
 
 // Test the connection

@@ -1,6 +1,10 @@
 extends ../../layouts/default.pug
+include ../../mixins/alert.pug
 
 block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
     .col-lg-12
         .card.mb-4
             .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
@@ -16,13 +20,13 @@ block main
                     i.fa-solid.fa-unlock-keyhole
                     |  Đổi mật khẩu
 
-            form.user-form(action=`${prefixAdmin}/profile/edit.htm` method="post")
+            form.user-form(action=`${prefixAdmin}/dashboard/profile/edit/${user.phone}` method="post")
                 .form-group
                     label(for="fullName") Họ và tên :
                     input#fullName.form-input(name="fullName" readonly placeholder="Họ và tên" value=user.fullName)
                 .form-group
                     label(for="gender") Giới tính :
-                    select#gender(disabled)
+                    select#gender(name="gender" disabled)
                         option(value="Male" selected=(user.gender == "Male" ? true : false)) Nam
                         option(value="Female" selected=(user.gender == "Female" ? true : false)) Nữ
                 .form-group
