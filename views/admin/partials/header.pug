@@ -6,10 +6,25 @@ nav.navbar.navbar-expand.navbar-light.bg-navbar.topbar.mb-4.static-top
         a.nav-link.dropdown-toggle(href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
             img.img-profile.rounded-circle(src="/img/boy.png" style="max-width: 60px")
             span.ml-2.d-none.d-lg-inline.text-white.small #{user.fullName}
-    .dropdown-menu.dropdown-menu-right.shadow.animated--grow-in(aria-labelledby="userDropdown")
-        a.dropdown-item(href="/autopart/admin/profile.htm")
-            i.fas.fa-user.fa-sm.fa-fw.mr-2.text-gray-400
-            | Trang cá nhân
-        a.dropdown-item(href="/autopart/admin/logout.htm")
-            i.fas.fa-sign-out-alt.fa-sm.fa-fw.mr-2.text-gray-400
-            | Đăng xuất
+        .dropdown-menu.dropdown-menu-right.shadow.animated--grow-in(aria-labelledby="userDropdown")
+            a.dropdown-item(href=`${prefixAdmin}/dashboard/profile`)
+                i.fas.fa-user.fa-sm.fa-fw.mr-2.text-gray-400
+                | Trang cá nhân
+            a.dropdown-item(href="javascript:void(0);" data-toggle="modal" data-target="#logoutModal")
+                i.fas.fa-sign-out-alt.fa-sm.fa-fw.mr-2.text-gray-400
+                | Đăng xuất
+
+
+//- Modal Logout
+#logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
+    .modal-dialog(role="document")
+        .modal-content
+            .modal-header
+                h5#exampleModalLabelLogout.modal-title Đăng xuất
+                button.close(type="button" data-dismiss="modal" aria-label="Close")
+                span(aria-hidden="true") ×
+            .modal-body
+                p Bạn có muốn đăng xuất không?
+            .modal-footer
+                button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                a.btn.btn-primary(href=`${prefixAdmin}/auth/logout`) Đăng xuất
