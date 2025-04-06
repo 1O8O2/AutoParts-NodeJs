@@ -1,0 +1,38 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Danh Sách Tài Khoản
+            .table-responsive.p-3
+                table#dataTable.table.align-items-center.table-flush
+                    thead.thead-light
+                        tr
+                            th Số Điện Thoại
+                            th Phân Quyền
+                            th Trạng Thái
+                            th Hoạt Động
+                    tbody
+                        each acc in accounts
+                            tr.brand-item
+                                td.align-middle #{acc.phone}
+                                td.align-middle #{acc.roleName}
+                                td.align-middle
+                                    if acc.status == 'Active'
+                                        a.change-status-account-link(href="javascript:void(0);" data-id=acc.phone data-status=acc.status)
+                                            span.badge.badge-success Hoạt động
+                                    else
+                                        a.change-status-account-link(href="javascript:void(0);" data-id=acc.phone data-status=acc.status)
+                                            span.badge.badge-danger Ngừng hoạt động
+                                td.align-middle
+                                    a.btn.btn-sm.btn-danger.edit-account-btn(href="javascript:void(0);" data-acc-phone=acc.phone data-toggle="modal" data-target="#EditModal") Sửa
+
+    #EditModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="EditModal" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered(role="document")
+            .modal-content
+

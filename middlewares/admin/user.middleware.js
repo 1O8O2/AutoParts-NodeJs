@@ -18,6 +18,7 @@ module.exports.infoUser = async (req, res, next) => {
                 where: { phone: account.dataValues.phone }
             });
             res.locals.user = user;
+            res.locals.systemConfig = systemConfig;
 
             next();
         }

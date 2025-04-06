@@ -10,13 +10,13 @@ block main
             .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
 
             .form-actions
-                button.btn.btn-save#edit(onclick="editAccount()")
+                button.btn-profile.btn-save#edit(onclick="editAccount()")
                     i.fa-solid.fa-pen-to-square
                     |  Chỉnh sửa thông tin
-                button.btn.btn-save#back(onclick="showInfoForm()")
+                button.btn-profile.btn-save#back(onclick="showInfoForm()")
                     i.fa-solid.fa-left-long
                     |  Quay lại
-                button.btn.btn-change-password#change-pass(onclick="showPassForm()")
+                button.btn-profile.btn-change-password#change-pass(onclick="showPassForm()")
                     i.fa-solid.fa-unlock-keyhole
                     |  Đổi mật khẩu
 
@@ -55,4 +55,4 @@ block main
                     input#confirmpass(type="password" name="confirmpass" placeholder="Nhập lại mật khẩu mới" oninput="validateInputs()" required)
                     p#warning(style="color: red; display: none;") Hai ô nhập không khớp!
                 .pass-actions
-                    button.btn.btn-save(type="submit" onclick="submitPasswordChange()") Xác nhận
+                    button.btn-profile.btn-save(type="submit" onclick="submitPasswordChange()") Xác nhận

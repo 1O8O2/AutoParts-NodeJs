@@ -27,11 +27,11 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
             i.fa-regular.fa-id-card
             span Danh sách nhân viên
     li.nav-item
-        a.nav-link(href="/autopart/admin/blog.htm")
+        a.nav-link(href=`${prefixAdmin}/blog`)
             i.fa-solid.fa-book-open-reader
             span Quản lý bài viết
     li.nav-item
-        a.nav-link(href="/autopart/admin/discount.htm")
+        a.nav-link(href=`${prefixAdmin}/discount`)
             i.fa-solid.fa-ticket
             span Quản lý khuyến mãi
     li.nav-item
@@ -44,18 +44,18 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
             span Quản lý đơn hàng
         #orderPage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
-                a.collapse-item(href="/admin/order/add.htm") Tạo đơn hàng
-                a.collapse-item(href="/admin/order.htm?status=pending") Đơn hàng chờ xác nhận
-                a.collapse-item(href="/admin/order.htm?status=processing") Đơn hàng chờ đóng gói
-                a.collapse-item(href="/admin/order.htm?status=delivery") Đơn hàng đang giao
-                a.collapse-item(href="/admin/order.htm?status=history") Lịch sử đơn hàng
+                a.collapse-item(href=`${prefixAdmin}/order/add`) Tạo đơn hàng
+                a.collapse-item(href=`${prefixAdmin}/order/Pending`) Đơn hàng chờ xác nhận
+                a.collapse-item(href=`${prefixAdmin}/order/Processing`) Đơn hàng chờ đóng gói
+                a.collapse-item(href=`${prefixAdmin}/order/Delivery`) Đơn hàng đang giao
+                a.collapse-item(href=`${prefixAdmin}/order/History`) Lịch sử đơn hàng
     li.nav-item
         a.nav-link.collapsed(href="#" data-toggle="collapse" data-target="#collapsePage" aria-expanded="true" aria-controls="collapsePage")
             i.fa-solid.fa-file-invoice
             span Cài đặt tài khoản
         #collapsePage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
-                a.collapse-item(href="/admin/account.htm") Danh sách
+                a.collapse-item(href=`${prefixAdmin}/account`) Danh sách
                 a.collapse-item(href="/admin/role.htm") Nhóm quyền
                 a.collapse-item(href="/admin/role/permission.htm") Phân quyền
 

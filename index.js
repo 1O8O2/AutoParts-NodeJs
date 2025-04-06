@@ -10,6 +10,10 @@ const port = 3000;
 const moment = require("moment");
 app.locals.moment = moment;
 
+// Connect to use Method-override library. Because form element only have method POST, using this library to use method like DELETE, etc.
+const methodOverride = require("method-override");
+app.use(methodOverride("_method"));
+
 // Connect to parse the body when data is sent onto server by using body-parser library
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false} ));
@@ -26,6 +30,12 @@ app.use(flash());
 // Set Pug as the view engine
 app.set('views', `${__dirname}/views`);
 app.set('view engine', 'pug');
+
+const path = require('path');
+// Assuming your main server file is in the root directory
+const configDir = path.join(__dirname, 'configs');
+// Serve static files from the 'configs' directory at the /configs URL
+app.use('/configs', express.static(configDir));
 
 // Configuration public file
 app.use(express.static(`${__dirname}/public`));

@@ -5,7 +5,7 @@ const {Cart, productInCart} = require('../../models/Cart');
 const Order = require('../../models/Order');
 
 // Helper
-const generate = require("../../helpers/generate");
+const generate = require("../../helpers/generateToken");
 
 // [GET] /account/register
 module.exports.showRegister = async (req, res) => {

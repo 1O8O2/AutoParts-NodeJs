@@ -55,7 +55,7 @@ const Blog = sequelize.define('Blog', {
 });
 
 // // Relationship with BlogGroup
-// Blog.belongsTo(BlogGroup, { foreignKey: 'blogGroupId', targetKey: 'blogGroupId' });
-// BlogGroup.hasMany(Blog, { foreignKey: 'blogGroupId', sourceKey: 'blogGroupId' });
+Blog.belongsTo(BlogGroup, { foreignKey: 'blogGroupId', targetKey: 'blogGroupId' });
+BlogGroup.hasMany(Blog, { foreignKey: 'blogGroupId', sourceKey: 'blogGroupId' });
 
 module.exports = Blog;

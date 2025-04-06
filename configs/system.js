@@ -5,3 +5,4 @@ module.exports = {
     prefixAdmin: PATH_ADMIN,
     prefixUrl: PATH_URL
 };
+

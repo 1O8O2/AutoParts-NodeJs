@@ -1,0 +1,10 @@
+extends ../../layouts/default.pug
+
+block main 
+    .article-container
+        h1.article-title= blog.title
+        p.article-category Thể loại: #{blog.BlogGroup.groupName}
+        p.article-category #{blog.description}
+        .article-content= blog.content
+        a.back-button(href=`${prefixAdmin}/blog/edit/${blog.blogId}`) Quay lại danh sách
+    
