@@ -1,0 +1,53 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+include ../../mixins/currency.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Danh Sách Đơn Hàng
+            .table-responsive.p-3
+                table#dataTable.table.align-items-center.table-flush
+                    thead.thead-light
+                        tr
+                            th Mã Đơn Hàng
+                            th Số Điện Thoại KH
+                            th Địa Chỉ Giao Hàng
+                            th Ngày Đặt Hàng
+                            th Tổng Tiền
+                            th Hoạt Động
+                    tbody
+                        each order in listDelivery
+                            tr.product-item
+                                td.align-middle #{order.orderId}
+                                td.align-middle #{order.userPhone}
+                                td.align-middle #{order.shipAddress}
+                                td.align-middle 
+                                    +formatDate(order.orderDate)
+                                td.align-middle 
+                                    +formatCurrency(order.totalCost)
+                                td.align-middle
+                                    button.btn.btn-sm.btn-primary.confirm-btn.mr-1(type="button" data-order-id=order.orderId data-order-status=order.status data-toggle="modal" data-target="#ConfirmModal") Hoàn Thành
+                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi Tiết
+
+    #ConfirmModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="ConfirmModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#ConfirmModal Hoàn Thành
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") ×
+                .modal-body
+                    p Xác nhận hoàn thành đơn hàng?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    button.btn.btn-primary.confirm-order-btn(type="button" data-order-id data-order-status) Xác Nhận
+
+    script(src="/vendor/jquery/jquery.min.js")
+    script(src="/js/adminjs/order/orderDeli.js")
+        

@@ -8,8 +8,8 @@ html
         link(rel="icon" href="/img/logo.webp")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css")
         link(rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" type="text/css")
-        link(rel="stylesheet" href="/css/adminCss/base.css")
         link(rel="stylesheet" href="/css/adminCss/profile.css")
+        link(rel="stylesheet" href="/css/adminCss/base.css")
         link(rel="stylesheet" href="/vendor/datatables/dataTables.bootstrap4.css")
         
     body 
@@ -24,11 +24,27 @@ html
                         block main
 
 
-        script(src="/js/adminjs/profile.js")
-        script(src="/js/adminjs/script.js")
         script(src="/vendor/jquery/jquery.min.js")
         script(src="/vendor/bootstrap/js/bootstrap.bundle.min.js")
         script(src="/vendor/jquery-easing/jquery.easing.min.js")
         script(src="/js/ruang-admin.min.js")
         script(src="/vendor/datatables/jquery.dataTables.min.js")
         script(src="/vendor/datatables/dataTables.bootstrap4.min.js")
+        script(src="/js/adminjs/profile.js")
+        script(src="/js/adminjs/script.js")
+        
+
+        script.
+            $(document).ready(function () {
+                $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm",
+                        "lengthMenu": "Hiển thị _MENU_ dòng",
+                        "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                        "paginate": {
+                            "previous": "Trước", 
+                            "next": "Tiếp" 
+                        }
+                    }
+                }); 
+            })            

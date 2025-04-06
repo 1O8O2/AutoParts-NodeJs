@@ -1,0 +1,39 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold.text-primary Thêm Bài Viết
+        .card-body
+            form(action=`${prefixAdmin}/blog/add` method="post" modelAttribute="blog")
+                .row
+                    .col-lg-6
+                        .form-group
+                            label(for="blogId") Mã bài viết <span class="required-text">*</span>
+                            input.form-control(type="text" id="blogId" name="blogId" value=`${nextId}` readonly)
+                        .form-group
+                            label(for="title") Tiêu đề bài viết <span class="required-text">*</span>
+                            input.form-control(type="text" id="title" name="title" placeholder="Nhập tiêu đề blog" required)
+                        .form-group
+                            label(for="description") Mô tả bài viết <span class="required-text">*</span>
+                            input.form-control(type="text" id="description" name="description" placeholder="Nhập mô tả blog" required)
+                        .form-group
+                            label(for="blogGroupId") Nhóm bài viết <span class="required-text">*</span>
+                            select.form-control.mb-3(name="blogGroupId" required)
+                                option(value="" disabled) -- Chọn nhóm blog --
+                                each blogGroup in blogGroups
+                                    option(value=`${blogGroup.blogGroupId}`) #{blogGroup.groupName}
+                        .form-group.d-flex
+                            label.mr-4(for="status") Trạng thái hoạt động <span class="required-text">*</span>
+                            .custom-control.custom-switch.ml-4
+                                input.custom-control-input(type="checkbox" name="status" id="status" value="Active" checked)
+                                label.custom-control-label(for="status") Hoạt động
+                    .col-lg-6
+                        .form-group
+                            label(for="content") Nội dung bài viết <span class="required-text">*</span>
+                            textarea.form-control.scrollable-textarea(id="content" name="content" rows="20" placeholder="Nhập nội dung bài viết" required)
+                        .d-flex.justify-content-end
+                            button.btn.btn-primary(type="submit") Lưu bài viết

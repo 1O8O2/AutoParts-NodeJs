@@ -6,7 +6,6 @@ let editBtn = document.querySelector("#edit")
 let passBtn = document.querySelector("#change-pass")
 let backBtn = document.querySelector("#back")
 
-console.log(inputs)
 
 function editAccount(){
 	if(!inputs[0].classList.contains("active")){

@@ -1,0 +1,34 @@
+.modal-header
+    h5#exampleModalCenterTitle.modal-title Chi Tiết Khuyến Mãi
+    button.close(type="button" data-dismiss="modal" aria-label="Close" aria-hidden="true")
+        span &times;
+.modal-body
+    p
+        strong Mã Khuyến Mãi: 
+        | #{discount.discountId}
+    p
+        strong Mô Tả Khuyến Mãi: 
+        | #{discount.discountDesc}
+    p
+        strong Phần Trăm Khuyến Mãi: 
+        | #{discount.discountAmount}%
+    p
+        strong Số Tiền Tối Thiểu: 
+        | !{`<fmt:formatNumber value="${discount.minimumAmount}" type="number" maxFractionDigits="0" groupingUsed="true"/> ₫`}
+    p
+        strong Số Lượng: 
+        | #{discount.usageLimit}
+    p
+        strong Ngày Bắt Đầu: 
+        | !{`<fmt:formatDate value="${discount.applyStartDate}" pattern="dd/MM/yyyy" />`}
+    p
+        strong Ngày Kết Thúc: 
+        | !{`<fmt:formatDate value="${discount.applyEndDate}" pattern="dd/MM/yyyy" />`}
+    p
+        strong Trạng Thái: 
+        if discount.status == 'Active'
+            span.badge.badge-success Hoạt động
+        else
+            span.badge.badge-danger Ngừng hoạt động
+.modal-footer
+    button.btn.btn-outline-primary(type="button" data-dismiss="modal" aria-label="Close") Close

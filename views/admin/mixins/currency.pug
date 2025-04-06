@@ -1,0 +1,6 @@
+mixin formatCurrency(price)
+    - function formatPrice(data) {
+    -   return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    - }
+
+    span #{formatPrice(price)}₫

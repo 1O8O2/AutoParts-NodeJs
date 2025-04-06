@@ -1,0 +1,69 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Danh Sách Khuyến Mãi
+                a.btn.btn-primary(href=`${prefixAdmin}/discount/add`) + Thêm khuyến mãi
+            .table-responsive.p-3
+                table#dataTable.table.align-items-center.table-flush
+                    thead.thead-light
+                        tr
+                            th Mô Tả Khuyến Mãi
+                            th Số Lượng Còn Lại
+                            th Thời Gian Bắt Đầu
+                            th Thời Gian Kết Thúc
+                            th Trạng thái
+                            th Hoạt Động
+                    tbody
+                        each discount in discounts
+                            tr.product-item
+                                td.align-middle #{discount.discountDesc}
+                                td.align-middle #{discount.usageLimit}
+                                td.align-middle
+                                    +formatDate(discount.applyStartDate)
+                                td.align-middle
+                                    +formatDate(discount.applyEndDate)
+                                td.align-middle
+                                    if discount.status === 'Active'
+                                        a.change-status-discount(href="javascript:void(0);" data-id=`${discount.discountId}` data-status=`${discount.status}`)
+                                            span.badge.badge-success Hoạt động
+                                    else
+                                        a.change-status-discount(href="javascript:void(0);" data-id=`${discount.discountId}` data-status=`${discount.status}`)
+                                            span.badge.badge-danger Ngừng hoạt động
+                                td.align-middle
+                                    a.btn.btn-sm.btn-danger.mr-1.delete-discount-btn(href="javascript:void(0);" data-discount-id=`${discount.discountId}` data-toggle="modal" data-target="#DeleteModal") Xóa
+                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/discount/edit/${discount.discountId}`) Sửa
+                                    a.btn.btn-sm.btn-dark.mr-1.detail-discount-btn(href="javascript:void(0);" data-discount-id=`${discount.discountId}` data-toggle="modal" data-target="#DetailModal") Chi tiết
+
+    #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5#exampleModalLabelLogout.modal-title Xóa khuyến mãi
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn chắc chắn muốn xóa khuyến mãi này không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a#delete-link.btn.btn-primary(href="#") Xóa
+
+    #DetailModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DetailModal" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered(role="document")
+            .modal-content
+                //-  Nội dung sẽ được load động qua Ajax
+
+    form(
+        action=""
+        method="POST"
+        id="delete-discount-item"
+    )
+
+        

@@ -1,0 +1,104 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+include ../../mixins/currency.pug
+
+block main 
+    +alert-error(3000)
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold.text-primary Chi Tiết Đơn Hàng
+        .card-body#submit-form
+            h5 Thông Tin Đơn Hàng
+            .row
+                .col-lg-6.order-info-column
+                    .form-group
+                        label Mã Đơn Hàng:
+                        span.form-control-plaintext #{order.orderId}
+                    .form-group
+                        label Họ Tên Khách Hàng:
+                        span.form-control-plaintext #{customer.fullName}
+                    .form-group
+                        label Số Điện Thoại Khách Hàng:
+                        span.form-control-plaintext #{order.userPhone}
+                    .form-group
+                        label Ngày Đặt Hàng:
+                        span.form-control-plaintext     
+                            +formatDate(order.orderDate)
+                .col-lg-6.order-info-column
+                    .form-group
+                        label Địa Chỉ Giao Hàng:
+                        span.form-control-plaintext #{order.shipAddress}
+                    .form-group
+                        label Mã Giảm Giá:
+                        span.form-control-plaintext
+                            if order.discountId
+                                each discount in discounts
+                                    if discount.discountId === order.discountId
+                                        | #{discount.discountDesc} - #{discount.discountAmount}% - #{discount.minimumAmount}₫
+                            else
+                                | Không có
+                    .form-group
+                        label Trạng Thái:
+                        if order.status == 'Pending'
+                            span.form-control-plaintext Chờ xác nhận
+                        else if order.status == 'Processing'
+                            span.form-control-plaintext Chờ đóng gói
+                        else if order.status == 'Shipping'
+                            span.form-control-plaintext Đang giao hàng
+                        else if order.status == 'Cancelled'
+                            span.form-control-plaintext Đã hủy
+                        else
+                            span.form-control-plaintext Đã hoàn thành
+                    .form-group.totalCost
+                        label Tổng Tiền:
+                        span.form-control-plaintext#totalCostlbl 
+                            +formatCurrency(order.totalCost)
+            .row.mt-4
+                .col-lg-12
+                    h5 Chi Tiết Đơn Hàng
+                    .selected-products#selectedProducts
+                        each detail, index in orderDetails
+                            .selected-item
+                                div
+                                    div #{detail.productName}
+                                    div Giá: 
+                                        +formatCurrency(detail.unitPrice)
+                                    div Số Lượng: #{detail.amount}
+            if order.status == 'Pending'
+                .d-flex.justify-content-end.mt-3
+                    button.btn.btn-primary.confirm-btn(type="button" data-order-id=order.orderId data-toggle="modal" data-target="#ConfirmModal") Xác Nhận Đơn Hàng
+                    button.btn.btn-danger.ml-2.cancelled-btn(type="button" data-order-id=order.orderId data-toggle="modal" data-target="#CancelledModal") Hủy Đơn Hàng
+                    a.btn.btn-secondary.ml-2(href=`${prefixAdmin}/order/Pending`) Quay Lại
+
+    #ConfirmModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="ConfirmModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#ConfirmModal Xác nhận
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") ×
+                .modal-body
+                    p Xác nhận đơn hàng?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    button.btn.btn-primary.confirm-order-btn(type="button" data-order-id=order.orderId data-order-status=order.status) Xác Nhận
+
+    #CancelledModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="CancelledModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#CancelledModal Hủy đơn hàng
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") ×
+                .modal-body
+                    p Bạn có muốn hủy đơn hàng?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    button.btn.btn-primary.cancel-order-btn(type="button" data-order-id=order.orderId data-order-status=order.status) Xác Nhận
+
+    script(src="/vendor/jquery/jquery.min.js")
+    script(src="/js/adminjs/order/orderDetail.js")
+
+        

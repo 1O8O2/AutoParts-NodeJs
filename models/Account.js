@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
+const { RoleGroup } = require('./RoleGroup'); 
 
 const Account = sequelize.define('Account', {
     phone: {
@@ -15,9 +16,13 @@ const Account = sequelize.define('Account', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    permission: {
-        type: DataTypes.STRING(50),
-        allowNull: false
+    permission: { 
+        type: DataTypes.STRING(255), 
+        allowNull: true, 
+        references: {
+            model: 'RoleGroup', 
+            key: 'roleGroupId'
+        }
     },
     status: {
         type: DataTypes.STRING(50),
@@ -26,12 +31,12 @@ const Account = sequelize.define('Account', {
     createdAt: {
         type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // Correct usage of Sequelize
+        defaultValue: Sequelize.fn('GETDATE')
     },
     updatedAt: {
         type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // Correct usage of Sequelize
+        defaultValue: Sequelize.fn('GETDATE')
     },
     deleted: {
         type: DataTypes.BOOLEAN,
@@ -43,14 +48,7 @@ const Account = sequelize.define('Account', {
     schema: 'dbo'
 });
 
-// Sync is typically done in app.js, not here, but for testing:
-(async () => {
-    try {
-        await Account.sync({ force: false });
-        console.log('Account model synced');
-    } catch (error) {
-        console.error('Error syncing Account model:', error);
-    }
-})();
+Account.belongsTo(RoleGroup, { foreignKey: 'permission' }); 
+RoleGroup.hasMany(Account, { foreignKey: 'permission' });  
 
 module.exports = Account;

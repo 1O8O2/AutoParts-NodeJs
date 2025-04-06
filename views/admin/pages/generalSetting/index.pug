@@ -1,0 +1,78 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3
+                h6.m-0.font-weight-bold.text-primary Thông Số Chung
+            .card-body
+                form#generalSettingsForm(action=`${prefixAdmin}/generalSettings/update` method="POST" enctype="multipart/form-data")
+                    .form-group
+                        label(for="websiteName") Tên Website
+                        input.form-control(type="text" id="websiteName" name="websiteName" value=generalSettings.websiteName readonly required)
+                    .form-group
+                        label(for="logo") Logo (Ảnh)
+                        .custom-file
+                            input.custom-file-input(type="file" id="logoFile" name="logoFile" accept="image/*" onchange="previewImage(this)" required disabled)
+                            label.custom-file-label(for="logoFile") Chọn ảnh
+                        .mt-3#previewContainer
+                            if generalSettings.logo
+                                img(src=generalSettings.logo alt="Logo hiện tại" style="max-width: 100px; max-height: 100px;")
+                    .form-group
+                        label(for="phone") Số Điện Thoại
+                        input.form-control(type="text" id="phone" name="phone" value=generalSettings.phone readonly required)
+                    .form-group
+                        label(for="email") Email
+                        input.form-control(type="email" id="email" name="email" value=generalSettings.email readonly required)
+                    .form-group
+                        label(for="address") Địa Chỉ
+                        input.form-control(type="text" id="address" name="address" value=generalSettings.address readonly required)
+                    .form-group
+                        label(for="copyright") Bản Quyền
+                        input.form-control(type="text" id="copyright" name="copyright" value=generalSettings.copyright readonly required)
+                    .form-group
+                        button#toggleEditBtn.btn.btn-primary(type="button") Chỉnh sửa
+
+    script.
+        $(document).ready(function() {
+            var isEditing = false;
+
+            $('#toggleEditBtn').on('click', function() {
+                if (!isEditing) {
+                    // Chuyển sang chế độ chỉnh sửa
+                    $('input.form-control').removeAttr('readonly');
+                    $('#logoFile').removeAttr('disabled');
+                    $(this).text('Cập nhật');
+                    $(this).removeClass('btn-primary').addClass('btn-success');
+                    isEditing = true;
+                } else {
+                    // Gửi form để cập nhật
+                    $('#generalSettingsForm').submit();
+                }
+            });
+        });
+
+        function previewImage(input) {
+            const previewContainer = document.getElementById('previewContainer');
+            const fileLabel = input.nextElementSibling;
+            previewContainer.innerHTML = '';
+
+            if (input.files && input.files[0]) {
+                fileLabel.textContent = input.files[0].name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Preview';
+                    img.style.maxWidth = '100px';
+                    img.style.maxHeight = '100px';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                fileLabel.textContent = 'Chọn ảnh';
+            }
+        }
