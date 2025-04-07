@@ -37,7 +37,7 @@ $(document).ready(function () {
     // End delete item
 
     // Change Status item
-    $('#dataTable').on('click', '[class^="change-status"]', function(e) {
+    $('#dataTable').on('click', '[class^="change-status-blog"], [class^="change-status-discount"]', function(e) {
         e.preventDefault();
         const $link = $(this);// Lấy phần tử <a> hiện tại
         const fullClassName = $link.attr('class');

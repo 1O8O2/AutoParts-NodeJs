@@ -1,0 +1,34 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Thêm Nhóm Hàng
+            .card-body
+                form(action=`${prefixAdmin}/productGroup/add` method="POST")
+                    .row
+                        .col-lg-12
+                            .form-group
+                                label(for="productGroupId") Mã nhóm hàng 
+                                    span.required-text *
+                                input.form-control(type="text" id="productGroupId" name="productGroupId" value=nextGroupId readonly required)
+                            .form-group
+                                label(for="groupName") Tên nhóm hàng 
+                                    span.required-text *
+                                input.form-control(type="text" id="groupName" name="groupName" placeholder="Nhập tên nhãn hàng" required)
+                            .form-group.d-flex
+                                label(for="status" class="mr-4") Trạng thái hoạt động
+                                .custom-control.custom-switch.ml-4
+                                    input.custom-control-input(type="checkbox" name="status" id="status" value="Active" checked)
+                                    label.custom-control-label(for="status") Hoạt động
+                            .d-flex.justify-content-end
+                                button.btn.btn-primary(type="submit") Lưu nhãn hàng
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up

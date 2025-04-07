@@ -1,0 +1,285 @@
+extends ../layouts/default.pug
+include ../mixins/alert.pug
+include ../mixins/currency.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .d-sm-flex.align-items-center.justify-content-between.mb-4
+        h1.h3.mb-0.text-gray-800 Thống kê
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold Chọn khoảng thời gian
+        .card-body
+            form.form-inline(action=`${prefixAdmin}/statistic` method="get")
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="fromDate") Từ ngày:
+                    input.form-control(type="date" id="fromDate" name="fromDate" value=fromDate)
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="toDate") Đến ngày:
+                    input.form-control(type="date" id="toDate" name="toDate" value=toDate)
+                button.btn.btn-primary.mb-2(type="submit") Lọc dữ liệu
+
+    .row.mb-3
+        // Total Income Card
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tổng doanh thu
+                            .h5.mb-0.font-weight-bold.text-gray-800
+                                +formatCurrency(totalIncome)
+                        .col-auto
+                            i.fas.fa-dollar-sign.fa-2x.text-primary
+
+        // Total Products Card
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.no-gutters.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Sản phẩm đã bán
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{totalProducts}
+                        .col-auto
+                            i.fas.fa-shopping-cart.fa-2x.text-success
+
+        // New Users Card
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.no-gutters.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tài khoản mới
+                            .h5.mb-0.mr-3.font-weight-bold.text-gray-800 #{accounts.length}
+                        .col-auto
+                            i.fas.fa-users.fa-2x.text-info
+
+        // Pending Orders Card
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.no-gutters.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Đơn hàng chờ xác nhận
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{newOrders.length}
+                        .col-auto
+                            i.fas.fa-comments.fa-2x.text-warning
+
+    .row
+        // Daily Income Chart
+        .col-xl-8.col-lg-7
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold Doanh thu theo ngày
+                .card-body
+                    .chart-area
+                        canvas#myAreaChart
+
+        // Product Sales Chart
+        .col-xl-4.col-lg-5
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold Sản phẩm đã bán
+                    span.small.text-gray-600 #{products.length} sản phẩm
+                .card-body#products(style="max-height: 400px; overflow-y: hidden;")
+                    .products-container
+                        each item in products
+                            .product-item.mb-4
+                                .d-flex.justify-content-between.align-items-center.mb-2
+                                    h6.mb-0.font-weight-bold #{item.product.name}
+                                    span.badge.badge-primary.px-2 #{item.product.productId}
+                                .small.text-gray-600.mb-2
+                                    .row
+                                        .col-6
+                                            i.fas.fa-tag.mr-1
+                                            | Giá: 
+                                            +formatCurrency(item.product.salePrice)
+                                        .col-6.text-right
+                                            i.fas.fa-boxes.mr-1
+                                            | Tồn kho: #{item.product.stock}
+                                .small.text-gray-600.mb-2
+                                    .row
+                                        .col-6
+                                            i.fas.fa-shopping-cart.mr-1
+                                            | Đã bán: #{item.amount}
+                                        .col-6.text-right
+                                            - const total = item.product.stock + item.amount
+                                            i.fas.fa-chart-pie.mr-1
+                                            | Tổng: #{total}
+                                .progress(style="height: 12px;")
+                                    - const percentage = (item.amount / total) * 100
+                                    if percentage >= 80
+                                        .progress-bar.bg-danger(role="progressbar" style=`width: ${percentage}%` aria-valuenow=item.amount aria-valuemin="0" aria-valuemax="100")
+                                    else if percentage >= 50
+                                        .progress-bar.bg-warning(role="progressbar" style=`width: ${percentage}%` aria-valuenow=item.amount aria-valuemin="0" aria-valuemax="100")
+                                    else
+                                        .progress-bar.bg-success(role="progressbar" style=`width: ${percentage}%` aria-valuenow=item.amount aria-valuemin="0" aria-valuemax="100")
+                                .small.text-muted.text-center.mt-1
+                                    | Đã bán #{percentage.toFixed(1)}% trong tổng số sản phẩm
+                .card-footer.py-2.bg-light
+                    button#showMoreProducts.btn.btn-link.text-primary.w-100(type="button")
+                        span.text-primary Xem thêm 
+                        i.fas.fa-chevron-down.ml-1
+
+        // Invoice Table
+        .col-xl-12.col-lg-12.mb-4
+            .card
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold Đơn hàng chờ xác nhận
+                    a.m-0.float-right.btn.btn-danger.btn-sm(href=`${prefixAdmin}/order/Pending`)
+                        | Xem thêm 
+                        i.fas.fa-chevron-right
+                .table-responsive
+                    table.table.align-items-center.table-flush
+                        thead.thead-light
+                            tr
+                                th Mã đơn hàng
+                                th Ngày đặt
+                                th Số điện thoại
+                                th Trạng thái
+                                th Hoạt động
+                        tbody
+                            each order in newOrders
+                                tr
+                                    td
+                                        a(href="#") #{order.orderId}
+                                    td #{order.orderDate}
+                                    td #{order.userPhone}
+                                    td
+                                        span.badge.badge-success #{order.status}
+                                    td
+                                        a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi tiết
+
+    script(src="/vendor/chart.js/Chart.min.js")
+    script.
+        // Area Chart Example
+        var ctx = document.getElementById("myAreaChart");
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: !{JSON.stringify(labels)},
+                datasets: [{
+                    label: "Doanh thu",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: !{JSON.stringify(dailyIncome)},
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'date'
+                        },
+                        gridLines: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            callback: function(value, index, values) {
+                                return value.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
+                            }
+                        },
+                        gridLines: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(tooltipItem, chart) {
+                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                            return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
+                        }
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const productsContainer = document.querySelector('#products');
+            const showMoreBtn = document.querySelector('#showMoreProducts');
+            const btnText = showMoreBtn.querySelector('span');
+            const btnIcon = showMoreBtn.querySelector('i');
+            let isExpanded = false;
+
+            // Function to check if scrolling is needed
+            function checkScroll() {
+                if (productsContainer.scrollHeight <= 400) {
+                    showMoreBtn.parentElement.style.display = 'none';
+                } else {
+                    showMoreBtn.parentElement.style.display = 'block';
+                }
+            }
+
+            showMoreBtn.addEventListener('click', function() {
+                if (!isExpanded) {
+                    productsContainer.style.maxHeight = 'none';
+                    productsContainer.style.overflowY = 'visible';
+                    btnText.textContent = 'Thu gọn';
+                    btnIcon.classList.remove('fa-chevron-down');
+                    btnIcon.classList.add('fa-chevron-up');
+                } else {
+                    productsContainer.style.maxHeight = '400px';
+                    productsContainer.style.overflowY = 'hidden';
+                    btnText.textContent = 'Xem thêm';
+                    btnIcon.classList.remove('fa-chevron-up');
+                    btnIcon.classList.add('fa-chevron-down');
+                }
+                isExpanded = !isExpanded;
+            });
+
+            // Check on load
+            checkScroll();
+
+            // Check on window resize
+            window.addEventListener('resize', checkScroll);
+        });

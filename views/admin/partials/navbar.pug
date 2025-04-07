@@ -5,7 +5,7 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
         .sidebar-brand-text.mx-3 BaoLong Autopart
     hr.sidebar-divider.my-0
     li.nav-item.active
-        a.nav-link(href="/autopart/admin/statistic.htm")
+        a.nav-link(href=`${prefixAdmin}/statistic`)
             i.fa-solid.fa-chart-column
             span Thống kê
     li.nav-item
@@ -14,16 +14,16 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
             span Quản lý sản phẩm
         #productPage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
-                a.collapse-item(href="/admin/product/import.htm") Nhập hàng
-                a.collapse-item(href="/admin/product.htm") Quản lý sản phẩm
-                a.collapse-item(href="/admin/productGroup.htm") Quản lý danh mục
-                a.collapse-item(href="/admin/brand.htm") Quản lý nhãn hàng
+                a.collapse-item(href=`${prefixAdmin}/product/import`) Nhập hàng
+                a.collapse-item(href=`${prefixAdmin}/product`) Quản lý sản phẩm
+                a.collapse-item(href=`${prefixAdmin}/productGroup`) Quản lý danh mục
+                a.collapse-item(href=`${prefixAdmin}/brand`) Quản lý nhãn hàng
     li.nav-item
-        a.nav-link(href="/autopart/admin/customer.htm")
+        a.nav-link(href=`${prefixAdmin}/customer`)
             i.fa-solid.fa-person
             span Danh sách khách hàng
     li.nav-item
-        a.nav-link(href="/autopart/admin/employee.htm")
+        a.nav-link(href=`${prefixAdmin}/employee`)
             i.fa-regular.fa-id-card
             span Danh sách nhân viên
     li.nav-item
@@ -35,7 +35,7 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
             i.fa-solid.fa-ticket
             span Quản lý khuyến mãi
     li.nav-item
-        a.nav-link(href="/autopart/admin/generalSettings.htm")
+        a.nav-link(href=`${prefixAdmin}/generalSettings`)
             i.fa-solid.fa-hammer
             span Thông số chung
     li.nav-item
@@ -56,8 +56,8 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
         #collapsePage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
                 a.collapse-item(href=`${prefixAdmin}/account`) Danh sách
-                a.collapse-item(href="/admin/role.htm") Nhóm quyền
-                a.collapse-item(href="/admin/role/permission.htm") Phân quyền
+                a.collapse-item(href=`${prefixAdmin}/role`) Nhóm quyền
+                a.collapse-item(href=`${prefixAdmin}/role/permission`) Phân quyền
 
     script.
         document.addEventListener('DOMContentLoaded', function() {
