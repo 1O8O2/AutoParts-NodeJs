@@ -1,0 +1,102 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/currency.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Thêm Sản Phẩm
+            .card-body
+                form(action=`${prefixAdmin}/product/add` method="POST" enctype="multipart/form-data")
+                    .row
+                        // Cột 1: Thông tin sản phẩm
+                        .col-lg-6
+                            .form-group
+                                label(for="productId") Mã Sản Phẩm 
+                                    span.text-danger *
+                                input.form-control(type="text" id="productId" name="productId" value=nextProductId readonly required)
+                            .form-group
+                                label(for="productName") Tên Sản Phẩm 
+                                    span.text-danger *
+                                input.form-control(type="text" id="productName" name="productName" required)
+                            .form-group
+                                label(for="brandId") Nhãn Hiệu 
+                                    span.text-danger *
+                                select.form-control(name="brandId" id="brandId" required)
+                                    option(value="" disabled selected) -- Chọn nhãn hiệu --
+                                    if brands && brands.length > 0
+                                        each brand in brands
+                                            option(value=brand.brandId)= brand.brandName
+                            .form-group
+                                label(for="groupId") Nhóm Sản Phẩm 
+                                    span.text-danger *
+                                select.form-control(name="groupId" id="groupId" required)
+                                    option(value="" disabled selected) -- Chọn nhóm sản phẩm --
+                                    if groups && groups.length > 0
+                                        each group in groups
+                                            option(value=group.groupId)= group.groupName
+                            .form-group
+                                label(for="description") Mô Tả
+                                textarea.form-control(id="description" name="description" rows="3")
+                        // Cột 2: Giá và hình ảnh
+                        .col-lg-6
+                            .form-group
+                                label(for="costPrice") Giá Nhập 
+                                    span.text-danger *
+                                input.form-control(type="number" id="costPrice" name="costPrice" min="0" required)
+                            .form-group
+                                label(for="salePrice") Giá Bán 
+                                    span.text-danger *
+                                input.form-control(type="number" id="salePrice" name="salePrice" min="0" required)
+                            .form-group
+                                label(for="stock") Số Lượng 
+                                    span.text-danger *
+                                input.form-control(type="number" id="stock" name="stock" min="0" required)
+                            .form-group
+                                label(for="status") Trạng Thái 
+                                    span.text-danger *
+                                select.form-control(name="status" id="status" required)
+                                    option(value="Active" selected) Hoạt động
+                                    option(value="Inactive") Ngừng hoạt động
+                            .form-group
+                                label(for="images") Hình Ảnh 
+                                    span.text-danger *
+                                input.form-control(type="file" id="images" name="images" multiple accept="image/*" required)
+                                #imagePreview.row.mt-2
+                    .d-flex.justify-content-end.mt-3
+                        button.btn.btn-primary(type="submit") Lưu Sản Phẩm
+                        a.btn.btn-secondary.ml-2(href=`${prefixAdmin}/product`) Quay Lại
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        $(document).ready(function() {
+            // Preview images before upload
+            $('#images').change(function() {
+                const files = this.files;
+                const previewContainer = $('#imagePreview');
+                
+                previewContainer.empty();
+                
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewContainer.append(`
+                                <div class="col-md-4 mb-3">
+                                    <img src="${e.target.result}" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                            `);
+                        }
+                        reader.readAsDataURL(files[i]);
+                    }
+                }
+            });
+        });

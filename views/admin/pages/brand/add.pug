@@ -1,0 +1,50 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Thêm Nhãn Hàng
+            .card-body
+                form(action=`${prefixAdmin}/brand/add` method="POST")
+                    .row
+                        .col-lg-12
+                            .form-group
+                                label(for="brandId")
+                                    | Mã nhãn hàng 
+                                    span.required-text *
+                                input.form-control#brandId(type="text" name="brandId" value=nextBrandId readonly required)
+                            .form-group
+                                label(for="brandName")
+                                    | Tên nhãn hàng 
+                                    span.required-text *
+                                input.form-control#brandName(type="text" name="brandName" placeholder="Nhập tên nhãn hàng" required)
+                            .form-group.d-flex
+                                label.mr-4(for="status") Trạng thái hoạt động
+                                .custom-control.custom-switch.ml-4
+                                    input.custom-control-input#status(type="checkbox" name="status" value="Active" checked)
+                                    label.custom-control-label(for="status") Hoạt động
+                            .d-flex.justify-content-end
+                                button.btn.btn-primary(type="submit") Lưu nhãn hàng
+
+    // Modal Logout
+    #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="exampleModalLabelLogout" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalLabelLogout Đăng xuất
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn có muốn đăng xuất không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a.btn.btn-primary(href="login.html") Đăng xuất
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up 

@@ -1,0 +1,139 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/currency.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .d-sm-flex.align-items-center.justify-content-between.mb-4
+            h1.h3.mb-0.text-gray-800 Chi Tiết Sản Phẩm
+
+        .row
+            .col-lg-4
+                // Ảnh sản phẩm
+                .card.mb-4
+                    .card-header.py-3
+                        h6.m-0.font-weight-bold.text-primary Ảnh Sản Phẩm
+                    .card-body
+                        each url in imgUrls
+                            if url.startsWith('https')
+                                img(src=url alt="Sản phẩm" class="img-fluid" style="max-width: 100px; max-height: 100px; margin-right: 10px;")
+                            else
+                                img(src=`/img/${url}` alt="Sản phẩm" class="img-fluid" style="max-width: 100px; max-height: 100px; margin-right: 10px;")
+
+                // Thông tin trạng thái
+                .card.mb-4
+                    .card-header.py-3
+                        h6.m-0.font-weight-bold.text-primary Trạng Thái
+                    .card-body
+                        .mb-3
+                            button.btn(
+                                id=`statusBtn_${product.productId}`
+                                class=product.status === 'Active' ? 'btn-success' : 'btn-danger'
+                                onclick=`changeStatus('${product.productId}', '${product.status}')`
+                            ) #{product.status}
+                        .mb-3
+                            strong Ngày ngừng bán:
+                            if !product.deletedAt
+                                p.text-muted.mb-0 Chưa ngừng bán
+                            else
+                                p.text-muted.mb-0 #{moment(product.deletedAt).format('DD/MM/YYYY')}
+                        .mb-3
+                            a.btn.btn-primary.btn-block(href=`${prefixAdmin}/product/edit?productId=${product.productId}`) Chỉnh sửa sản phẩm
+
+            .col-lg-8
+                // Thông tin cơ bản
+                .card.mb-4
+                    .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                        h6.m-0.font-weight-bold.text-primary Thông Tin Cơ Bản
+                    .card-body
+                        .row
+                            .col-md-6
+                                .form-group
+                                    label.font-weight-bold Mã sản phẩm:
+                                    p #{product.productId}
+                                .form-group
+                                    label.font-weight-bold Tên sản phẩm:
+                                    p #{product.productName}
+                                .form-group
+                                    label.font-weight-bold Danh mục:
+                                    p #{groupName}
+                            .col-md-6
+                                .form-group
+                                    label.font-weight-bold Thương hiệu:
+                                    p #{brandName}
+                                .form-group
+                                    label.font-weight-bold Đơn vị tính:
+                                    p #{product.unit}
+                                .form-group
+                                    label.font-weight-bold Khối lượng:
+                                    p #{product.weight} kg
+
+                // Thông tin giá & kho
+                .card.mb-4
+                    .card-header.py-3
+                        h6.m-0.font-weight-bold.text-primary Thông Tin Giá & Kho
+                    .card-body
+                        .row
+                            .col-md-6
+                                .form-group
+                                    label.font-weight-bold Giá bán:
+                                    p.text-danger
+                                        +formatCurrency(product.salePrice)
+                                .form-group
+                                    label.font-weight-bold Giá nhập:
+                                    p
+                                        +formatCurrency(product.costPrice)
+                            .col-md-6
+                                .form-group
+                                    label.font-weight-bold Tồn kho:
+                                    p #{product.stock}
+
+                // Mô tả sản phẩm
+                .card
+                    .card-header.py-3
+                        h6.m-0.font-weight-bold.text-primary Mô Tả Sản Phẩm
+                    .card-body
+                        p #{product.description}
+
+    // Modal Logout
+    #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Đăng xuất
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn có muốn đăng xuất không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a.btn.btn-primary(href=`${prefixAdmin}/logout`) Đăng xuất
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up 
+
+block append scripts
+    script.
+        function changeStatus(productId, currentStatus) {
+            $.ajax({
+                url: `${systemConfig.prefixAdmin}/product/changeStatus/${productId}`,
+                type: 'POST',
+                data: { status: currentStatus },
+                success: function(response) {
+                    if (response.success) {
+                        // Update the status button
+                        const statusBtn = $(`#statusBtn_${productId}`);
+                        statusBtn.text(response.newStatus);
+                        statusBtn.removeClass('btn-success btn-danger')
+                            .addClass(response.newStatus === 'Active' ? 'btn-success' : 'btn-danger');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error changing status:', error);
+                }
+            });
+        } 

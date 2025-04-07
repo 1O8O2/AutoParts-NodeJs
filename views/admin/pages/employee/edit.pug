@@ -1,0 +1,73 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Chỉnh Sửa Thông Tin Nhân Viên
+            .card-body
+                form(action=`${prefixAdmin}/employee/edit` method="POST")
+                    input(type="hidden" name="phone" value=employee.phone)
+                    .row
+                        // Cột 1
+                        .col-lg-6.order-info-column
+                            .form-group
+                                label(for="fullName") Họ và Tên 
+                                    span.text-danger *
+                                input#fullName.form-control(type="text" name="fullName" value=employee.fullName required)
+                            .form-group
+                                label(for="gender") Giới Tính 
+                                    span.text-danger *
+                                select#gender.form-control(name="gender" required)
+                                    option(value="Male" selected=(employee.gender === "Male")) Nam
+                                    option(value="Female" selected=(employee.gender === "Female")) Nữ
+                            .form-group
+                                label(for="phone") Số Điện Thoại 
+                                    span.text-danger *
+                                input#phone.form-control(type="text" value=employee.phone readonly)
+                            .form-group
+                                label(for="email") Email 
+                                    span.text-danger *
+                                input#email.form-control(type="email" name="email" value=employee.email required)
+                            .form-group
+                                label(for="citizenId") Số CCCD 
+                                    span.text-danger *
+                                input#citizenId.form-control(type="text" name="citizenId" value=employee.citizenId required)
+                        // Cột 2
+                        .col-lg-6.order-info-column
+                            .form-group
+                                label(for="birthDate") Ngày Sinh 
+                                    span.text-danger *
+                                input#birthDate.form-control(type="date" name="birthDate" value=employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : '' required)
+                            .form-group
+                                label(for="startDate") Ngày Bắt Đầu Làm Việc 
+                                    span.text-danger *
+                                input#startDate.form-control(type="date" name="startDate" value=employee.startDate ? new Date(employee.startDate).toISOString().split('T')[0] : '' required)
+                            .form-group
+                                label(for="address") Địa Chỉ 
+                                    span.text-danger *
+                                input#address.form-control(type="text" name="address" value=employee.address required)
+                            .form-group
+                                label(for="educationLevel") Trình Độ Học Vấn 
+                                    span.text-danger *
+                                input#educationLevel.form-control(type="text" name="educationLevel" value=employee.educationLevel required)
+                            .form-group.d-flex
+                                label.mr-4(for="status") Trạng thái hoạt động 
+                                    span.text-danger *
+                                .custom-control.custom-switch.ml-4
+                                    if employee.status === "Active"
+                                        input#status.custom-control-input(type="checkbox" name="status" value="Active" checked)
+                                    else
+                                        input#status.custom-control-input(type="checkbox" name="status" value="Active")
+                                    label.custom-control-label(for="status") Hoạt động
+                    .d-flex.justify-content-end.mt-3
+                        button.btn.btn-primary(type="submit") Lưu Chỉnh Sửa
+                        a.btn.btn-secondary.ml-2(href=`${prefixAdmin}/employee`) Quay Lại
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up

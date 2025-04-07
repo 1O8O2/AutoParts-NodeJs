@@ -1,0 +1,111 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .col-lg-12
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold.text-primary Danh Sách Nhân Viên
+                    a.btn.btn-primary(href=`${prefixAdmin}/employee/add`) + Thêm nhân viên
+                .table-responsive.p-3
+                    table.table.align-items-center.table-flush#dataTable
+                        thead.thead-light
+                            tr
+                                th Họ Tên Nhân Viên
+                                th Email
+                                th Số Điện Thoại
+                                th Giới Tính
+                                th Trạng Thái
+                                th Hoạt Động
+                        tbody
+                            if employees && employees.length > 0
+                                each employee in employees
+                                    tr.employee-item
+                                        td.align-middle #{employee.fullName}
+                                        td.align-middle #{employee.email}
+                                        td.align-middle #{employee.phone}
+                                        td.align-middle
+                                            if employee.gender === "Male"
+                                                span Nam
+                                            else
+                                                span Nữ
+                                        td.align-middle
+                                            a.change-status-link(href="javascript:void(0);" data-emp-phone=employee.phone data-emp-status=employee.status)
+                                                if employee.status === "Active"
+                                                    span.badge.badge-success Hoạt động
+                                                else
+                                                    span.badge.badge-danger Ngừng hoạt động
+                                        td.align-middle
+                                            a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/employee/edit?empPhone=${employee.phone}`) Sửa
+                                            a.btn.btn-sm.btn-dark.ml-1(href=`${prefixAdmin}/employee/detail?empPhone=${employee.phone}`) Chi Tiết
+                            else
+                                tr
+                                    td(colspan="6" class="text-center") Không có nhân viên nào
+
+    // Modal Logout
+    #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalLabelLogout Đăng xuất
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn có muốn đăng xuất không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a.btn.btn-primary(href="login.html") Đăng xuất
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#dataTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                    "paginate": {
+                        "previous": "Trước", 
+                        "next": "Tiếp"
+                    }
+                }
+            });
+
+            // Handle change status link click
+            $('#dataTable').on('click', '.change-status-link', function(event) {
+                event.preventDefault();
+                const empPhone = $(this).data('emp-phone');
+                const empStatus = $(this).data('emp-status');
+                
+                $.ajax({
+                    url: '#{prefixAdmin}/employee/changeStatus',
+                    type: 'POST',
+                    data: { empPhone: empPhone },
+                    success: function(response) {
+                        const badge = $(event.target).closest('.change-status-link').find('.badge');
+                        const link = $(event.target).closest('.change-status-link');
+                        
+                        if (empStatus === "Inactive") {
+                            badge.removeClass('badge-danger').addClass('badge-success').text('Hoạt động');
+                            link.data('emp-status', 'Active');
+                        } else {
+                            badge.removeClass('badge-success').addClass('badge-danger').text('Ngừng hoạt động');
+                            link.data('emp-status', 'Inactive');
+                        }
+                    },
+                    error: function(error) {
+                        console.error("Error changing status:", error);
+                        alert("Lỗi khi thay đổi trạng thái.");
+                    }
+                });
+            });
+        }); 

@@ -1,5 +1,6 @@
 mixin formatCurrency(price)
     - function formatPrice(data) {
+    -   if (data === undefined || data === null) return '0';
     -   return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     - }
 

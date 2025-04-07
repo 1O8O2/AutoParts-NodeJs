@@ -1,0 +1,87 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .col-lg-12
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold.text-primary Danh Sách Khách Hàng
+                .table-responsive.p-3
+                    table.table.align-items-center.table-flush#dataTable
+                        thead.thead-light
+                            tr
+                                th Số điện thoại
+                                th Tên khách hàng
+                                th Email
+                                th Địa chỉ
+                                th Hoạt Động
+                        tbody
+                            if customers && customers.length > 0
+                                each customer in customers
+                                    tr.customer-item
+                                        td.align-middle #{customer.phone}
+                                        td.align-middle #{customer.fullName}
+                                        td.align-middle #{customer.email}
+                                        td.align-middle #{customer.address}
+                                        td.align-middle
+                                            a.btn.btn-sm.btn-dark.detail-btn(href="javascript:void(0);" data-customer-phone=customer.phone data-toggle="modal" data-target="#DetailModal") Chi tiết
+                            else
+                                tr
+                                    td(colspan="5" class="text-center") Không có khách hàng nào
+
+    // Detail Modal
+    #DetailModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DetailModal" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalCenterTitle Chi Tiết Khách Hàng
+                    button.close(type="button" data-dismiss="modal" aria-label="Close" aria-hidden="true")
+                        span &times;
+                .modal-body#detailModalBody
+                    // Content will be loaded dynamically
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal" aria-label="Close") Đóng
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#dataTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                    "paginate": {
+                        "previous": "Trước", 
+                        "next": "Tiếp"
+                    }
+                }
+            });
+
+            // Handle detail button click
+            $('#dataTable').on('click', '.detail-btn', function() {
+                const cusPhone = $(this).data('customer-phone');
+                
+                $.ajax({
+                    url: '#{prefixAdmin}/customer/detail',
+                    type: 'GET',
+                    data: { cusPhone: cusPhone },
+                    success: function(response) {
+                        $('#detailModalBody').html(response);
+                        $('#DetailModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading customer details:", error);
+                        alert("Lỗi khi tải thông tin khách hàng. Vui lòng thử lại sau.");
+                    }
+                });
+            });
+        }); 
