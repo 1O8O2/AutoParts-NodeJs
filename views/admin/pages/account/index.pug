@@ -21,16 +21,24 @@ block main
                         each acc in accounts
                             tr.brand-item
                                 td.align-middle #{acc.phone}
-                                td.align-middle #{acc.roleName}
+                                td.align-middle #{acc.RoleGroup.roleGroupName}
                                 td.align-middle
                                     if acc.status == 'Active'
-                                        a.change-status-account-link(href="javascript:void(0);" data-id=acc.phone data-status=acc.status)
+                                        if (permission.includes("DANH_SACH_TAI_KHOAN_SUA"))
+                                            a.change-status-account-link(href="javascript:void(0);" data-id=acc.phone data-status=acc.status)
+                                                span.badge.badge-success Hoạt động
+                                        else
                                             span.badge.badge-success Hoạt động
                                     else
-                                        a.change-status-account-link(href="javascript:void(0);" data-id=acc.phone data-status=acc.status)
+                                        if (permission.includes("DANH_SACH_TAI_KHOAN_SUA"))
+                                            a.change-status-account-link(href="javascript:void(0);" data-id=acc.phone data-status=acc.status)
+                                                span.badge.badge-danger Ngừng hoạt động
+                                        else
                                             span.badge.badge-danger Ngừng hoạt động
                                 td.align-middle
-                                    a.btn.btn-sm.btn-danger.edit-account-btn(href="javascript:void(0);" data-acc-phone=acc.phone data-toggle="modal" data-target="#EditModal") Sửa
+                                    if (permission.includes("DANH_SACH_TAI_KHOAN_SUA"))
+                                        a.btn.btn-sm.btn-danger.edit-account-btn.mr-1(href="javascript:void(0);" data-acc-phone=acc.phone data-toggle="modal" data-target="#EditModal") Sửa
+
 
     #EditModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="EditModal" aria-hidden="true")
         .modal-dialog.modal-dialog-centered(role="document")

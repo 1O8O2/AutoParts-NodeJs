@@ -28,6 +28,10 @@ label {
   box-shadow: none;
 }
 
+.roleName:hover {
+  cursor: pointer;
+}
+
 /* Order detail */
 .order-info-column {
   padding: 15px;

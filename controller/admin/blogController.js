@@ -11,7 +11,7 @@ module.exports.index = async (req, res) => {
     try {
         const blogs = await Blog.findAll({
             where: {
-                deleted: false
+                deleted: false,
             },
             include: [{
                 model: BlogGroup,

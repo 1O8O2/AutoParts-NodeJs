@@ -40,16 +40,21 @@ const RoleGroup = sequelize.define('RoleGroup', {
         defaultValue: false
     },
     permissions: {
-        type: DataTypes.VIRTUAL, // Virtual field to hold permissions, like products in Cart
-        defaultValue: []
+        type: DataTypes.VIRTUAL, // Virtual field to hold permissions
+        get() {
+            return this._permissions || [];
+        },
+        set(value) {
+            this._permissions = value;
+        }
     }
 }, {
     tableName: 'RoleGroup',
     timestamps: false, // Managed manually via createdAt/updatedAt
     hooks: {
         afterCreate: async (roleGroup, options) => {
-            if (roleGroup.permissions.length > 0) {
-                const permissionsData = roleGroup.permissions.map(permissionName => ({
+            if (roleGroup._permissions && roleGroup._permissions.length > 0) {
+                const permissionsData = roleGroup._permissions.map(permissionName => ({
                     roleGroupId: roleGroup.roleGroupId,
                     permissionName
                 }));
@@ -57,13 +62,13 @@ const RoleGroup = sequelize.define('RoleGroup', {
             }
         },
         beforeUpdate: async (roleGroup, options) => {
-            if (roleGroup.changed('permissions')) {
+            if (roleGroup._permissions !== undefined) {
                 await RoleGroupPermissions.destroy({
                     where: { roleGroupId: roleGroup.roleGroupId },
                     transaction: options.transaction
                 });
-                if (roleGroup.permissions.length > 0) {
-                    const permissionsData = roleGroup.permissions.map(permissionName => ({
+                if (roleGroup._permissions && roleGroup._permissions.length > 0) {
+                    const permissionsData = roleGroup._permissions.map(permissionName => ({
                         roleGroupId: roleGroup.roleGroupId,
                         permissionName
                     }));

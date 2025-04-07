@@ -10,7 +10,8 @@ block main
         .card.mb-4
             .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
                 h6.m-0.font-weight-bold.text-primary Danh Sách Khuyến Mãi
-                a.btn.btn-primary(href=`${prefixAdmin}/discount/add`) + Thêm khuyến mãi
+                if (permission.includes("QUAN_LY_KHUYEN_MAI_THEM"))
+                    a.btn.btn-primary(href=`${prefixAdmin}/discount/add`) + Thêm khuyến mãi
             .table-responsive.p-3
                 table#dataTable.table.align-items-center.table-flush
                     thead.thead-light
@@ -32,15 +33,24 @@ block main
                                     +formatDate(discount.applyEndDate)
                                 td.align-middle
                                     if discount.status === 'Active'
-                                        a.change-status-discount(href="javascript:void(0);" data-id=`${discount.discountId}` data-status=`${discount.status}`)
+                                        if (permission.includes("QUAN_LY_KHUYEN_MAI_SUA"))
+                                            a.change-status-discount(href="javascript:void(0);" data-id=`${discount.discountId}` data-status=`${discount.status}`)
+                                                span.badge.badge-success Hoạt động
+                                        else
                                             span.badge.badge-success Hoạt động
                                     else
-                                        a.change-status-discount(href="javascript:void(0);" data-id=`${discount.discountId}` data-status=`${discount.status}`)
+                                        if (permission.includes("QUAN_LY_KHUYEN_MAI_SUA"))
+                                            a.change-status-discount(href="javascript:void(0);" data-id=`${discount.discountId}` data-status=`${discount.status}`)
+                                                span.badge.badge-danger Ngừng hoạt động
+                                        else
                                             span.badge.badge-danger Ngừng hoạt động
                                 td.align-middle
-                                    a.btn.btn-sm.btn-danger.mr-1.delete-discount-btn(href="javascript:void(0);" data-discount-id=`${discount.discountId}` data-toggle="modal" data-target="#DeleteModal") Xóa
-                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/discount/edit/${discount.discountId}`) Sửa
-                                    a.btn.btn-sm.btn-dark.mr-1.detail-discount-btn(href="javascript:void(0);" data-discount-id=`${discount.discountId}` data-toggle="modal" data-target="#DetailModal") Chi tiết
+                                    if (permission.includes("QUAN_LY_KHUYEN_MAI_XOA"))
+                                        a.btn.btn-sm.btn-danger.mr-1.delete-discount-btn(href="javascript:void(0);" data-discount-id=`${discount.discountId}` data-toggle="modal" data-target="#DeleteModal") Xóa
+                                    if (permission.includes("QUAN_LY_KHUYEN_MAI_SUA"))
+                                        a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/discount/edit/${discount.discountId}`) Sửa
+                                    if (permission.includes("QUAN_LY_KHUYEN_MAI_XEM"))
+                                        a.btn.btn-sm.btn-dark.mr-1.detail-discount-btn(href="javascript:void(0);" data-discount-id=`${discount.discountId}` data-toggle="modal" data-target="#DetailModal") Chi tiết
 
     #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
         .modal-dialog(role="document")
@@ -53,7 +63,7 @@ block main
                     p Bạn chắc chắn muốn xóa khuyến mãi này không?
                 .modal-footer
                     button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
-                    a#delete-link.btn.btn-primary(href="#") Xóa
+                    button#delete-link.btn.btn-primary(type="button") Xóa
 
     #DetailModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DetailModal" aria-hidden="true")
         .modal-dialog.modal-dialog-centered(role="document")

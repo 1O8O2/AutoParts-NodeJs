@@ -1,5 +1,5 @@
-extends ../../layouts/default.pug
-include ../../mixins/alert.pug
+extends ../../../layouts/default.pug
+include ../../../mixins/alert.pug
 
 block main 
     +alert-error(3000)
@@ -9,7 +9,8 @@ block main
         .card.mb-4
             .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
                 h6.m-0.font-weight-bold.text-primary Danh Sách Nhóm Quyền
-                a.btn.btn-primary(href=`${prefixAdmin}/admin/role/add`) + Thêm nhóm quyền
+                if (permission.includes("NHOM_QUYEN_THEM"))
+                    a.btn.btn-primary(href=`${prefixAdmin}/role/add`) + Thêm nhóm quyền
             .table-responsive.p-3
                 table#dataTable.table.align-items-center.table-flush
                     thead.thead-light
@@ -20,21 +21,31 @@ block main
                             th Trạng Thái
                             th Hoạt Động
                     tbody
-                        each RG in roleGroup
+                        each RG in roleGroups
                             tr.product-item
                                 td.align-middle #{RG.roleGroupId}
                                 td.align-middle #{RG.roleGroupName}
                                 td.align-middle #{RG.description}
                                 td.align-middle
                                     if RG.status == 'Active'
-                                        a.change-status-link(href="javascript:void(0);" data-role-id=RG.roleGroupId data-role-status=RG.status)
+                                        if (permission.includes("NHOM_QUYEN_SUA"))
+                                            a.change-status-role-link(href="javascript:void(0);" data-id=RG.roleGroupId data-status=RG.status)
+                                                span.badge.badge-success Hoạt động
+                                        else
                                             span.badge.badge-success Hoạt động
                                     else
-                                        a.change-status-link(href="javascript:void(0);" data-role-id=RG.roleGroupId data-role-status=RG.status)
+                                        if (permission.includes("NHOM_QUYEN_SUA"))
+                                            a.change-status-role-link(href="javascript:void(0);" data-id=RG.roleGroupId data-status=RG.status)
+                                                span.badge.badge-danger Ngừng hoạt động
+                                        else
                                             span.badge.badge-danger Ngừng hoạt động
                                 td.align-middle
-                                    a.btn.btn-sm.btn-danger.delete-btn(href="javascript:void(0);" data-role-id=RG.roleGroupId data-toggle="modal" data-target="#DeleteModal") Xóa
-                                    a.btn.btn-sm.btn-dark.edit-btn(href="javascript:void(0);" data-role-id=RG.roleGroupId data-toggle="modal" data-target="#EditModal") Sửa
+                                    if (permission.includes("NHOM_QUYEN_XOA"))
+                                        a.btn.btn-sm.btn-danger.delete-roleGroup-btn.mr-1(href="javascript:void(0);" data-role-id=RG.roleGroupId data-toggle="modal" data-target="#DeleteModal") Xóa
+                                    if (permission.includes("NHOM_QUYEN_SUA"))
+                                        a.btn.btn-sm.btn-dark.edit-btn.mr-1(href="javascript:void(0);" data-role-id=RG.roleGroupId data-toggle="modal" data-target="#EditModal") Sửa
+                                    if (permission.includes("NHOM_QUYEN_XEM"))
+                                        a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/role/detail/${RG.roleGroupId}`) Xem
 
     #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
         .modal-dialog(role="document")
@@ -47,58 +58,14 @@ block main
                     p Bạn chắc chắn muốn xóa nhóm quyền này không?
                 .modal-footer
                     button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
-                    a#delete-link.btn.btn-primary(href="#") Xóa
+                    button#delete-link.btn.btn-primary(type="button") Xóa
 
     #EditModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="EditModal" aria-hidden="true")
         .modal-dialog.modal-dialog-centered(role="document")
             .modal-content
 
-    script.
-        $(document).ready(function() {
-            $('#dataTable').DataTable({
-                "language": {
-                    "search": "Tìm kiếm",
-                    "lengthMenu": "Hiển thị _MENU_ dòng",
-                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
-                    "paginate": { "previous": "Trước", "next": "Tiếp" }
-                }
-            });
-
-            $('#dataTable').on('click', '.change-status-link', function(event) {
-                event.preventDefault();
-                var roleGroupId = $(this).data('role-id');
-                var roleStatus = $(this).data('role-status');
-                $.ajax({
-                    url: '${pageContext.request.contextPath}/admin/role/changeStatus.htm',
-                    type: 'POST',
-                    data: { roleGroupId: roleGroupId },
-                    success: function(response) {
-                        var badge = $(event.target).closest('.change-status-link').find('.badge');
-                        var link = $(event.target).closest('.change-status-link');
-                        if (roleStatus === "Inactive") {
-                            badge.removeClass('badge-danger').addClass('badge-success').text('Hoạt động');
-                            link.data('role-status', 'Active');
-                        } else {
-                            badge.removeClass('badge-success').addClass('badge-danger').text('Ngừng hoạt động');
-                            link.data('role-status', 'Inactive');
-                        }
-                    },
-                    error: function(error) {
-                        console.error("Error changing status:", error);
-                        alert("Lỗi khi thay đổi trạng thái.");
-                    }
-                });
-            });
-
-            $('#dataTable').on('click', '.delete-btn', function() {
-                var roleGroupId = $(this).data('role-id');
-                $('#delete-link').attr('href', '${pageContext.request.contextPath}/admin/role/delete.htm?roleGroupId=' + roleGroupId);
-            });
-
-            $('#dataTable').on('click', '.edit-btn', function() {
-                var roleGroupId = $(this).data('role-id');
-                $('#EditModal .modal-content').load('${pageContext.request.contextPath}/admin/role/edit.htm?roleGroupId=' + roleGroupId, function() {
-                    $('#EditModal').modal('show');
-                });
-            });
-        });
+    form(
+        action=""
+        method="POST"
+        id="delete-roleGroup-item"
+    )

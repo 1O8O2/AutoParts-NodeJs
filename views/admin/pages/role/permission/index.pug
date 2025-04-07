@@ -1,0 +1,317 @@
+extends ../../../layouts/default.pug
+include ../../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12#form-permissions
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Phân quyền
+            .p-3
+                form(action=`${prefixAdmin}/role/permissions/update?_method=PATCH` method="POST")
+                    div(data-records=roleGroup)
+                        table.table.table-sm
+                            thead
+                                tr
+                                    th Tính năng
+                                    each role, index in roleGroup
+                                        th.text-center.roleName(onclick=`toggleColumn(${index})`) #{role.roleGroupName}
+                            tbody
+                                //- Hidden row for IDs
+                                tr.d-none(data-name="id")
+                                    td
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="hidden" name="roleGroupIds" value=role.roleGroupId)
+
+                                //- Thống kê
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Thống kê
+                                tr(data-name="THONG_KE")
+                                    td Xem thống kê
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="THONG_KE" checked=role.permissions.includes('THONG_KE'))
+
+                                //- Phiếu nhập
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Phiếu nhập
+                                tr(data-name="PHIEU_NHAP_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="PHIEU_NHAP_XEM" checked=role.permissions.includes('PHIEU_NHAP_XEM'))
+                                tr(data-name="PHIEU_NHAP_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="PHIEU_NHAP_THEM" checked=role.permissions.includes('PHIEU_NHAP_THEM'))
+
+                                //- Quản lý sản phẩm
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Quản lý sản phẩm
+                                tr(data-name="QUAN_LY_SAN_PHAM_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_SAN_PHAM_XEM" checked=role.permissions.includes('QUAN_LY_SAN_PHAM_XEM'))
+                                tr(data-name="QUAN_LY_SAN_PHAM_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_SAN_PHAM_THEM" checked=role.permissions.includes('QUAN_LY_SAN_PHAM_THEM'))
+                                tr(data-name="QUAN_LY_SAN_PHAM_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_SAN_PHAM_SUA" checked=role.permissions.includes('QUAN_LY_SAN_PHAM_SUA'))
+                                tr(data-name="QUAN_LY_SAN_PHAM_XOA")
+                                    td Xóa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_SAN_PHAM_XOA" checked=role.permissions.includes('QUAN_LY_SAN_PHAM_XOA'))
+
+                                //- Danh mục sản phẩm
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Danh mục sản phẩm
+                                tr(data-name="DANH_MUC_SAN_PHAM_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_MUC_SAN_PHAM_XEM" checked=role.permissions.includes('DANH_MUC_SAN_PHAM_XEM'))
+                                tr(data-name="DANH_MUC_SAN_PHAM_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_MUC_SAN_PHAM_THEM" checked=role.permissions.includes('DANH_MUC_SAN_PHAM_THEM'))
+                                tr(data-name="DANH_MUC_SAN_PHAM_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_MUC_SAN_PHAM_SUA" checked=role.permissions.includes('DANH_MUC_SAN_PHAM_SUA'))
+                                tr(data-name="DANH_MUC_SAN_PHAM_XOA")
+                                    td Xóa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_MUC_SAN_PHAM_XOA" checked=role.permissions.includes('DANH_MUC_SAN_PHAM_XOA'))
+
+                                //- Quản lý nhãn hàng
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Quản lý nhãn hàng
+                                tr(data-name="QUAN_LY_NHAN_HANG_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_NHAN_HANG_XEM" checked=role.permissions.includes('QUAN_LY_NHAN_HANG_XEM'))
+                                tr(data-name="QUAN_LY_NHAN_HANG_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_NHAN_HANG_THEM" checked=role.permissions.includes('QUAN_LY_NHAN_HANG_THEM'))
+                                tr(data-name="QUAN_LY_NHAN_HANG_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_NHAN_HANG_SUA" checked=role.permissions.includes('QUAN_LY_NHAN_HANG_SUA'))
+
+                                //- Danh sách khách hàng
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Danh sách khách hàng
+                                tr(data-name="DANH_SACH_KHACH_HANG_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_SACH_KHACH_HANG_XEM" checked=role.permissions.includes('DANH_SACH_KHACH_HANG_XEM'))
+
+                                //- Danh sách nhân viên
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Danh sách nhân viên
+                                tr(data-name="DANH_SACH_NHAN_VIEN_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_SACH_NHAN_VIEN_XEM" checked=role.permissions.includes('DANH_SACH_NHAN_VIEN_XEM'))
+                                tr(data-name="DANH_SACH_NHAN_VIEN_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_SACH_NHAN_VIEN_THEM" checked=role.permissions.includes('DANH_SACH_NHAN_VIEN_THEM'))
+                                tr(data-name="DANH_SACH_NHAN_VIEN_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_SACH_NHAN_VIEN_SUA" checked=role.permissions.includes('DANH_SACH_NHAN_VIEN_SUA'))
+
+                                //- Quản lý bài viết
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Quản lý bài viết
+                                tr(data-name="QUAN_LY_BAI_VIET_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_BAI_VIET_XEM" checked=role.permissions.includes('QUAN_LY_BAI_VIET_XEM'))
+                                tr(data-name="QUAN_LY_BAI_VIET_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_BAI_VIET_THEM" checked=role.permissions.includes('QUAN_LY_BAI_VIET_THEM'))
+                                tr(data-name="QUAN_LY_BAI_VIET_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_BAI_VIET_SUA" checked=role.permissions.includes('QUAN_LY_BAI_VIET_SUA'))
+                                tr(data-name="QUAN_LY_BAI_VIET_XOA")
+                                    td Xóa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_BAI_VIET_XOA" checked=role.permissions.includes('QUAN_LY_BAI_VIET_XOA'))
+
+                                //- Quản lý khuyến mãi
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Quản lý khuyến mãi
+                                tr(data-name="QUAN_LY_KHUYEN_MAI_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_KHUYEN_MAI_XEM" checked=role.permissions.includes('QUAN_LY_KHUYEN_MAI_XEM'))
+                                tr(data-name="QUAN_LY_KHUYEN_MAI_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_KHUYEN_MAI_THEM" checked=role.permissions.includes('QUAN_LY_KHUYEN_MAI_THEM'))
+                                tr(data-name="QUAN_LY_KHUYEN_MAI_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_KHUYEN_MAI_SUA" checked=role.permissions.includes('QUAN_LY_KHUYEN_MAI_SUA'))
+                                tr(data-name="QUAN_LY_KHUYEN_MAI_XOA")
+                                    td Xóa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_KHUYEN_MAI_XOA" checked=role.permissions.includes('QUAN_LY_KHUYEN_MAI_XOA'))
+
+                                //- Quản lý đơn hàng
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Quản lý đơn hàng
+                                tr(data-name="QUAN_LY_DON_HANG_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_DON_HANG_XEM" checked=role.permissions.includes('QUAN_LY_DON_HANG_XEM'))
+                                tr(data-name="QUAN_LY_DON_HANG_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_DON_HANG_THEM" checked=role.permissions.includes('QUAN_LY_DON_HANG_THEM'))
+                                tr(data-name="QUAN_LY_DON_HANG_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="QUAN_LY_DON_HANG_SUA" checked=role.permissions.includes('QUAN_LY_DON_HANG_SUA'))
+
+                                //- Danh sách tài khoản
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Danh sách tài khoản
+                                tr(data-name="DANH_SACH_TAI_KHOAN_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_SACH_TAI_KHOAN_XEM" checked=role.permissions.includes('DANH_SACH_TAI_KHOAN_XEM'))
+                                tr(data-name="DANH_SACH_TAI_KHOAN_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="DANH_SACH_TAI_KHOAN_SUA" checked=role.permissions.includes('DANH_SACH_TAI_KHOAN_SUA'))
+
+                                //- Cài đặt chung
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Cài đặt chung
+                                tr(data-name="CAI_DAT_CHUNG_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="CAI_DAT_CHUNG_XEM" checked=role.permissions.includes('CAI_DAT_CHUNG_XEM'))
+                                tr(data-name="CAI_DAT_CHUNG_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="CAI_DAT_CHUNG_SUA" checked=role.permissions.includes('CAI_DAT_CHUNG_SUA'))
+
+                                //- Nhóm quyền
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Nhóm quyền
+                                tr(data-name="NHOM_QUYEN_XEM")
+                                    td Xem
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="NHOM_QUYEN_XEM" checked=role.permissions.includes('NHOM_QUYEN_XEM'))
+                                tr(data-name="NHOM_QUYEN_THEM")
+                                    td Thêm mới
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="NHOM_QUYEN_THEM" checked=role.permissions.includes('NHOM_QUYEN_THEM'))
+                                tr(data-name="NHOM_QUYEN_SUA")
+                                    td Chỉnh sửa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="NHOM_QUYEN_SUA" checked=role.permissions.includes('NHOM_QUYEN_SUA'))
+                                tr(data-name="NHOM_QUYEN_XOA")
+                                    td Xóa
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="NHOM_QUYEN_XOA" checked=role.permissions.includes('NHOM_QUYEN_XOA'))
+
+                                //- Phân quyền
+                                tr
+                                    td(colspan=roleGroup.length + 1)
+                                        b Phân quyền
+                                tr(data-name="PHAN_QUYEN")
+                                    td Quản lý phân quyền
+                                    each role in roleGroup
+                                        td.text-center
+                                            input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="PHAN_QUYEN" checked=role.permissions.includes('PHAN_QUYEN'))
+
+                    .d-flex.justify-content-end.mt-3
+                        if (permission.includes("PHAN_QUYEN"))
+                            button.btn.btn-primary#button-submit(type="submit") Cập nhật
+
+    script.
+        function toggleColumn(columnIndex) {
+            const rows = document.querySelectorAll('tbody tr:not(.d-none)');
+            let firstCheckbox = null;
+            let shouldCheck = true;
+            for (let row of rows) {
+                const cells = row.getElementsByTagName('td');
+                if (cells.length > columnIndex + 1) {
+                    firstCheckbox = cells[columnIndex + 1].querySelector('input[type="checkbox"]');
+                    if (firstCheckbox) {
+                        shouldCheck = !firstCheckbox.checked;
+                        break;
+                    }
+                }
+            }
+            rows.forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                if (cells.length > columnIndex + 1) {
+                    const checkbox = cells[columnIndex + 1].querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        checkbox.checked = shouldCheck;
+                    }
+                }
+            });
+        }

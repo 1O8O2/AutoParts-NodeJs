@@ -17,14 +17,14 @@
                 strong Nhóm Quyền:
             select.form-control.mb-3(name="permission" path="permission" required)
                 option(value="" disabled) -- Chọn nhóm quyền --
-                each role in roleGroup
+                each role in roleGroups
                     option(value=role.roleGroupId selected=role.roleGroupId == account.permission) #{role.roleGroupName}
         .form-group
             label(for="status")
                 strong Trạng Thái:
             select.form-control(name="status" path="status" required)
-                option(value="Active" selected=account.status == 'Active') Hoạt động
-                option(value="Inactive" selected=account.status == 'Inactive') Ngừng hoạt động
+                option(value="Active" selected=(account.status == 'Active')) Hoạt động
+                option(value="Inactive" selected=(account.status == 'Inactive')) Ngừng hoạt động
 .modal-footer
     button.btn.btn-outline-secondary(type="button" data-dismiss="modal") Đóng
     button.btn.btn-primary(type="submit" form="editAccountForm") Lưu Thay Đổi

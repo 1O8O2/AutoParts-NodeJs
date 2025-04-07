@@ -9,11 +9,11 @@ const discountRoute = require('./discount.route.js');
 const generalSettingRoute = require('./generalSetting.route.js');
 const orderRoute = require('./order.route.js');
 const accountRoute = require('./account.route.js');
+const roleRoute = require('./role.route.js');
 
 module.exports = (app) => {
     const PATH_ADMIN = systemConfig.prefixAdmin;
 
-    // app.use(userMiddleware.infoUser);
     app.use(PATH_ADMIN + '/auth', authRoute);
     app.use(PATH_ADMIN + '/dashboard', userMiddleware.infoUser, dashboardRoute);
     app.use(PATH_ADMIN + '/blog', userMiddleware.infoUser, blogRoute);
@@ -21,4 +21,5 @@ module.exports = (app) => {
     app.use(PATH_ADMIN + '/generalSetting', userMiddleware.infoUser, generalSettingRoute);
     app.use(PATH_ADMIN + '/order', userMiddleware.infoUser, orderRoute);
     app.use(PATH_ADMIN + '/account', userMiddleware.infoUser, accountRoute);
+    app.use(PATH_ADMIN + '/role', userMiddleware.infoUser, roleRoute);
 }

@@ -34,6 +34,15 @@ $(document).ready(function () {
             $('#delete-discount-item').submit(); 
         });
     });
+
+    $('#dataTable').on('click', '.delete-roleGroup-btn', function() {
+        const roleGroupId = $(this).data('role-id');
+        $('#delete-link').on('click', function(e) {
+            e.preventDefault(); 
+            $('#delete-roleGroup-item').attr('action', `/AutoParts/admin/role/delete/${roleGroupId}?_method=DELETE`);
+            $('#delete-roleGroup-item').submit(); 
+        });
+    });
     // End delete item
 
     // Change Status item
@@ -89,4 +98,13 @@ $(document).ready(function () {
         });
     });
     // End Show edit account modal
+
+    // Show edit role modal
+    $('#dataTable').on('click', '.edit-btn', function() {
+        const roleGroupId = $(this).data('role-id');
+        $('#EditModal .modal-content').load(`/AutoParts/admin/role/edit/${roleGroupId}`, function() {
+            $('#EditModal').modal('show');
+        });
+    });
+    // End Show edit role modal
 });

@@ -16,7 +16,9 @@ app.use(methodOverride("_method"));
 
 // Connect to parse the body when data is sent onto server by using body-parser library
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: false} ));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true })); // Middleware để parse form
+app.use(express.json());
 
 // Connect to Express Flash library to show notification when changing things
 const flash = require("express-flash");

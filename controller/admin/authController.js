@@ -40,4 +40,12 @@ module.exports.logout = async (req, res) => {
   }
 };
 
+// [GET] /AutoParts/admin/auth/access-denied
+module.exports.accessDenied = async (req, res) => {
+  try {
+    res.render('admin/pages/account/access-denied');
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+};
 
