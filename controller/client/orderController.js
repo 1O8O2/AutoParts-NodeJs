@@ -49,14 +49,14 @@ module.exports.createOrder = async (req, res) => {
 
         // Create order details and update cart
         const updatedProductsInCart = productsInCart.filter(item => ![item.product]);
-        for (const product of selectedProducts) {
-            console.log(product.product.productId)
+        for (const item of selectedProducts) {
+            console.log(item.product.productId)
             await OrderDetail.create({
                 orderId: newOrder.orderId,
-                productId: product.product.productId,
-                productName: product.product.productName,
-                amount: product.amount,
-                unitPrice: product.product.salePrice
+                productId: item.product.productId,
+                productName: item.product.productName,
+                amount: item.amount,
+                unitPrice: item.product.salePrice
             });
         }
 
@@ -109,7 +109,7 @@ module.exports.showCart = async (req, res) => {
         const cus = await Customer.findOne({ where: { phone: res.locals.user.phone } });
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
-            return res.render('order', { message: 'Cart not found' });
+            return res.render('client/pages/order/order', { message: 'Cart not found' });
         }
 
         let productsInCart = cart.products || [];
@@ -117,7 +117,7 @@ module.exports.showCart = async (req, res) => {
         // Remove products that are not selected
         const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
         if (selectedProducts.length === 0) {
-            return res.render('order', { message: 'No products selected' });
+            return res.render('client/pages/order/order', { message: 'No products selected' });
         }
 
         res.render('client/pages/order/order', {selectedProducts});

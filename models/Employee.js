@@ -8,7 +8,6 @@ const Employee = sequelize.define('Employee', {
     },
     phone: {
         type: DataTypes.STRING,
-        primaryKey: true,
         allowNull: false
     },
     fullName: {
@@ -17,6 +16,7 @@ const Employee = sequelize.define('Employee', {
     },
     email: {
         type: DataTypes.STRING,
+        primaryKey: true,
         allowNull: true
     },
     birthDate: {

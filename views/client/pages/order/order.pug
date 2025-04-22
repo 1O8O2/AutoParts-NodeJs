@@ -22,8 +22,9 @@ html(lang="en")
                 h4
                   b Giỏ hàng
               div 
-              .col.align-self-center.text-right.text-muted #{selectedProducts.length} món
+              .col.align-self-center.text-right.text-muted #{selectedProducts ? selectedProducts.length : 0} món
           .cart-list
+          if selectedProducts && selectedProducts.length > 0
             each product in selectedProducts
               .row.border-bottom
                 .row.main.align-items-center

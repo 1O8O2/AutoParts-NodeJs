@@ -2,6 +2,11 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
 const Customer = sequelize.define('Customer', {
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true
+    },
     cartId: {
         type: DataTypes.STRING,
         allowNull: true
@@ -12,7 +17,6 @@ const Customer = sequelize.define('Customer', {
     },
     phone: {
         type: DataTypes.STRING,
-        primaryKey: true,
         allowNull: false
     },
     address: {

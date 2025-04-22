@@ -2,8 +2,8 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
 const Account = sequelize.define('Account', {
-    phone: {
-        type: DataTypes.STRING(10),
+    email: {
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true
     },
@@ -21,6 +21,10 @@ const Account = sequelize.define('Account', {
     },
     status: {
         type: DataTypes.STRING(50),
+        allowNull: true
+    },
+    email: {
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     createdAt: {

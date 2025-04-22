@@ -70,6 +70,14 @@ const Product = sequelize.define('Product', {
     description: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    createdBy: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    updatedBy: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'Product',

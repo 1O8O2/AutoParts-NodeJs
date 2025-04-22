@@ -48,14 +48,14 @@ const Blog = sequelize.define('Blog', {
     deletedAt: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    updatedBy: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'Blog',
     timestamps: false
 });
-
-// // Relationship with BlogGroup
-// Blog.belongsTo(BlogGroup, { foreignKey: 'blogGroupId', targetKey: 'blogGroupId' });
-// BlogGroup.hasMany(Blog, { foreignKey: 'blogGroupId', sourceKey: 'blogGroupId' });
 
 module.exports = Blog;

@@ -12,7 +12,7 @@ const Order = sequelize.define('Order', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    userPhone: {
+    userEmail: {
         type: DataTypes.STRING,
         allowNull: true
     },
@@ -59,6 +59,10 @@ const Order = sequelize.define('Order', {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
+    },
+    updatedBy: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     details: {
         type: DataTypes.VIRTUAL,
