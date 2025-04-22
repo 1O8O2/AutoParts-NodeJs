@@ -5,24 +5,24 @@ const ImportDetail = require('./ImportDetail');
 
 const Import = sequelize.define('Import', {
     importId: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         primaryKey: true,
         allowNull: false
     },
-    employeePhone: {
-        type: DataTypes.STRING,
+    employeeEmail: {
+        type: DataTypes.STRING(255),
         allowNull: false,
         references: {
-            model: 'Employee',
-            key: 'phone'
+            model: Employee,
+            key: 'email'
         }
     },
     importDate: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false
     },
     importCost: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.DECIMAL(18, 2),
         allowNull: true
     }
 }, {
@@ -32,15 +32,13 @@ const Import = sequelize.define('Import', {
 
 // Define associations
 Import.belongsTo(Employee, {
-    foreignKey: 'employeePhone',
-    targetKey: 'phone',
-    as: 'Employee'
+    foreignKey: 'employeeEmail',
+    targetKey: 'email'
 });
 
 Import.hasMany(ImportDetail, {
     foreignKey: 'importId',
-    sourceKey: 'importId',
-    as: 'importDetails'
+    sourceKey: 'importId'
 });
 
-module.exports = Import; 
+module.exports = Import;

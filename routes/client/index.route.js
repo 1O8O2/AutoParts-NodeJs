@@ -27,4 +27,5 @@ module.exports = (app) => {
     app.use(PATH_URL + '/blog', blogRoute);
     app.use(PATH_URL + '/account', accountRoute);
     app.use(PATH_URL + '/product', productRoute);
+    app.use(PATH_URL + '/order', orderRoute);
 }

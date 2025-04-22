@@ -24,7 +24,12 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
 app.use(cookieParser("keyboard cat"));
-app.use(session({ cookie: { maxAge: 60000 }}));
+app.use(session({ 
+    cookie: { maxAge: 86400000 }, // Increase to 24 hours (1 day)
+    resave: false,
+    saveUninitialized: true,
+    secret: "keyboard cat" 
+}));
 app.use(flash());
 
 // Set Pug as the view engine
@@ -39,6 +44,10 @@ app.use('/configs', express.static(configDir));
 
 // Configuration public file
 app.use(express.static(`${__dirname}/public`));
+
+// Load message codes middleware
+const messagesMiddleware = require('./middlewares/messages.middleware');
+app.use(messagesMiddleware.loadMessageCodes);
 
 // App locals variables
 const systemConfig = require("./configs/system");

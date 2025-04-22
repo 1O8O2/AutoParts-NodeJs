@@ -2,47 +2,60 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
 const ProductGroup = sequelize.define('ProductGroup', {
-    productGroupId: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        allowNull: false
-    },
-    groupName: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    parentGroupId: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    status: {
-        type: DataTypes.STRING(50),
-        allowNull: true
-    },
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    deleted: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
+  productGroupId: {
+    type: DataTypes.STRING(50),
+    primaryKey: true,
+    allowNull: false
+  },
+  groupName: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  parentGroupId: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    references: {
+      model: 'ProductGroup',
+      key: 'productGroupId'
     }
+  },
+  status: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'Active',
+    allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true
+  }
 }, {
-    tableName: 'ProductGroup',
-    timestamps: false
+  tableName: 'ProductGroup',
+  timestamps: true
 });
 
-// // Self-referencing relationship for parentGroupId
-// ProductGroup.belongsTo(ProductGroup, { as: 'parentGroup', foreignKey: 'parentGroupId', targetKey: 'productGroupId' });
-// ProductGroup.hasMany(ProductGroup, { as: 'childGroups', foreignKey: 'parentGroupId', sourceKey: 'productGroupId' });
+// Self-referencing relationship for parent-child product groups
+ProductGroup.belongsTo(ProductGroup, { 
+  as: 'parentGroup',
+  foreignKey: 'parentGroupId'
+});
+ProductGroup.hasMany(ProductGroup, {
+  as: 'childGroups',
+  foreignKey: 'parentGroupId'
+});
 
 module.exports = ProductGroup;

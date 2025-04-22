@@ -8,14 +8,13 @@ module.exports.infoUser = async (req, res, next) => {
         const account = await Account.findOne({
             where: {
                 token: req.cookies.token,
-                // deleted: false,
                 status: "Active"
             }
         });
 
         if (account) {
             const user = await Employee.findOne({
-                where: { phone: account.dataValues.phone }
+                where: { email: account.email }
             });
             res.locals.user = user;
             res.locals.systemConfig = systemConfig;

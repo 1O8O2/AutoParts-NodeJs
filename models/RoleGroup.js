@@ -3,52 +3,52 @@ const sequelize = require('../configs/database');
 
 const RoleGroup = sequelize.define('RoleGroup', {
     roleGroupId: {
-        type: DataTypes.STRING(255), // Matches NVARCHAR(255) in Java
+        type: DataTypes.STRING(50),
         primaryKey: true,
         allowNull: false
     },
     roleGroupName: {
-        type: DataTypes.STRING(255), // Matches roleGroupName in Java
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     description: {
-        type: DataTypes.STRING, // No length specified in Java, default STRING
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     status: {
-        type: DataTypes.STRING(50), // Matches length=50 in Java
+        type: DataTypes.STRING(50),
         allowNull: true,
-        defaultValue: 'Active' // Matches columnDefinition DEFAULT 'Active'
+        defaultValue: 'Active'
     },
     deletedAt: {
-        type: DataTypes.DATE, // Matches Timestamp in Java (DATETIMEOFFSET in SQL Server)
+        type: DataTypes.DATE,
         allowNull: true
     },
     createdAt: {
-        type: DataTypes.DATE, // Matches Timestamp
+        type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
+        defaultValue: Sequelize.fn('GETDATE')
     },
     updatedAt: {
-        type: DataTypes.DATE, // Matches Timestamp
+        type: DataTypes.DATE,
         allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
+        defaultValue: Sequelize.fn('GETDATE')
     },
     deleted: {
-        type: DataTypes.BOOLEAN, // Matches boolean in Java
-        allowNull: false,
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
         defaultValue: false
     },
     permissions: {
-        type: DataTypes.VIRTUAL, // Virtual field to hold permissions, like products in Cart
+        type: DataTypes.VIRTUAL,
         defaultValue: []
     }
 }, {
     tableName: 'RoleGroup',
-    timestamps: false, // Managed manually via createdAt/updatedAt
+    timestamps: true,
     hooks: {
         afterCreate: async (roleGroup, options) => {
-            if (roleGroup.permissions.length > 0) {
+            if (roleGroup.permissions && roleGroup.permissions.length > 0) {
                 const permissionsData = roleGroup.permissions.map(permissionName => ({
                     roleGroupId: roleGroup.roleGroupId,
                     permissionName
@@ -62,7 +62,7 @@ const RoleGroup = sequelize.define('RoleGroup', {
                     where: { roleGroupId: roleGroup.roleGroupId },
                     transaction: options.transaction
                 });
-                if (roleGroup.permissions.length > 0) {
+                if (roleGroup.permissions && roleGroup.permissions.length > 0) {
                     const permissionsData = roleGroup.permissions.map(permissionName => ({
                         roleGroupId: roleGroup.roleGroupId,
                         permissionName
@@ -88,7 +88,7 @@ const RoleGroup = sequelize.define('RoleGroup', {
 
 const RoleGroupPermissions = sequelize.define('RoleGroupPermissions', {
     roleGroupId: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(50),
         allowNull: false,
         primaryKey: true,
         references: {
@@ -97,7 +97,7 @@ const RoleGroupPermissions = sequelize.define('RoleGroupPermissions', {
         }
     },
     permissionName: {
-        type: DataTypes.STRING(255), // Arbitrary length for permission names
+        type: DataTypes.STRING(255),
         allowNull: false,
         primaryKey: true
     }
