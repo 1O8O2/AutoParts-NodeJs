@@ -1,8 +1,8 @@
-const  Product  = require('../../models/Product');
-const  Brand  = require('../../models/Brand');
-const  ProductGroup  = require('../../models/ProductGroup');
-const Customer = require('../../models/Customer')
-const {Cart, productsInCart} = require('../../models/Cart')
+const Product = require('../../models/Product');
+const Brand = require('../../models/Brand');
+const ProductGroup = require('../../models/ProductGroup');
+const Customer = require('../../models/Customer');
+const {Cart, ProductsInCart} = require('../../models/Cart');
 
 // [GET] /product/productDetail
 module.exports.showProduct = async (req, res) => {
@@ -27,7 +27,7 @@ module.exports.showProduct = async (req, res) => {
             message: req.query.message || null
         });
     } catch (error) {
-        res.render('productdetail', { message: 'Đã xảy ra lỗi khi tải sản phẩm' });
+        res.render('client/pages/product/productDetail', { message: 'Đã xảy ra lỗi khi tải sản phẩm' });
     }
 };
 
@@ -39,19 +39,19 @@ module.exports.addProduct = async (req, res) => {
             return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        console.log("----------------------------------------------" + res.locals.user.phone)
-
-        const cus = await Customer.findByPk(res.locals.user.phone);
-      
+        const cus = await Customer.findByPk(res.locals.user.email);
+        if (!cus) {
+            return res.redirect('/AutoParts/account/login');
+        }
 
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
-            return res.render('productdetail', { message: 'Giỏ hàng không tồn tại' });
+            return res.render('client/pages/product/productDetail', { message: 'Giỏ hàng không tồn tại' });
         }
 
         const product = await Product.findByPk(productId);
         if (!product) {
-            return res.render('productdetail', { message: 'Sản phẩm không tồn tại' });
+            return res.render('client/pages/product/productDetail', { message: 'Sản phẩm không tồn tại' });
         }
 
         // Update cart.products (virtual field)
@@ -66,16 +66,15 @@ module.exports.addProduct = async (req, res) => {
         // Save updated cart (hooks handle ProductsInCart table)
         cart.products = productsInCart;
         await cart.save();
-        res.locals.cart=cart
+        res.locals.cart = cart;
 
         // Redirect to product detail page
         res.redirect(`/AutoParts`);
     } catch (error) {
         console.error('Error in addProduct:', error);
-        res.redirect(`/AutoParts&message=Thêm vào giỏ thất bại`);
+        res.redirect(`/AutoParts?message=Thêm vào giỏ thất bại`);
     }
 };
-
 
 module.exports.deleteProduct = async (req, res) => {
     try {
@@ -86,7 +85,11 @@ module.exports.deleteProduct = async (req, res) => {
             return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        const cus = await Customer.findOne({ where: { phone: res.locals.user.phone } });
+        const cus = await Customer.findByPk(res.locals.user.email);
+        if (!cus) {
+            return res.redirect('/AutoParts/account/login');
+        }
+        
         const cart = await Cart.findByPk(cus.cartId);
         if (cart && cart.products) {
             // Filter out the product to delete

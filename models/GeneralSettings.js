@@ -1,23 +1,30 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
-const Brand = sequelize.define('Brand', {
-  brandId: {
-    type: DataTypes.STRING(50),
+const GeneralSettings = sequelize.define('GeneralSettings', {
+  websiteName: {
+    type: DataTypes.STRING(255),
     primaryKey: true,
     allowNull: false
   },
-  brandName: {
+  logo: {
     type: DataTypes.STRING(255),
     allowNull: true
   },
-  status: {
-    type: DataTypes.STRING(50),
-    defaultValue: 'Active',
+  phone: {
+    type: DataTypes.STRING(15),
     allowNull: true
   },
-  deletedAt: {
-    type: DataTypes.DATE,
+  email: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  address: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  copyright: {
+    type: DataTypes.STRING(255),
     allowNull: true
   },
   createdAt: {
@@ -34,10 +41,14 @@ const Brand = sequelize.define('Brand', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
     allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
-  tableName: 'Brand',
+  tableName: 'GeneralSettings',
   timestamps: true
 });
 
-module.exports = Brand;
+module.exports = GeneralSettings;

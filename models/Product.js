@@ -1,85 +1,112 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
-const ProductGroup = require('./ProductGroup');
 const Brand = require('./Brand');
+const ProductGroup = require('./ProductGroup');
+const Employee = require('./Employee');
 
 const Product = sequelize.define('Product', {
-    productId: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        allowNull: false
-    },
-    productName: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    productGroupId: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    brandId: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    salePrice: {
-        type: DataTypes.DOUBLE,
-        allowNull: true
-    },
-    costPrice: {
-        type: DataTypes.DOUBLE,
-        allowNull: true
-    },
-    stock: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    },
-    unit: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    imageUrls: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    weight: {
-        type: DataTypes.DOUBLE,
-        allowNull: true
-    },
-    status: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        defaultValue: 'Active'
-    },
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    deleted: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    },
-    description: {
-        type: DataTypes.STRING,
-        allowNull: true
+  productId: {
+    type: DataTypes.STRING(50),
+    primaryKey: true,
+    allowNull: false
+  },
+  productName: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  productGroupId: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    references: {
+      model: ProductGroup,
+      key: 'productGroupId'
     }
+  },
+  brandId: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    references: {
+      model: Brand,
+      key: 'brandId'
+    }
+  },
+  salePrice: {
+    type: DataTypes.DECIMAL(18, 2),
+    allowNull: true
+  },
+  costPrice: {
+    type: DataTypes.DECIMAL(18, 2),
+    allowNull: true
+  },
+  stock: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  unit: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  imageUrls: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  weight: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'Active',
+    allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true
+  },
+  createdBy: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    references: {
+      model: Employee,
+      key: 'email'
+    }
+  },
+  updatedBy: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    references: {
+      model: Employee,
+      key: 'email'
+    }
+  }
 }, {
-    tableName: 'Product',
-    timestamps: false
+  tableName: 'Product',
+  timestamps: true
 });
 
-// // Relationships
-// Product.belongsTo(ProductGroup, { foreignKey: 'productGroupId', targetKey: 'productGroupId' });
-// ProductGroup.hasMany(Product, { foreignKey: 'productGroupId', sourceKey: 'productGroupId' });
-// Product.belongsTo(Brand, { foreignKey: 'brandId', targetKey: 'brandId' });
-// Brand.hasMany(Product, { foreignKey: 'brandId', sourceKey: 'brandId' });
+// Define relationships
+Product.belongsTo(Brand, { foreignKey: 'brandId', targetKey: 'brandId' });
+Product.belongsTo(ProductGroup, { foreignKey: 'productGroupId', targetKey: 'productGroupId' });
+Product.belongsTo(Employee, { foreignKey: 'createdBy', targetKey: 'email', as: 'creator' });
+Product.belongsTo(Employee, { foreignKey: 'updatedBy', targetKey: 'email', as: 'updater' });
 
 module.exports = Product;

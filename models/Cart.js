@@ -1,34 +1,29 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
-
 const Product = require('./Product');
 
 const Cart = sequelize.define('Cart', {
     cartId: {
-        type: DataTypes.STRING(50),
-        primaryKey: true,
-        allowNull: false
+      type: DataTypes.STRING(50),
+      primaryKey: true,
+      allowNull: false
     },
     createDate: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
+      type: DataTypes.DATEONLY,
+      allowNull: true
     },
     updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
-    },
-    products: {
-        type: DataTypes.VIRTUAL,
-        defaultValue: []
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.fn('GETDATE')
     }
-}, {
+  }, {
     tableName: 'Cart',
-    timestamps: false,
+    timestamps: true,
+    createdAt: false,
     hooks: {
         afterCreate: async (cart, options) => {
-            if (cart.products.length > 0) {
+            if (cart.products && cart.products.length > 0) {
                 const productsData = cart.products.map(({ product, amount }) => ({
                     cartId: cart.cartId,
                     productId: product.productId,
@@ -43,7 +38,7 @@ const Cart = sequelize.define('Cart', {
                     where: { cartId: cart.cartId },
                     transaction: options.transaction
                 });
-                if (cart.products.length > 0) {
+                if (cart.products && cart.products.length > 0) {
                     const productsData = cart.products.map(({ product, amount }) => ({
                         cartId: cart.cartId,
                         productId: product.productId,
@@ -97,7 +92,7 @@ const ProductsInCart = sequelize.define('ProductsInCart', {
     },
     amount: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     }
 }, {
     tableName: 'ProductsInCart',

@@ -2,40 +2,42 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
 const BlogGroup = sequelize.define('BlogGroup', {
-    blogGroupId: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        allowNull: false
-    },
-    groupName: {
-        type: DataTypes.STRING(50),
-        allowNull: false
-    },
-    status: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        defaultValue: 'Active'
-    },
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    deleted: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    }
+  blogGroupId: {
+    type: DataTypes.STRING(50),
+    primaryKey: true,
+    allowNull: false
+  },
+  groupName: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'Active',
+    allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true
+  }
 }, {
-    tableName: 'BlogGroup',
-    timestamps: false
+  tableName: 'BlogGroup',
+  timestamps: true
 });
 
 module.exports = BlogGroup;

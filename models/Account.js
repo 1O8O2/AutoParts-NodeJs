@@ -3,10 +3,10 @@ const sequelize = require('../configs/database');
 const { RoleGroup } = require('./RoleGroup'); 
 
 const Account = sequelize.define('Account', {
-    phone: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
-        primaryKey: true
+    email: {
+        type: DataTypes.STRING(255),
+        primaryKey: true,
+        allowNull: false
     },
     password: {
         type: DataTypes.STRING(255),
@@ -17,15 +17,12 @@ const Account = sequelize.define('Account', {
         allowNull: true
     },
     permission: { 
-        type: DataTypes.STRING(255), 
-        allowNull: true, 
-        references: {
-            model: 'RoleGroup', 
-            key: 'roleGroupId'
-        }
+        type: DataTypes.STRING(50), 
+        allowNull: false
     },
     status: {
         type: DataTypes.STRING(50),
+        defaultValue: 'Active',
         allowNull: true
     },
     createdAt: {
@@ -40,15 +37,16 @@ const Account = sequelize.define('Account', {
     },
     deleted: {
         type: DataTypes.BOOLEAN,
+        defaultValue: false,
         allowNull: true
     }
 }, {
     tableName: 'Account',
-    timestamps: false,
-    schema: 'dbo'
+    timestamps: true
 });
 
-Account.belongsTo(RoleGroup, { foreignKey: 'permission' }); 
-RoleGroup.hasMany(Account, { foreignKey: 'permission' });  
+// Define relationship with RoleGroup
+Account.belongsTo(RoleGroup, { foreignKey: 'permission', targetKey: 'roleGroupId' });
+RoleGroup.hasMany(Account, { foreignKey: 'permission', sourceKey: 'roleGroupId' });
 
 module.exports = Account;
