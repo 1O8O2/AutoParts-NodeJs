@@ -1,0 +1,40 @@
+.selected-products {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.selected-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selected-item span {
+    flex-grow: 1;
+}
+
+#totalCostlbl {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #ff6f61;
+}
+
+.order-info-column {
+    padding: 15px;
+}
+
+.order-info-column label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.order-info-column span {
+    display: block;
+    padding: 5px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+} 

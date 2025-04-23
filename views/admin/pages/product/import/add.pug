@@ -1,0 +1,154 @@
+extends ../../../layouts/default.pug
+include ../../../mixins/alert.pug
+include ../../../mixins/currency.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Nhập Hàng
+            .card-body
+                form(action=`${prefixAdmin}/product/import/add` method="POST")
+                    .row
+                        // Cột 1: Thông tin phiếu nhập
+                        .col-lg-6.order-info-column
+                            .form-group
+                                label(for="importId") Mã Phiếu Nhập 
+                                    span.text-danger *
+                                input.form-control(type="text" id="importId" name="importId" value=nextImportId readonly required)
+                            .form-group
+                                label(for="employeePhone") Nhân Viên Nhập 
+                                    span.text-danger *
+                                select.form-control(name="employeePhone" id="employeePhone" required)
+                                    option(value="" disabled selected) -- Chọn nhân viên --
+                                    if employeeList && employeeList.length > 0
+                                        each employee in employeeList
+                                            option(value=employee.phone)= employee.fullName
+                                    else
+                                        option(value="" disabled) Không có nhân viên nào
+                            .form-group
+                                label(for="importDate") Ngày Nhập 
+                                    span.text-danger *
+                                input.form-control(type="date" name="importDate" id="importDate" required)
+                            .form-group
+                                label Tổng Chi Phí: 
+                                    span#totalCostlbl 0₫
+                                input.form-control(type="hidden" id="importCost" name="importCost" value="0")
+                        // Cột 2: Chọn sản phẩm
+                        .col-lg-6.order-info-column
+                            .form-group
+                                label(for="productId") Sản Phẩm 
+                                    span.text-danger *
+                                select.form-control(id="productId" onchange="addProduct(this)")
+                                    option(value="" disabled selected) -- Chọn sản phẩm --
+                                    if productList && productList.length > 0
+                                        each product in productList
+                                            option(value=product.productId data-name=product.productName data-price=product.costPrice)= product.productName
+                                    else
+                                        option(value="" disabled) Không có sản phẩm nào
+                            .form-group
+                                label(for="amount") Số Lượng 
+                                    span.text-danger *
+                                input.form-control(type="number" id="amount" min="1" value="1")
+                            .form-group
+                                label(for="price") Giá Nhập 
+                                    span.text-danger *
+                                input.form-control(type="number" id="price" min="0")
+                            button.btn.btn-primary.mb-3(type="button" onclick="addProductToList()") Thêm Sản Phẩm
+                            .selected-products
+                                h6 Danh Sách Sản Phẩm Đã Chọn
+                                #selectedProductsList
+                    .d-flex.justify-content-end.mt-3
+                        button.btn.btn-primary(type="submit") Lưu Phiếu Nhập
+                        a.btn.btn-secondary.ml-2(href=`${prefixAdmin}/product`) Quay Lại
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        let selectedProducts = [];
+
+        function formatCurrency(amount) {
+            const number = Number(amount);
+            
+            if (isNaN(number)) {
+                return "0₫";
+            }
+
+            let formattedNumber = number.toLocaleString('vi-VN', {
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0 
+            });
+            
+            formattedNumber = formattedNumber.replace(/\./g, ',');
+
+            return formattedNumber + '₫';
+        }
+        
+        function addProduct(select) {
+            const selectedOption = select.options[select.selectedIndex];
+            const priceInput = document.getElementById("price");
+            priceInput.value = selectedOption.getAttribute("data-price");
+        }
+
+        function addProductToList() {
+            const productId = document.getElementById("productId").value;
+            const productName = document.getElementById("productId").options[document.getElementById("productId").selectedIndex].text;
+            const amount = parseInt(document.getElementById("amount").value);
+            const price = parseFloat(document.getElementById("price").value);
+
+            if (!productId || amount <= 0 || price < 0) {
+                alert("Vui lòng nhập đầy đủ thông tin sản phẩm!");
+                return;
+            }
+
+            const existingProduct = selectedProducts.find(p => p.productId === productId);
+            if (existingProduct) {
+                existingProduct.amount += amount;
+                existingProduct.price = price; 
+            } else {
+                selectedProducts.push({ productId, productName, amount, price });
+            }
+
+            updateSelectedProductsList();
+            updateTotalCost();
+        }
+
+        function updateSelectedProductsList() {
+            const list = document.getElementById("selectedProductsList");
+            list.innerHTML = "";
+            const importId = document.getElementById("importId").value;
+
+            selectedProducts.forEach((product, index) => {
+                const item = document.createElement("div");
+                item.className = "selected-item";
+                item.innerHTML = '<div>' + 
+                        '<div>' + product.productName + '</div>' + 
+                        '<div>Số lượng: ' + product.amount + '</div>' + 
+                        '<div> Giá: ' + formatCurrency(product.price) + '</div>' + 
+                    '</div>' +
+                    '<input type="hidden" name="importDetails[' + index + '].id.importId" value="' + importId + '">' + 
+                    '<input type="hidden" name="importDetails[' + index + '].id.productId" value="' + product.productId + '">' +
+                    '<input type="hidden" name="importDetails[' + index + '].amount" value="' + product.amount + '">' + 
+                    '<input type="hidden" name="importDetails[' + index + '].price" value="' + product.price + '">' +
+                    '<button type="button" class="btn btn-danger btn-sm" onclick="removeProduct(\'' + product.productId + '\')">Xóa</button>';
+                list.appendChild(item);
+            });
+        }
+        
+        function removeProduct(index) {
+            selectedProducts.splice(index, 1);
+            updateSelectedProductsList();
+            updateTotalCost();
+        }
+
+        function updateTotalCost() {
+            const totalCost = selectedProducts.reduce((sum, product) => sum + (product.amount * product.price), 0);
+            $('#totalCostlbl').text(formatCurrency(totalCost));
+            $('#importCost').val(totalCost);
+        } 

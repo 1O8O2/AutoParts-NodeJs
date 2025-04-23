@@ -1,0 +1,116 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .col-lg-12
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold.text-primary Danh Mục Sản Phẩm
+                    a.btn.btn-primary(href=`${prefixAdmin}/productGroup/add`) + Thêm danh mục
+                .table-responsive.p-3
+                    table.table.align-items-center.table-flush#dataTable
+                        thead.thead-light
+                            tr
+                                th Tiêu Đề
+                                th Trạng thái
+                                th Hoạt Động
+                        tbody
+                            if productGroups && productGroups.length > 0
+                                each group in productGroups
+                                    tr.product-item
+                                        td.align-middle #{group.groupName}
+                                        td.align-middle
+                                            a.change-status-link(href="javascript:void(0);" data-group-id=group.productGroupId data-group-status=group.status)
+                                                if group.status === 'Active'
+                                                    span.badge.badge-success Hoạt động
+                                                else
+                                                    span.badge.badge-danger Ngừng hoạt động
+                                        td.align-middle
+                                            a.btn.btn-sm.btn-danger.delete-btn.mr-1(href="javascript:void(0);" data-group-id=group.productGroupId data-toggle="modal" data-target="#DeleteModal") Xóa
+                            else
+                                tr
+                                    td(colspan="3" class="text-center") Không có danh mục sản phẩm nào
+
+    // Delete Modal
+    #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Xóa danh mục
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn chắc chắn muốn xóa danh mục sản phẩm này không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a.btn.btn-primary#delete-link(href="#") Xóa
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#dataTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                    "paginate": {
+                        "previous": "Trước", 
+                        "next": "Tiếp"
+                    }
+                }
+            });
+
+            // Handle delete button click
+            $('#dataTable').on('click', '.delete-btn', function() {
+                const groupId = $(this).data('group-id');
+                $('#delete-link').attr('href', `#{prefixAdmin}/productGroup/delete?productGroupId=${groupId}`);
+            });
+
+            // Handle status change
+            $('#dataTable').on('click', '.change-status-link', function(event) {
+                event.preventDefault(); 
+                const groupId = $(this).data('group-id');
+                const currentStatus = $(this).data('group-status');
+                
+                if (!groupId) {
+                    console.error("Group ID is undefined");
+                    alert("Lỗi: Không tìm thấy ID danh mục");
+                    return;
+                }
+
+                $.ajax({
+                    url: '#{prefixAdmin}/productGroup/changeStatus',
+                    type: 'POST',
+                    data: { groupId: groupId },
+                    success: function(response) {
+                    if (response.success) {
+                        var badge = $(event.target).closest('.change-status-link').find('.badge');
+                        var link = $(event.target).closest('.change-status-link');
+                        
+                        if (currentStatus === "Inactive") { 
+                            badge.removeClass('badge-danger').addClass('badge-success').text('Hoạt động');
+                            link.data('group-status', 'Active');
+                        } else {
+                            badge.removeClass('badge-success').addClass('badge-danger').text('Ngừng hoạt động');
+                            link.data('group-status', 'Inactive');
+                        }
+                    } else {
+                        alert("Lỗi khi thay đổi trạng thái: " + (response.error || "Không xác định"));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error changing status:", error);
+                    alert("Lỗi khi thay đổi trạng thái. Vui lòng thử lại sau.");
+                }
+                });
+            });
+        }); 

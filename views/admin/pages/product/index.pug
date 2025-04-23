@@ -1,0 +1,138 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/currency.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .col-lg-12
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold.text-primary Danh Sách Sản Phẩm
+                    a.btn.btn-primary(href=`${prefixAdmin}/product/add`) + Thêm sản phẩm
+                .table-responsive.p-3
+                    table.table.align-items-center.table-flush#dataTable
+                        thead.thead-light
+                            tr
+                                th Ảnh Sản Phẩm
+                                th Tên Sản Phẩm
+                                th Giá Bán
+                                th Số Lượng
+                                th Trạng thái
+                                th Hoạt Động
+                        tbody
+                            if products && products.length > 0
+                                each product in products
+                                    tr.product-item
+                                        td
+                                            img(src=product.imageUrls[0] alt="" style="max-width: 100px; max-height: 100px; display: block;")
+                                        td.align-middle #{product.productName}
+                                        td.align-middle
+                                            +formatCurrency(product.salePrice)
+                                        td.align-middle #{product.stock}
+                                        td.align-middle
+                                            a.change-status-link(href="javascript:void(0);" data-product-id=product.productId data-product-status=product.status)
+                                                if product.status === 'Active'
+                                                    span.badge.badge-success Hoạt động
+                                                else
+                                                    span.badge.badge-danger Ngừng hoạt động
+                                        td.align-middle
+                                            a.btn.btn-sm.btn-danger.delete-btn.mr-1(href="javascript:void(0);" data-product-id=product.productId data-toggle="modal" data-target="#DeleteModal") Xóa
+                                            a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/product/edit?productId=${product.productId}`) Sửa
+                                            a.btn.btn-sm.btn-dark(href=`${prefixAdmin}/product/detail?productId=${product.productId}`) Chi Tiết
+                            else
+                                tr
+                                    td(colspan="6" class="text-center") Không có sản phẩm nào
+
+    // Modal Logout
+    #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalLabelLogout Đăng xuất
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn có muốn đăng xuất không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a.btn.btn-primary(href="login.html") Đăng xuất
+
+    // Modal Delete Item
+    #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalLabelLogout Xóa sản phẩm
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn chắc chắn muốn xóa sản phẩm này không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a#delete-link.btn.btn-primary(href="#") Xóa
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        $(document).ready(function () {
+            $('#dataTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                    "paginate": {
+                        "previous": "Trước", 
+                        "next": "Tiếp" 
+                    }
+                }
+            }); 
+            
+        $('#dataTable').on('click', '.change-status-link', function(event) {
+            event.preventDefault(); 
+            var productId = $(this).data('product-id');
+            var productStatus = $(this).data('product-status');
+            
+            if (!productId) {
+                console.error("Product ID is undefined");
+                alert("Lỗi: Không tìm thấy ID sản phẩm");
+                return;
+            }
+
+            $.ajax({
+                url: '#{prefixAdmin}/product/changeStatus',
+                type: 'POST',
+                data: { productId: productId },
+                success: function(response) {
+                    if (response.success) {
+                        var badge = $(event.target).closest('.change-status-link').find('.badge');
+                        var link = $(event.target).closest('.change-status-link');
+                        
+                        if (productStatus === "Inactive") { 
+                            badge.removeClass('badge-danger').addClass('badge-success').text('Hoạt động');
+                            link.data('product-status', 'Active');
+                        } else {
+                            badge.removeClass('badge-success').addClass('badge-danger').text('Ngừng hoạt động');
+                            link.data('product-status', 'Inactive');
+                        }
+                    } else {
+                        alert("Lỗi khi thay đổi trạng thái: " + (response.error || "Không xác định"));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error changing status:", error);
+                    alert("Lỗi khi thay đổi trạng thái. Vui lòng thử lại sau.");
+                }
+            });
+        });
+            
+            $('#dataTable').on('click', '.delete-btn', function() {
+                var productId = $(this).data('product-id');
+                $('#delete-link').attr('href', '#{prefixAdmin}/product/delete?productId=' + productId);
+            });
+        });

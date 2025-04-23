@@ -45,10 +45,10 @@ module.exports.add = async (req, res) => {
 module.exports.addPost = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
-        const findCusAcc = await Account.findByPk(req.body.userPhone, { transaction });
+        const findCusAcc = await Account.findByPk(req.body.userEmail, { transaction });
         if (!findCusAcc) {
             const accData = {
-                phone: req.body.userPhone,
+                email: req.body.userEmail,
                 password: md5('1111'), 
                 token: generateToken.generateRandomString(),
                 permission: 'RG002',
@@ -58,15 +58,16 @@ module.exports.addPost = async (req, res) => {
             await Account.create(accData, { transaction });
 
             const cusData = {
+                email: req.body.userEmail,
                 fullName: req.body.userName,
-                phone: req.body.userPhone,
+                phone: req.body.userPhone || '',
                 address: req.body.shipAddress,
                 status: 'Active'
             };
             await Customer.create(cusData, { transaction });
         }
 
-        // Chuyển đổi orderDetails thành mảng
+        // Convert orderDetails to array
         const orderDetails = [];
         const orderDetailKeys = Object.keys(req.body).filter(key => key.startsWith('orderDetails['));
         const indices = [...new Set(orderDetailKeys.map(key => {
@@ -84,22 +85,22 @@ module.exports.addPost = async (req, res) => {
             orderDetails.push(detail);
         });
         
-        // Tạo dữ liệu Order
+        // Create Order data
         const orderData = {
             orderId: req.body.orderId,
-            discountId: (req.body.discountId == '' ? null : req.body.discountId),
-            userPhone: req.body.userPhone,
+            discountId: (req.body.discountId === '' ? null : req.body.discountId),
+            userEmail: req.body.userEmail,
             shipAddress: req.body.shipAddress,
             totalCost: parseFloat(req.body.totalCost),
-            confirmedBy: res.locals.user.phone,
+            confirmedBy: res.locals.user.email,
             status: 'Processing',
             deleted: false
         };
 
-        // Tạo bản ghi Order
+        // Create Order record
         const order = await Order.create(orderData, { transaction });
 
-        // Thêm orderId vào orderDetails và tạo các bản ghi OrderDetail
+        // Add orderId to orderDetails and create OrderDetail records
         const orderDetailData = orderDetails.map(detail => ({
             ...detail,
             orderId: order.orderId
@@ -110,9 +111,10 @@ module.exports.addPost = async (req, res) => {
         await transaction.commit();
 
         req.flash('success', 'Tạo đơn hàng thành công!');
-        res.redirect("admin/pages/order/orderProcessing");
+        res.redirect(`${systemConfig.prefixAdmin}/order/Processing`);
     } catch (err) {
         await transaction.rollback();
+        console.error(err);
         req.flash('error', 'Tạo đơn hàng thất bại!');
         res.redirect('back');
     }
@@ -129,7 +131,8 @@ module.exports.index = async (req, res) => {
                     where: {
                         status: 'Pending',
                         deleted: false
-                    }
+                    },
+                    include: [{ model: Customer }]
                 });
 
                 return res.render('admin/pages/order/orderConfirm/index', {
@@ -141,7 +144,8 @@ module.exports.index = async (req, res) => {
                     where: {
                         status: 'Processing',
                         deleted: false
-                    }
+                    },
+                    include: [{ model: Customer }]
                 });
                 return res.render('admin/pages/order/orderProcessing', {
                     pageTitle: "Danh sách đơn hàng đang xử lý",
@@ -152,7 +156,8 @@ module.exports.index = async (req, res) => {
                     where: {
                         status: 'Shipping',
                         deleted: false
-                    }
+                    },
+                    include: [{ model: Customer }]
                 });
                 return res.render('admin/pages/order/orderDeli', {
                     pageTitle: "Danh sách đơn hàng đang giao hàng",
@@ -163,7 +168,8 @@ module.exports.index = async (req, res) => {
                     where: {
                         status: { [Op.in]: ['Completed', 'Cancelled'] },
                         deleted: false
-                    }
+                    },
+                    include: [{ model: Customer }]
                 });
                 return res.render('admin/pages/order/orderHistory', {
                     pageTitle: "Danh sách lịch sử đơn hàng",
@@ -171,6 +177,7 @@ module.exports.index = async (req, res) => {
                 });
         }
     } catch (err) {
+        console.error(err);
         res.status(500).send('Server error');
     }
 };
@@ -180,8 +187,15 @@ module.exports.edit = async (req, res) => {
     try {
         const orderId = req.params.orderId;
 
-        const order = await Order.findByPk(orderId);
-        const customer = await Customer.findByPk(order.userPhone);
+        const order = await Order.findByPk(orderId, {
+            include: [{ model: Customer }]
+        });
+        
+        if (!order) {
+            req.flash('error', "Đơn hàng không tồn tại!");
+            return res.redirect('back');
+        }
+
         const products = await Product.findAll({
             where: {
                 deleted: false
@@ -201,13 +215,14 @@ module.exports.edit = async (req, res) => {
         res.render('admin/pages/order/orderConfirm/edit', {
             pageTitle: "Sửa đơn hàng",
             order: order,
-            customer: customer,
+            customer: order.Customer,
             products: products,
             discounts: discounts,
             orderDetails: orderDetails
-        })
+        });
 
     } catch (err) {
+        console.error(err);
         res.status(500).send('Server error');
     }
 };
@@ -224,10 +239,10 @@ module.exports.editPatch = async (req, res) => {
             return res.redirect('back');
         }
 
-        const findCusAcc = await Account.findByPk(req.body.userPhone, { transaction });
+        const findCusAcc = await Account.findByPk(req.body.userEmail, { transaction });
         if (!findCusAcc) {
             const accData = {
-                phone: req.body.userPhone,
+                email: req.body.userEmail,
                 password: md5('1111'),
                 token: generateToken.generateRandomString(),
                 permission: 'RG002',
@@ -237,8 +252,9 @@ module.exports.editPatch = async (req, res) => {
             await Account.create(accData, { transaction });
 
             const cusData = {
+                email: req.body.userEmail,
                 fullName: req.body.userName,
-                phone: req.body.userPhone,
+                phone: req.body.userPhone || '',
                 address: req.body.shipAddress,
                 status: 'Active'
             };
@@ -250,17 +266,17 @@ module.exports.editPatch = async (req, res) => {
                     address: req.body.shipAddress
                 },
                 {
-                    where: { phone: req.body.userPhone },
+                    where: { email: req.body.userEmail },
                     transaction
                 }
             );
         }
 
-        // Chuyển đổi orderDetails thành mảng
+        // Convert orderDetails to array
         const orderDetails = [];
         const orderDetailKeys = Object.keys(req.body).filter(key => key.startsWith('orderDetails['));
         const indices = [...new Set(orderDetailKeys.map(key => {
-        const match = key.match(/orderDetails\[(\d+)\]/);
+            const match = key.match(/orderDetails\[(\d+)\]/);
             return match ? match[1] : null;
         }).filter(index => index !== null))];
 
@@ -274,12 +290,13 @@ module.exports.editPatch = async (req, res) => {
             orderDetails.push(detail);
         });
 
-        // Cập nhật dữ liệu Order
+        // Update Order data
         const orderData = {
-            discountId: (req.body.discountId == '' ? null : req.body.discountId),
-            userPhone: req.body.userPhone,
+            discountId: (req.body.discountId === '' ? null : req.body.discountId),
+            userEmail: req.body.userEmail,
             shipAddress: req.body.shipAddress,
             totalCost: parseFloat(req.body.totalCost),
+            updatedBy: res.locals.user.email,
             deleted: false
         };
 
@@ -288,13 +305,13 @@ module.exports.editPatch = async (req, res) => {
             transaction
         });
 
-        // Xóa các OrderDetail cũ
+        // Delete old OrderDetails
         await OrderDetail.destroy({
             where: { orderId: orderId },
             transaction
         });
 
-        // Tạo lại các OrderDetail mới
+        // Create new OrderDetails
         const orderDetailData = orderDetails.map(detail => ({
             ...detail,
             orderId: orderId
@@ -308,6 +325,7 @@ module.exports.editPatch = async (req, res) => {
         res.redirect(`${systemConfig.prefixAdmin}/order/Pending`);
     } catch (err) {
         await transaction.rollback();
+        console.error(err);
         req.flash('error', 'Cập nhật đơn hàng thất bại!');
         res.redirect('back');
     }
@@ -318,28 +336,33 @@ module.exports.detail = async (req, res) => {
     try {
         const orderId = req.params.orderId;
 
-        const order = await Order.findByPk(orderId);
-        const customer = await Customer.findByPk(order.userPhone);
-        const discounts = await Discount.findAll({
-            where: {
-                deleted: false
-            }
+        const order = await Order.findByPk(orderId, {
+            include: [
+                { model: Customer },
+                { model: Discount }
+            ]
         });
+        
+        if (!order) {
+            req.flash('error', "Đơn hàng không tồn tại!");
+            return res.redirect('back');
+        }
+
         const orderDetails = await OrderDetail.findAll({
-            where: {
-                orderId: orderId
-            }
+            where: { orderId: orderId },
+            include: [{ model: Product }]
         });
         
         res.render('admin/pages/order/detail', {
             pageTitle: "Chi tiết đơn hàng",
             order: order,
-            customer: customer,
-            discounts: discounts,
+            customer: order.Customer,
+            discount: order.Discount,
             orderDetails: orderDetails
-        })
+        });
 
     } catch (err) {
+        console.error(err);
         res.status(500).send('Server error');
     }
 };
@@ -350,40 +373,50 @@ module.exports.changeStatus = async (req, res) => {
         const status = req.body.status;
         const orderId = req.body.orderId;			
 
-        if (status == 'Pending') {
+        if (status === 'Pending') {
             await Order.update(
-                { status: "Processing" },
+                { 
+                    status: "Processing",
+                    confirmedBy: res.locals.user.email
+                },
                 { 
                     where: { orderId: orderId }
                 }
             );
 
             req.flash('success', "Xác nhận đơn hàng thành công!");
-            return res.redirect(`${systemConfig.prefixAdmin}/order/Processing`)
+            return res.redirect(`${systemConfig.prefixAdmin}/order/Processing`);
         }
-        else if (status == 'Processing') {
+        else if (status === 'Processing') {
             await Order.update(
-                { status: "Shipping" },
+                { 
+                    status: "Shipping",
+                    updatedBy: res.locals.user.email 
+                },
                 { 
                     where: { orderId: orderId }
                 }
             );
 
             req.flash('success', "Chuyển trạng thái giao hàng thành công!");
-            return res.redirect(`${systemConfig.prefixAdmin}/order/Delivery`)
+            return res.redirect(`${systemConfig.prefixAdmin}/order/Delivery`);
         }
-        else if (status == 'Cancelled' || status == 'Shipping') {
+        else if (status === 'Cancelled' || status === 'Shipping') {
             await Order.update(
-                { status: (status == 'Cancelled' ? 'Cancelled' : 'Completed') },
+                { 
+                    status: (status === 'Cancelled' ? 'Cancelled' : 'Completed'),
+                    updatedBy: res.locals.user.email
+                },
                 { 
                     where: { orderId: orderId }
                 }
             );
 
             req.flash('success', "Thành công!");
-            return res.redirect(`${systemConfig.prefixAdmin}/order/History`)
+            return res.redirect(`${systemConfig.prefixAdmin}/order/History`);
         }
     } catch (err) {
+        console.error(err);
         req.flash('error', 'Thất bại!');
         res.redirect('back');
     }

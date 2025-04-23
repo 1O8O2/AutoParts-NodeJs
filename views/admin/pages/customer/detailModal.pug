@@ -1,0 +1,21 @@
+if customer
+    p
+        strong Số điện thoại: 
+        span #{customer.phone}
+    p
+        strong Tên khách hàng: 
+        span #{customer.name}
+    p
+        strong Email: 
+        span #{customer.email}
+    p
+        strong Địa chỉ: 
+        span #{customer.address}
+    p
+        strong Ngày tạo: 
+        span #{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'N/A'}
+    p
+        strong Cập nhật lần cuối: 
+        span #{customer.updatedAt ? new Date(customer.updatedAt).toLocaleDateString() : 'N/A'}
+else
+    p.text-danger Không tìm thấy thông tin khách hàng 
