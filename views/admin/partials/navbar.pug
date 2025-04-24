@@ -6,7 +6,7 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
     hr.sidebar-divider.my-0
     if (permission.includes("THONG_KE"))
         li.nav-item.active
-            a.nav-link(href="/autopart/admin/statistic.htm")
+            a.nav-link(href=`${prefixAdmin}/statistic`)
                 i.fa-solid.fa-chart-column
                 span Thống kê
     li.nav-item
@@ -16,21 +16,21 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
         #productPage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
                 if (permission.includes("PHIEU_NHAP_XEM"))
-                    a.collapse-item(href="/admin/product/import.htm") Nhập hàng
+                    a.collapse-item(href=`${prefixAdmin}/product/import`) Nhập hàng
                 if (permission.includes("QUAN_LY_SAN_PHAM_XEM"))
-                    a.collapse-item(href="/admin/product.htm") Quản lý sản phẩm
+                    a.collapse-item(href=`${prefixAdmin}/product`) Quản lý sản phẩm
                 if (permission.includes("DANH_MUC_SAN_PHAM_XEM"))
-                    a.collapse-item(href="/admin/productGroup.htm") Quản lý danh mục
+                    a.collapse-item(href=`${prefixAdmin}/productGroup`) Quản lý danh mục
                 if (permission.includes("QUAN_LY_NHAN_HANG_XEM"))
-                    a.collapse-item(href="/admin/brand.htm") Quản lý nhãn hàng
+                    a.collapse-item(href=`${prefixAdmin}/brand`) Quản lý nhãn hàng
     if (permission.includes("DANH_SACH_KHACH_HANG_XEM"))
         li.nav-item
-            a.nav-link(href="/autopart/admin/customer.htm")
+            a.nav-link(href=`${prefixAdmin}/customer`)
                 i.fa-solid.fa-person
                 span Danh sách khách hàng
     if (permission.includes("DANH_SACH_NHAN_VIEN_XEM"))
         li.nav-item
-            a.nav-link(href="/autopart/admin/employee.htm")
+            a.nav-link(href=`${prefixAdmin}/employee`)
                 i.fa-regular.fa-id-card
                 span Danh sách nhân viên
     if (permission.includes("QUAN_LY_BAI_VIET_XEM"))
@@ -45,7 +45,7 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
                 span Quản lý khuyến mãi
     if (permission.includes("CAI_DAT_CHUNG_XEM"))
         li.nav-item
-            a.nav-link(href="/autopart/admin/generalSettings.htm")
+            a.nav-link(href=`${prefixAdmin}/generalSettings`)
                 i.fa-solid.fa-hammer
                 span Thông số chung
     if (permission.includes("QUAN_LY_DON_HANG_XEM"))

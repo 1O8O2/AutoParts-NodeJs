@@ -4,12 +4,14 @@ const ProductGroup = require('../../models/ProductGroup');
 const Import = require('../../models/Import');
 const ImportDetail = require('../../models/ImportDetail');
 const Employee = require('../../models/Employee');
+
 const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const systemConfig = require('../../configs/system');
 const { format } = require('date-fns');
+const moment = require('moment');
 
 // Configure multer for image upload
 const storage = multer.diskStorage({
@@ -90,6 +92,7 @@ const generateNextProductId = async () => {
     }
 };
 
+// [GET] /admin/product
 module.exports.index = async (req, res) => {
     try {
         const products = await Product.findAll({
@@ -117,6 +120,7 @@ module.exports.index = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/add
 module.exports.add = async (req, res) => {
     try {
         const brands = await Brand.findAll({
@@ -141,6 +145,7 @@ module.exports.add = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/add
 module.exports.addPost = async (req, res) => {
     try {
         const productData = req.body;
@@ -172,6 +177,7 @@ module.exports.addPost = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/edit
 module.exports.edit = async (req, res) => {
     try {
         const product = await Product.findByPk(req.query.productId);
@@ -190,6 +196,7 @@ module.exports.edit = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/edit
 module.exports.editPost = async (req, res) => {
     try {
         const productData = req.body;
@@ -227,6 +234,7 @@ module.exports.editPost = async (req, res) => {
     }
 };
 
+// [DELETE] /admin/product/delete
 module.exports.delete = async (req, res) => {
     try {
         const product = await Product.findByPk(req.query.productId);
@@ -241,6 +249,7 @@ module.exports.delete = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/detail
 module.exports.detail = async (req, res) => {
     try {
         console.log(req.query.productId);
@@ -272,6 +281,7 @@ module.exports.detail = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/changeStatus
 module.exports.changeStatus = async (req, res) => {
     try {
         const product = await Product.findByPk(req.body.productId);
@@ -285,6 +295,7 @@ module.exports.changeStatus = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/import
 module.exports.import = async (req, res, next) => {
     try {
         const imports = await Import.findAll({
@@ -312,17 +323,19 @@ module.exports.import = async (req, res, next) => {
     }
 };
 
+// [GET] /admin/product/import/add
 module.exports.importAdd = async (req, res) => {
     try {
-        const employeeList = await Employee.findAll({ where: { deleted: false }});
         const productList = await Product.findAll({ where: { deleted: false }});
         const nextImportId = await generateNextImportId();
 
+        const currentDate = moment().format('DD/MM/YYYY');
+
         res.render('admin/pages/product/import/add', {
             pageTitle: "Thêm phiếu nhập",
-            employeeList,
             productList,
-            nextImportId
+            nextImportId,
+            currentDate
         });
     } catch (err) {
         console.error(err);
@@ -330,6 +343,7 @@ module.exports.importAdd = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/import/add
 module.exports.importAddPost = async (req, res) => {
     try {
         const importData = req.body;
@@ -367,24 +381,35 @@ module.exports.importAddPost = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/import/detail/:importId
 module.exports.importDetail = async (req, res) => {
     try {
         const importRecord = await Import.findByPk(req.params.importId, {
             include: [
-                { model: ImportDetail, include: [Product] },
+                { 
+                    model: ImportDetail, 
+                    as: 'importDetails',
+                    include: [Product] 
+                },
                 { model: Employee }
             ]
         });
-
         if (!importRecord) {
             req.flash('error', 'Phiếu nhập không tồn tại!');
             return res.redirect(`${systemConfig.prefixAdmin}/product/import`);
         }
 
+        const productList = await Product.findAll({
+            where: {
+                deleted: false
+            }
+        });
+
         res.render('admin/pages/product/import/detail', {
             pageTitle: "Chi tiết phiếu nhập",
             importRecord,
-            employeeFullName: importRecord.Employee ? importRecord.Employee.fullName : 'Không xác định'
+            employeeFullName: importRecord.Employee ? importRecord.Employee.fullName : 'Không xác định',
+            productList
         });
     } catch (err) {
         console.error(err);

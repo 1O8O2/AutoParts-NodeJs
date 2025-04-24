@@ -12,6 +12,6 @@ html(lang="en")
       .login-header
         h1 Đăng nhập hệ thống quản lý
       form.login-form(action=`${prefixAdmin}/auth/login` method="post")
-        input(type="tel" name="phone" placeholder="Số điện thoại" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required)
+        input(type="email" name="email" placeholder="Email" required)
         input(type="password" name="password" placeholder="Mật khẩu" required)
         button(type="submit") Đăng nhập

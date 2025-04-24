@@ -20,19 +20,13 @@ block main
                                     span.text-danger *
                                 input.form-control(type="text" id="importId" name="importId" value=nextImportId readonly required)
                             .form-group
-                                label(for="employeePhone") Nhân Viên Nhập 
+                                label(for="employeeEmail") Nhân Viên Nhập 
                                     span.text-danger *
-                                select.form-control(name="employeePhone" id="employeePhone" required)
-                                    option(value="" disabled selected) -- Chọn nhân viên --
-                                    if employeeList && employeeList.length > 0
-                                        each employee in employeeList
-                                            option(value=employee.phone)= employee.fullName
-                                    else
-                                        option(value="" disabled) Không có nhân viên nào
+                                input.form-control(type="text" id="employeeEmail" name="employeeEmail" value=user.fullName readonly required)
                             .form-group
                                 label(for="importDate") Ngày Nhập 
                                     span.text-danger *
-                                input.form-control(type="date" name="importDate" id="importDate" required)
+                                input.form-control(type="text" name="importDate" id="importDate" value=currentDate readonly required)
                             .form-group
                                 label Tổng Chi Phí: 
                                     span#totalCostlbl 0₫
@@ -46,7 +40,11 @@ block main
                                     option(value="" disabled selected) -- Chọn sản phẩm --
                                     if productList && productList.length > 0
                                         each product in productList
-                                            option(value=product.productId data-name=product.productName data-price=product.costPrice)= product.productName
+                                            option(value=product.productId 
+                                                data-name=product.productName 
+                                                data-price=product.costPrice
+                                                data-stock=product.stock
+                                            )= product.productName
                                     else
                                         option(value="" disabled) Không có sản phẩm nào
                             .form-group
@@ -98,7 +96,9 @@ block append scripts
 
         function addProductToList() {
             const productId = document.getElementById("productId").value;
-            const productName = document.getElementById("productId").options[document.getElementById("productId").selectedIndex].text;
+            const selectedOption = document.getElementById("productId").options[document.getElementById("productId").selectedIndex];
+            const productName = selectedOption.text;
+            const stock = selectedOption.getAttribute("data-stock");
             const amount = parseInt(document.getElementById("amount").value);
             const price = parseFloat(document.getElementById("price").value);
 
@@ -108,6 +108,12 @@ block append scripts
             }
 
             const existingProduct = selectedProducts.find(p => p.productId === productId);
+
+            if (amount > stock || amount + existingProduct.amount > stock) {
+                alert("Số lượng sản phẩm không được lớn hơn số lượng tồn kho!");
+                return;
+            }
+
             if (existingProduct) {
                 existingProduct.amount += amount;
                 existingProduct.price = price; 
@@ -141,8 +147,8 @@ block append scripts
             });
         }
         
-        function removeProduct(index) {
-            selectedProducts.splice(index, 1);
+        function removeProduct(productId) {
+            selectedProducts = selectedProducts.filter(p => p.productId != productId);
             updateSelectedProductsList();
             updateTotalCost();
         }

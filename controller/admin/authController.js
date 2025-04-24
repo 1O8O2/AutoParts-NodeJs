@@ -14,7 +14,7 @@ module.exports.login = async (req, res) => {
 // [POST] /AutoParts/admin/auth/login
 module.exports.loginPost = async (req, res) => {
   try {
-    const account = await Account.findByPk(req.body.phone);
+    const account = await Account.findByPk(req.body.email);
     
     if (account != null && account.password == req.body.password && account.status != 'Deleted') {
       res.cookie("token", account.token);
