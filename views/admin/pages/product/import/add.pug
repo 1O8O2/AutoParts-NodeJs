@@ -7,11 +7,12 @@ block main
     +alert-success(3000)
 
     .container-fluid#container-wrapper
+        #alertContainer
         .card.mb-4
             .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
                 h6.m-0.font-weight-bold.text-primary Nhập Hàng
             .card-body
-                form(action=`${prefixAdmin}/product/import/add` method="POST")
+                form(action=`${prefixAdmin}/product/import/add` method="POST" onsubmit="return validateForm()")
                     .row
                         // Cột 1: Thông tin phiếu nhập
                         .col-lg-6.order-info-column
@@ -20,9 +21,9 @@ block main
                                     span.text-danger *
                                 input.form-control(type="text" id="importId" name="importId" value=nextImportId readonly required)
                             .form-group
-                                label(for="employeeEmail") Nhân Viên Nhập 
+                                label(for="employeeName") Nhân Viên Nhập 
                                     span.text-danger *
-                                input.form-control(type="text" id="employeeEmail" name="employeeEmail" value=user.fullName readonly required)
+                                input.form-control(type="text" id="employeeName" name="employeeName" value=user.fullName readonly required)
                             .form-group
                                 label(for="importDate") Ngày Nhập 
                                     span.text-danger *
@@ -67,9 +68,43 @@ block main
     a.scroll-to-top.rounded(href="#page-top")
         i.fas.fa-angle-up
 
-block append scripts
     script.
+        const messages = !{JSON.stringify(messages)};
         let selectedProducts = [];
+
+        function showAlertClientSide(message, type = 'success', duration = 3000) {
+            const existingAlerts = document.querySelectorAll('.message.info');
+            existingAlerts.forEach(alert => alert.remove());
+            // Determine alert class based on type
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+            // Create alert HTML
+            const alertHtml = `
+                <div class="message info">
+                    <div class="alert ${alertClass}" data-time="${duration}" show-alert role="alert">
+                        ${message} <span close-alert>X</span>
+                    </div>
+                </div>
+            `;
+
+            // Append to a container (e.g., at the top of the form)
+            const container = document.getElementById('alertContainer') || document.querySelector('.container-fluid');
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+
+            // Handle auto-dismissal (if you have existing logic for this)
+            const alertElement = container.querySelector('.alert[show-alert]');
+            if (duration > 0) {
+                setTimeout(() => {
+                    alertElement.parentElement.remove();
+                }, duration);
+            }
+
+            // Add click handler for manual close
+            const closeButton = alertElement.querySelector('[close-alert]');
+            closeButton.addEventListener('click', () => {
+                alertElement.parentElement.remove();
+            });
+        }
 
         function formatCurrency(amount) {
             const number = Number(amount);
@@ -103,17 +138,11 @@ block append scripts
             const price = parseFloat(document.getElementById("price").value);
 
             if (!productId || amount <= 0 || price < 0) {
-                alert("Vui lòng nhập đầy đủ thông tin sản phẩm!");
+                showAlertClientSide(messages.BLANK_INFORMATION, "error");
                 return;
             }
 
             const existingProduct = selectedProducts.find(p => p.productId === productId);
-
-            if (amount > stock || amount + existingProduct.amount > stock) {
-                alert("Số lượng sản phẩm không được lớn hơn số lượng tồn kho!");
-                return;
-            }
-
             if (existingProduct) {
                 existingProduct.amount += amount;
                 existingProduct.price = price; 
@@ -158,3 +187,11 @@ block append scripts
             $('#totalCostlbl').text(formatCurrency(totalCost));
             $('#importCost').val(totalCost);
         } 
+
+        function validateForm() {
+            if (selectedProducts.length === 0) {
+                showAlertClientSide(messages.CHOOSE_AT_LEAST_A_PRODUCT, "error");
+                return false;
+            }
+            return true;
+        }

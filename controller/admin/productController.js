@@ -317,8 +317,7 @@ module.exports.import = async (req, res, next) => {
             imports: imports
         });
     } catch (error) {
-        console.error('Error in import:', error);
-        req.flash('error', 'Có lỗi xảy ra khi tải danh sách nhập hàng');
+        req.flash('error', res.locals.messages.IMPORT_LOAD_ERROR);
         res.redirect(req.get('Referrer') || '/');
     }
 };
@@ -328,14 +327,15 @@ module.exports.importAdd = async (req, res) => {
     try {
         const productList = await Product.findAll({ where: { deleted: false }});
         const nextImportId = await generateNextImportId();
-
+        const messages = res.locals.messages;
         const currentDate = moment().format('DD/MM/YYYY');
 
         res.render('admin/pages/product/import/add', {
             pageTitle: "Thêm phiếu nhập",
             productList,
             nextImportId,
-            currentDate
+            currentDate,
+            messages
         });
     } catch (err) {
         console.error(err);
@@ -347,36 +347,49 @@ module.exports.importAdd = async (req, res) => {
 module.exports.importAddPost = async (req, res) => {
     try {
         const importData = req.body;
+        importData.employeeEmail = res.locals.user.email;
         
-        // Create import record
         const importRecord = await Import.create({
             ...importData,
             importDate: new Date()
         });
 
-        // Process import details and update product stock
-        if (importData.details) {
-            for (const detail of importData.details) {
-                await ImportDetail.create({
-                    importId: importRecord.importId,
-                    productId: detail.productId,
-                    amount: detail.amount,
-                    price: detail.price
-                });
+        const importDetails = [];
+        const detailKeys = Object.keys(importData).filter(key => key.startsWith('importDetails['));
+        const indices = [...new Set(detailKeys.map(key => key.match(/\[(\d+)\]/)[1]))]; // Lấy các index duy nhất
 
-                // Update product stock
-                const product = await Product.findByPk(detail.productId);
-                await product.update({
-                    stock: product.stock + parseInt(detail.amount)
-                });
-            }
+        for (const index of indices) {
+            const detail = {
+                id: {
+                    importId: importData[`importDetails[${index}].id.importId`],
+                    productId: importData[`importDetails[${index}].id.productId`]
+                },
+                amount: parseInt(importData[`importDetails[${index}].amount`]),
+                price: parseFloat(importData[`importDetails[${index}].price`])
+            };
+            importDetails.push(detail);
         }
 
-        req.flash('success', 'Thêm phiếu nhập thành công!');
+        // Process import details and update product stock
+        for (const detail of importDetails) {
+            await ImportDetail.create({
+                importId: importRecord.importId,
+                productId: detail.id.productId,
+                amount: detail.amount,
+                price: detail.price
+            });
+
+            const product = await Product.findByPk(detail.id.productId);
+            await product.update({
+                stock: product.stock + detail.amount
+            });
+        }
+
+        req.flash('success', res.locals.messages.CREATE_IMPORT_SUCCESS);
         res.redirect(`${systemConfig.prefixAdmin}/product/import`);
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Thêm phiếu nhập thất bại!');
+        req.flash('error', res.locals.messages.CREATE_IMPORT_ERROR);
         res.redirect('back');
     }
 };
@@ -395,7 +408,7 @@ module.exports.importDetail = async (req, res) => {
             ]
         });
         if (!importRecord) {
-            req.flash('error', 'Phiếu nhập không tồn tại!');
+            req.flash('error', res.locals.messages.IMPORT_NOT_EXIST);
             return res.redirect(`${systemConfig.prefixAdmin}/product/import`);
         }
 
