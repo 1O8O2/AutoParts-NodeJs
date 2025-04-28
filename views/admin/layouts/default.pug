@@ -35,4 +35,19 @@ html
         script(src="/js/adminjs/profile.js")
         script(src="/js/adminjs/script.js")
         
+        script.
+            $(document).ready(function () {
+                $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm",
+                        "lengthMenu": "Hiển thị _MENU_ dòng",
+                        "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                        "paginate": {
+                            "previous": "Trước",     
+                            "next": "Tiếp" 
+                        }
+                    }
+                }); 
+            });
+
         block scripts

@@ -44,8 +44,6 @@ block main
                                         a.btn.btn-sm.btn-danger.delete-roleGroup-btn.mr-1(href="javascript:void(0);" data-role-id=RG.roleGroupId data-toggle="modal" data-target="#DeleteModal") Xóa
                                     if (permission.includes("NHOM_QUYEN_SUA"))
                                         a.btn.btn-sm.btn-dark.edit-btn.mr-1(href="javascript:void(0);" data-role-id=RG.roleGroupId data-toggle="modal" data-target="#EditModal") Sửa
-                                    if (permission.includes("NHOM_QUYEN_XEM"))
-                                        a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/role/detail/${RG.roleGroupId}`) Xem
 
     #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
         .modal-dialog(role="document")

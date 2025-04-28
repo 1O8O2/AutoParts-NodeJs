@@ -29,11 +29,10 @@ block main
                         h6.m-0.font-weight-bold.text-primary Trạng Thái
                     .card-body
                         .mb-3
-                            button.btn(
-                                id=`statusBtn_${product.productId}`
-                                class=product.status === 'Active' ? 'btn-success' : 'btn-danger'
-                                onclick=`changeStatus('${product.productId}', '${product.status}')`
-                            ) #{product.status}
+                            if (product.status === 'Active')
+                                p.badge.badge-success Hoạt động
+                            else
+                                p.badge.badge-danger Ngừng hoạt động
                         .mb-3
                             strong Ngày ngừng bán:
                             if !product.deletedAt
@@ -115,25 +114,3 @@ block main
     // Scroll to top
     a.scroll-to-top.rounded(href="#page-top")
         i.fas.fa-angle-up 
-
-block append scripts
-    script.
-        function changeStatus(productId, currentStatus) {
-            $.ajax({
-                url: `${systemConfig.prefixAdmin}/product/changeStatus/${productId}`,
-                type: 'POST',
-                data: { status: currentStatus },
-                success: function(response) {
-                    if (response.success) {
-                        // Update the status button
-                        const statusBtn = $(`#statusBtn_${productId}`);
-                        statusBtn.text(response.newStatus);
-                        statusBtn.removeClass('btn-success btn-danger')
-                            .addClass(response.newStatus === 'Active' ? 'btn-success' : 'btn-danger');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error changing status:', error);
-                }
-            });
-        } 

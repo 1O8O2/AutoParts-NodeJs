@@ -1,6 +1,8 @@
-const Employee = require('../../models/employee');
-const Account = require('../../models/account');
+const Employee = require('../../models/Employee');
+const Account = require('../../models/Account');
 const {RoleGroup,RoleGroupPermissions} = require('../../models/RoleGroup');
+
+const systemConfig = require('../../configs/system');
 
 module.exports.index = async (req, res) => {
     try {
@@ -19,9 +21,22 @@ module.exports.index = async (req, res) => {
 
 module.exports.detail = async (req, res) => {
     try {
-        const empPhone = req.query.empPhone;
+        const empEmail = req.query.empEmail;
         const employee = await Employee.findOne({
-            where: { phone: empPhone, deleted: false }
+            where: { 
+                email: empEmail, deleted: false
+            },
+            include: [
+                {
+                    model: Account,
+                    attributes: ['permission'],
+                    where: { deleted: false },
+                    required: true
+                }
+            ]
+        });
+        const roleGroups = await RoleGroup.findAll({
+            where: { deleted: false }
         });
         
         if (!employee) {
@@ -30,7 +45,8 @@ module.exports.detail = async (req, res) => {
 
         res.render('admin/pages/employee/detail', {
             pageTitle: "Chi tiết nhân viên",
-            employee: employee
+            employee: employee,
+            roleGroups: roleGroups
         });
     } catch (error) {
         console.error("Error fetching employee details:", error);
@@ -57,33 +73,43 @@ module.exports.addPost = async (req, res) => {
         employeeData.status = employeeData.status || "Inactive";
         employeeData.deleted = false;
 
-        // Create new employee
-        const newEmployee = await Employee.create(employeeData);
-
         // Create associated account
         const accountData = {
-            phone: employeeData.phone,
+            email: employeeData.email,
             password: "1111", // Default password
             permission: employeeData.permission,
             status: employeeData.status,
-            createdAt: new Date(),
-            updatedAt: new Date(),
             deleted: false
         };
         await Account.create(accountData);
 
-        res.redirect('/admin/employee');
+        // Create new employee
+        const newEmployee = await Employee.create(employeeData);
+        
+        req.flash('success', 'Thêm nhân viên thành công');
+        res.redirect(`${systemConfig.prefixAdmin}/employee`);
     } catch (error) {
         console.error("Error adding employee:", error);
+        req.flash('error', 'Thêm nhân viên thất bại');
         res.redirect('back');
     }
 };
 
 module.exports.edit = async (req, res) => {
     try {
-        const empPhone = req.query.empPhone;
+        const empEmail = req.query.empEmail;
         const employee = await Employee.findOne({
-            where: { phone: empPhone, deleted: false }
+            where: { 
+                email: empEmail, deleted: false 
+            },
+            include: [
+                {
+                    model: Account,
+                    attributes: ['permission'],
+                    where: { deleted: false },
+                    required: true
+                }
+            ]
         });
         const roleGroups = await RoleGroup.findAll();
 
@@ -108,7 +134,7 @@ module.exports.editPatch = async (req, res) => {
         employeeData.status = employeeData.status || "Inactive";
 
         await Employee.update(employeeData, {
-            where: { phone: employeeData.phone }
+            where: { email: employeeData.email }
         });
 
         // Update associated account
@@ -119,22 +145,24 @@ module.exports.editPatch = async (req, res) => {
                 updatedAt: new Date()
             },
             {
-                where: {phone: employeeData.phone }
+                where: {email: employeeData.email }
             }
         );
 
-        res.redirect('/admin/employee');
+        req.flash('success', 'Chỉnh sửa thông tin nhân viên thành công');
+        res.redirect(`${systemConfig.prefixAdmin}/employee`);
     } catch (error) {
         console.error("Error updating employee:", error);
+        req.flash('error', 'Chỉnh sửa thông tin nhân viên thất bại');
         res.redirect('back');
     }
 };
 
 module.exports.changeStatus = async (req, res) => {
     try {
-        const empPhone = req.body.empPhone;
+        const empEmail = req.body.empEmail;
         const employee = await Employee.findOne({
-            where: { phone: empPhone, deleted: false }
+            where: { email: empEmail, deleted: false }
         });
 
         if (!employee) {
@@ -144,16 +172,16 @@ module.exports.changeStatus = async (req, res) => {
         const newStatus = employee.status === "Active" ? "Inactive" : "Active";
         await Employee.update(
             { status: newStatus },
-            { where: { phone: empPhone } }
+            { where: { email: empEmail } }
         );
 
         // Update account status
         await Account.update(
             { status: newStatus },
-            { where: { phone: empPhone } }
+            { where: { email: empEmail } }
         );
 
-        res.redirect('/admin/employee');
+        res.json({ success: true });
     } catch (error) {
         console.error("Error changing employee status:", error);
         res.redirect('back');

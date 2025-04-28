@@ -56,19 +56,6 @@ block main
 block append scripts
     script.
         $(document).ready(function() {
-            // Initialize DataTable
-            $('#dataTable').DataTable({
-                "language": {
-                    "search": "Tìm kiếm",
-                    "lengthMenu": "Hiển thị _MENU_ dòng",
-                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
-                    "paginate": {
-                        "previous": "Trước", 
-                        "next": "Tiếp"
-                    }
-                }
-            });
-
             // Handle delete button click
             $('#dataTable').on('click', '.delete-btn', function() {
                 const groupId = $(this).data('group-id');

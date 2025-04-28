@@ -14,7 +14,16 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Chỉ được upload file ảnh!'), false);
+        }
+        cb(null, true);
+    },
+    limits: { fileSize: 5 * 1024 * 1024 } 
+});
 
 // Product routes
 router.get('/', productController.index);
@@ -22,7 +31,7 @@ router.get('/add', productController.add);
 router.post('/add', upload.array('imageFiles'), productController.addPost);
 router.get('/edit', productController.edit);
 router.post('/edit', upload.array('imageFiles'), productController.editPost);
-router.get('/delete', productController.delete);
+router.delete('/delete/:productId', productController.delete);
 router.get('/detail', productController.detail);
 router.post('/changeStatus', productController.changeStatus);
 

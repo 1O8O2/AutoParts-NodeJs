@@ -102,11 +102,10 @@ module.exports.index = async (req, res) => {
         });
 
         // Process image URLs
-        const baseUrl = req.protocol + '://' + req.get('host') + '/img/';
         products.forEach(product => {
             if (product.imageUrls) {
                 const imgArray = product.imageUrls.split(',');
-                product.imageUrls = imgArray;
+                product.imageUrl = imgArray[0];
             }
         });
 
@@ -168,11 +167,10 @@ module.exports.addPost = async (req, res) => {
             imageUrls
         });
 
-        req.flash('success', 'Thêm sản phẩm thành công!');
-        res.redirect('/admin/product');
+        req.flash('success', res.locals.messages.CREATE_PRODUCT_SUCCESS);
+        res.redirect(`${systemConfig.prefixAdmin}/product`);
     } catch (err) {
-        console.error(err);
-        req.flash('error', 'Thêm sản phẩm thất bại!');
+        req.flash('error', res.locals.messages.CREATE_PRODUCT_ERROR);
         res.redirect('back');
     }
 };
@@ -225,26 +223,27 @@ module.exports.editPost = async (req, res) => {
 
         await product.update(productData);
 
-        req.flash('success', 'Cập nhật sản phẩm thành công!');
+        req.flash('success', res.locals.messages.UPDATE_PRODUCT_SUCCESS);
         res.redirect(`${systemConfig.prefixAdmin}/product`);
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Cập nhật sản phẩm thất bại!');
+        req.flash('error', res.locals.messages.UPDATE_PRODUCT_ERROR);
         res.redirect('back');
     }
 };
 
-// [DELETE] /admin/product/delete
+// [DELETE] /admin/product/delete/:productId
 module.exports.delete = async (req, res) => {
     try {
-        const product = await Product.findByPk(req.query.productId);
+        const productId = req.params.productId;
+        const product = await Product.findByPk(productId);
         await product.update({ deleted: true });
 
-        req.flash('success', 'Xóa sản phẩm thành công!');
+        req.flash('success', res.locals.messages.DELETE_PRODUCT_SUCCESS);
         res.redirect(`${systemConfig.prefixAdmin}/product`);
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Xóa sản phẩm thất bại!');
+        req.flash('error', res.locals.messages.DELETE_PRODUCT_ERROR);
         res.redirect('back');
     }
 };
@@ -252,7 +251,6 @@ module.exports.delete = async (req, res) => {
 // [GET] /admin/product/detail
 module.exports.detail = async (req, res) => {
     try {
-        console.log(req.query.productId);
         const productId = req.query.productId;
         const product = await Product.findByPk(productId);
 
@@ -276,7 +274,7 @@ module.exports.detail = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Có lỗi xảy ra khi tải chi tiết sản phẩm');
+        req.flash('error', res.locals.messages.LOAD_ERROR);
         res.redirect(`${systemConfig.prefixAdmin}/product`);
     }
 };
@@ -317,7 +315,7 @@ module.exports.import = async (req, res, next) => {
             imports: imports
         });
     } catch (error) {
-        req.flash('error', res.locals.messages.IMPORT_LOAD_ERROR);
+        req.flash('error', res.locals.messages.LOAD_ERROR);
         res.redirect(req.get('Referrer') || '/');
     }
 };

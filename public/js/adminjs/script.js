@@ -43,6 +43,15 @@ $(document).ready(function () {
             $('#delete-roleGroup-item').submit(); 
         });
     });
+
+    $('#dataTable').on('click', '.delete-product-btn', function() {
+        const productId = $(this).data('product-id');
+        $('#delete-link').on('click', function(e) {
+            e.preventDefault(); 
+            $('#delete-product-item').attr('action', `/AutoParts/admin/product/delete/${productId}?_method=DELETE`);
+            $('#delete-product-item').submit(); 
+        });
+    }); 
     // End delete item
 
     // Change Status item
@@ -92,8 +101,8 @@ $(document).ready(function () {
 
     // Show edit account modal
     $('#dataTable').on('click', '.edit-account-btn', function() {
-        const accPhone = $(this).data('acc-phone');
-        $('#EditModal .modal-content').load(`/AutoParts/admin/account/edit/${accPhone}`, function() {
+        const accEmail = $(this).data('acc-email');
+        $('#EditModal .modal-content').load(`/AutoParts/admin/account/edit/${accEmail}`, function() {
             $('#EditModal').modal('show');
         });
     });

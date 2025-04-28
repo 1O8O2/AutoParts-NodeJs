@@ -53,17 +53,15 @@ block main
                                         span.input-group-text VNĐ
                         .col-lg-6
                             .form-group
-                                label(for="stock") Số lượng 
-                                    span.required-text *
-                                input.form-control(type="text" id="stock" name="stock" value=product.stock placeholder="Nhập số lượng sản phẩm" required)
+                                input.form-control(type="number" id="stock" name="stock" value="0" hidden required)
                             .form-group
                                 label(for="unit") Đơn vị 
                                     span.required-text *
                                 select.form-control.mb-3(id="unit" name="unit" required)
                                     option(value="" disabled) -- Chọn đơn vị của sản phẩm --
-                                    option(value="Cái" selected=product.unit === "Cái") Cái
-                                    option(value="Bộ" selected=product.unit === "Bộ") Bộ
-                                    option(value="Bình" selected=product.unit === "Bình") Bình
+                                    option(value="Cái" selected=(product.unit === "Cái")) Cái
+                                    option(value="Bộ" selected=(product.unit === "Bộ")) Bộ
+                                    option(value="Bình" selected=(product.unit === "Bình")) Bình
                             .form-group
                                 label(for="imageUrls") Ảnh sản phẩm 
                                     span.required-text *
@@ -79,10 +77,11 @@ block main
                                             if imageUrl.startsWith('https')
                                                 img(src=imageUrl alt="Current Image (External)" style="max-width: 100px; max-height: 100px; margin-right: 10px; margin-bottom: 10px;")
                                             else
-                                                img(src=`/resources/img/${imageUrl}` alt="Current Image (Local)" style="max-width: 100px; max-height: 100px; margin-right: 10px; margin-bottom: 10px;")
+                                                img(src=`/img/${imageUrl}` alt="Current Image (Local)" style="max-width: 100px; max-height: 100px; margin-right: 10px; margin-bottom: 10px;")
                                 .mt-2
-                                    input(type="checkbox" name="confirmDeleteImg" id="confirmDeleteImg" value="confirm")
-                                    label.ml-2(for="confirmDeleteImg") Xóa ảnh cũ
+                                    div.d-flex.align-items-center
+                                        input(type="checkbox" name="confirmDeleteImg" id="confirmDeleteImg" value="confirm")
+                                        label.ml-2(for="confirmDeleteImg") Xóa ảnh cũ
                             .form-group
                                 label(for="weight") Khối lượng 
                                     span.required-text *

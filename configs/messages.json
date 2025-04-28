@@ -35,7 +35,14 @@
   "CREATE_IMPORT_SUCCESS": "Tạo đơn nhập hàng thành công!",
   "CREATE_IMPORT_ERROR": "Tạo đơn nhập hàng thất bại!",
   "IMPORT_NOT_EXIST": "Phiếu nhập không tồn tại!",
-  "IMPORT_LOAD_ERROR": "Lỗi khi tải danh sách nhập hàng!",
 
-  "CHOOSE_AT_LEAST_A_PRODUCT": "Vui lòng chọn ít nhất một sản phẩm!"
+  "LOAD_ERROR": "Lỗi khi tải danh sách nhập hàng!",
+
+  "CHOOSE_AT_LEAST_A_PRODUCT": "Vui lòng chọn ít nhất một sản phẩm!",
+  "CREATE_PRODUCT_SUCCESS": "Thêm sản phẩm thành công!",
+  "CREATE_PRODUCT_ERROR": "Thêm sản phẩm thất bại!",
+  "UPDATE_PRODUCT_SUCCESS": "Cập nhật sản phẩm thành công!",
+  "UPDATE_PRODUCT_ERROR": "Cập nhật sản phẩm thất bại!",
+  "DELETE_PRODUCT_SUCCESS": "Xóa sản phẩm thành công!",
+  "DELETE_PRODUCT_ERROR": "Xóa sản phẩm thất bại!"
 }

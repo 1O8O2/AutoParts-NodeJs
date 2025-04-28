@@ -64,7 +64,7 @@ module.exports.addPost = async (req, res) => {
 
         const blogData = {
             ...req.body,
-            createdBy: res.locals.user.dataValues.phone
+            createdBy: res.locals.user.email
         };
         
         const isSuccess = await Blog.create(blogData);
@@ -77,6 +77,7 @@ module.exports.addPost = async (req, res) => {
             res.redirect('back');
         }
     } catch (err) {
+        req.flash("error", "Thêm bài viết thất bại!");
         res.redirect('back');
     }
 };
@@ -116,7 +117,7 @@ module.exports.editPatch = async (req, res) => {
 
         const blogData = {
             ...req.body,
-            createdBy: res.locals.user.dataValues.phone
+            updatedBy: res.locals.user.email
         };
         
         const isSuccess = await Blog.update(
@@ -136,7 +137,7 @@ module.exports.editPatch = async (req, res) => {
             res.redirect('back');
         }
     } catch (err) {
-        req.flash("error", err);
+        req.flash("error", "Thay đổi thông bài viết thất bại!");
         res.redirect('back');
     }
 };

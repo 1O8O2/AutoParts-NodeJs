@@ -1,9 +1,30 @@
 const express = require('express');
 const router = express.Router();
+const controller = require('../../controller/admin/generalSettingController');
+const multer = require('multer');
+const path = require('path');
 
-const controller = require('../../controller/admin/generalSettingController')
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../../public/img/'));
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '_' + file.originalname);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Chỉ được upload file ảnh!'), false);
+        }
+        cb(null, true);
+    },
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 router.get('/', controller.index);
-router.post('/update', controller.update);
+router.post('/update', upload.single('logoFile'), controller.update);
 
 module.exports = router;

@@ -189,25 +189,28 @@ module.exports.permissions = async (req, res) => {
 // [PATCH] /AutoParts/admin/role/permissions/update
 module.exports.updatePermissions = async (req, res) => {
   try {
-      const ids = req.body.roleGroupIds || []; 
-      
-      for (const id of ids) {
-        const key = `permissions[${id}]`; 
-        const permissions = req.body[key] || []; 
-        
-        const roleGroup = await RoleGroup.findByPk(id);
-        if (roleGroup) {
-          roleGroup.permissions = permissions;
-          await roleGroup.save();
-        }
+    const ids = req.body.roleGroupIds || []; 
+    
+    for (const id of ids) {
+      const key = `permissions[${id}]`; 
+      let permissions = req.body[key] || []; 
+      if (!Array.isArray(permissions)) {
+        permissions = permissions ? [permissions] : [];
       }
 
-      req.flash("success", "Cập nhật quyền thành công!");
-      res.redirect(`${systemConfig.prefixAdmin}/role/permissions`);
+      const roleGroup = await RoleGroup.findByPk(id);
+      if (roleGroup) {
+        roleGroup.permissions = permissions;
+        await roleGroup.save();
+      }
+    }
+
+    req.flash("success", "Cập nhật quyền thành công!");
+    res.redirect(`${systemConfig.prefixAdmin}/role/permissions`);
   } catch (err) {
-      console.error('Error:', err);
-      req.flash("error", "Cập nhật quyền thất bại!");
-      res.status(500).send('Server error');
+    console.error('Error:', err);
+    req.flash("error", "Cập nhật quyền thất bại!");
+    res.status(500).send('Server error');
   }
 };
 

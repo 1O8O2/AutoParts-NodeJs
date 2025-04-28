@@ -9,30 +9,31 @@ block main
             .card-header.py-3
                 h6.m-0.font-weight-bold.text-primary Thông Số Chung
             .card-body
-                form#generalSettingsForm(action=`${prefixAdmin}/generalSettings/update` method="POST" enctype="multipart/form-data")
+                form#generalSettingsForm(action=`${prefixAdmin}/generalSetting/update` method="POST" enctype="multipart/form-data")
                     .form-group
                         label(for="websiteName") Tên Website
-                        input.form-control(type="text" id="websiteName" name="websiteName" value=generalSettings.websiteName readonly required)
+                        input.form-control(type="text" id="websiteName" name="websiteName" value=generalSetting.websiteName || '' readonly required)
                     .form-group
                         label(for="logo") Logo (Ảnh)
                         .custom-file
-                            input.custom-file-input(type="file" id="logoFile" name="logoFile" accept="image/*" onchange="previewImage(this)" required disabled)
+                            input.custom-file-input(type="file" id="logoFile" name="logoFile" accept="image/*" onchange="previewImage(this)" disabled)
                             label.custom-file-label(for="logoFile") Chọn ảnh
+                        input(type="hidden" name="existingLogo" value=generalSetting.logo || '') 
                         .mt-3#previewContainer
-                            if generalSettings.logo
-                                img(src=generalSettings.logo alt="Logo hiện tại" style="max-width: 100px; max-height: 100px;")
+                            if generalSetting.logo
+                                img(src=`/img/${generalSetting.logo}` alt="Logo hiện tại" style="max-width: 100px; max-height: 100px;")
                     .form-group
                         label(for="phone") Số Điện Thoại
-                        input.form-control(type="text" id="phone" name="phone" value=generalSettings.phone readonly required)
+                        input.form-control(type="text" id="phone" name="phone" value=generalSetting.phone || '' readonly required)
                     .form-group
                         label(for="email") Email
-                        input.form-control(type="email" id="email" name="email" value=generalSettings.email readonly required)
+                        input.form-control(type="email" id="email" name="email" value=generalSetting.email || '' readonly required)
                     .form-group
                         label(for="address") Địa Chỉ
-                        input.form-control(type="text" id="address" name="address" value=generalSettings.address readonly required)
+                        input.form-control(type="text" id="address" name="address" value=generalSetting.address || '' readonly required)
                     .form-group
                         label(for="copyright") Bản Quyền
-                        input.form-control(type="text" id="copyright" name="copyright" value=generalSettings.copyright readonly required)
+                        input.form-control(type="text" id="copyright" name="copyright" value=generalSetting.copyright || '' readonly required)
                     .form-group
                         button#toggleEditBtn.btn.btn-primary(type="button") Chỉnh sửa
 
@@ -40,16 +41,19 @@ block main
         $(document).ready(function() {
             var isEditing = false;
 
+            $('#generalSettingsForm').on('submit', function(e) {
+                console.log('Form submitted:', $(this).serializeArray());
+            });
+
             $('#toggleEditBtn').on('click', function() {
                 if (!isEditing) {
-                    // Chuyển sang chế độ chỉnh sửa
                     $('input.form-control').removeAttr('readonly');
-                    $('#logoFile').removeAttr('disabled');
+                    $('#logoFile').removeAttr('disabled').removeAttr('required'); // Bỏ required
                     $(this).text('Cập nhật');
                     $(this).removeClass('btn-primary').addClass('btn-success');
                     isEditing = true;
                 } else {
-                    // Gửi form để cập nhật
+                    console.log('Submitting form...');
                     $('#generalSettingsForm').submit();
                 }
             });

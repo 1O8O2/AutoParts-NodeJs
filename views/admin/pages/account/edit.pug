@@ -3,15 +3,15 @@
     button.close(type="button" data-dismiss="modal" aria-label="Close" aria-hidden="true")
         span ×
 .modal-body
-    form#editAccountForm(action=`${prefixAdmin}/account/edit/${account.phone}?_method=PATCH` method="post")
+    form#editAccountForm(action=`${prefixAdmin}/account/edit/${account.email}?_method=PATCH` method="post")
         .form-group
-            label(for="phone")
-                strong Số Điện Thoại:
-            input.form-control(type="text" path="phone" value=account.phone readonly required)
+            label(for="email")
+                strong Email:
+            input.form-control(type="text" path="email" value=account.email readonly required)
         .form-group
             label(for="password")
                 strong Mật Khẩu:
-            input.form-control(type="text" path="password" value=account.password required)
+            input.form-control(type="password" path="password" value=account.password required)
         .form-group
             label(for="permission")
                 strong Nhóm Quyền:

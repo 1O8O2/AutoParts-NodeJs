@@ -21,7 +21,7 @@ block main
                         span.form-control-plaintext #{customer.fullName}
                     .form-group
                         label Số Điện Thoại Khách Hàng:
-                        span.form-control-plaintext #{order.userPhone}
+                        span.form-control-plaintext #{customer.phone}
                     .form-group
                         label Ngày Đặt Hàng:
                         span.form-control-plaintext     
@@ -34,9 +34,7 @@ block main
                         label Mã Giảm Giá:
                         span.form-control-plaintext
                             if order.discountId
-                                each discount in discounts
-                                    if discount.discountId === order.discountId
-                                        | #{discount.discountDesc} - #{discount.discountAmount}% - #{discount.minimumAmount}₫
+                                | #{discounts.discountDesc} - #{discounts.discountAmount}% - #{discounts.minimumAmount}₫
                             else
                                 | Không có
                     .form-group

@@ -23,17 +23,17 @@ module.exports.index = async (req, res) => {
     }
 };
 
-// [PATCH] /AutoParts/admin/account/change-status/:newStatus/:accPhone
+// [PATCH] /AutoParts/admin/account/change-status/:newStatus/:accEmail
 module.exports.changeStatus = async (req, res) => {
     try {
-        const accPhone = req.params.accPhone;
+        const accEmail = req.params.accEmail;
         const newStatus = req.params.newStatus;
         
         const isSuccess = await Account.update(
             { status: newStatus },
             { 
                 where: { 
-                    phone: accPhone
+                    email: accEmail
                 } 
             }
         );
@@ -51,11 +51,11 @@ module.exports.changeStatus = async (req, res) => {
 // [GET] /AutoParts/admin/account/edit
 module.exports.edit = async (req, res) => {
     try {
-        const accPhone = req.params.accPhone;
+        const accEmail = req.params.accEmail;
         const account = await Account.findOne({
             where: { 
                 deleted: false,
-                phone: accPhone 
+                email: accEmail 
             },
             include: [{
                 model: RoleGroup,
@@ -77,26 +77,24 @@ module.exports.edit = async (req, res) => {
     }
 };
 
-// [PATCH] /AutoParts/admin/account/edit/:accPhone
+// [PATCH] /AutoParts/admin/account/edit/:accEmail
 module.exports.editPatch = async (req, res) => {
     try {
-        const accPhone = req.params.accPhone;
+        const accEmail = req.params.accEmail;
         
         const isSuccess = await Account.update(
             req.body,
             { 
                 where: { 
-                    phone: accPhone
+                    email: accEmail
                 } 
             }
         );
         
         if (isSuccess) {
-            console.log("OK1")
             req.flash("success", "Thay đổi thông tin tài khoản thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/account`);
         } else {
-            console.log("OK2")
             req.flash("error", "Thay đổi thông tin tài khoản thất bại!");
             return res.redirect('back');
         }

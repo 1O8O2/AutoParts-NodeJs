@@ -357,7 +357,7 @@ module.exports.detail = async (req, res) => {
             pageTitle: "Chi tiết đơn hàng",
             order: order,
             customer: order.Customer,
-            discount: order.Discount,
+            discounts: order.Discount,
             orderDetails: orderDetails
         });
 
