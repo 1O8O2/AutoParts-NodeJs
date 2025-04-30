@@ -8,18 +8,22 @@ const Order = require('../../models/Order');
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
     try {
+
+
         if (!res.locals.user) {
             return res.redirect('/AutoParts/account/login');
         }
 
         const cus = await Customer.findByPk(res.locals.user.email);
         if (!cus) {
+
             return res.redirect('/AutoParts/account/login');
         }
         
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
-            throw new Error('Cart not found');
+            req.flash('error', res.locals.messages.CART_NOT_FOUND_WARNING);
+            return res.render('back');
         }
 
         // Get all products from cart (virtual field populated by afterFind hook)
@@ -72,8 +76,8 @@ module.exports.createOrder = async (req, res) => {
 
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
-        console.error('Error in createOrder:', error);
-        return res.redirect('/AutoParts/account/login');
+        req.flash('error', res.locals.messages.ORDER_CREATE_ERROR);
+        return res.redirect('back');
     }
 };
 
@@ -104,6 +108,7 @@ module.exports.showDetail = async (req, res) => {
 module.exports.showCart = async (req, res) => {
     try {
         if (!res.locals.user) {
+
             return res.redirect('/AutoParts/account/login');
         }
 
@@ -120,11 +125,11 @@ module.exports.showCart = async (req, res) => {
         let productsInCart = cart.products || [];
 
         // Remove products that are not selected
-        const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
+        const selectedProducts = productsInCart.filter(item => req.query[item.product.productId])||[]
         if (selectedProducts.length === 0) {
-            return res.render('client/pages/order/order', { message: 'No products selected' });
+            req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
+            return res.redirect('back');
         }
-
         res.render('client/pages/order/order', { selectedProducts });
     } catch (error) {
         console.error('Error in showCart:', error);

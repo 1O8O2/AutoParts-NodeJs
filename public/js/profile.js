@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Alert handling
-    const alerts = document.querySelectorAll('[show-alert]');
+    const alerts = document.querySelectorAll('[show-alert]')
+    console.log(alerts);
     alerts.forEach(alert => {
         const time = parseInt(alert.getAttribute('data-time'));
         const closeBtn = alert.querySelector('[close-alert]');
@@ -30,32 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Select DOM elements
-    let textInputs = document.querySelectorAll(".input-field input[type='text']");
-    let phoneInput = document.querySelector(".input-field input[type='tel']");
-    let editBtn = document.querySelector(".edit-btn") || document.getElementById('edit-btn'); // Use either selector
-    let form = document.querySelector("form[action='/AutoParts/account/edit']");
-  
-    // Edit button toggle and form submission
-    if (editBtn) {
-      editBtn.onclick = function(event) {
-          event.preventDefault(); // Prevent default form submission
-          if (editBtn.innerHTML !== "Lưu") {
-              // Enable text inputs and phone for editing, except email and status
-              textInputs.forEach(input => {
-                  input.disabled = false;
-              });
-              phoneInput.disabled = false;
-              // Email remains readonly
-              editBtn.innerHTML = "Lưu"; // Change button text to "Save"
-          }
-          else{
-            form.submit(); // Submit the form
-            // Disable text inputs and phone after submission
 
-          }
-      };
-    }
+    
+
   
     // Tab switching between orders and change password
     let orderLst = document.querySelector(".orders");
@@ -117,4 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
   
+
+
+
+    
 });

@@ -1,3 +1,4 @@
+include ../../mixins/alert.pug
 doctype html
 html
   head
@@ -10,6 +11,7 @@ html
       integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     )
+    link(rel="stylesheet" href="/css/base.css")
     link(href="/css/register.css" rel="stylesheet")
     
     script.
@@ -27,6 +29,8 @@ html
       }
   
   body
+    +alert-success(3000)
+    +alert-error(3000)
     .wrapper
       form#register-login(action="/AutoParts/account/register" method="post" data-oc-toggle="ajax")
         h2 Đăng ký

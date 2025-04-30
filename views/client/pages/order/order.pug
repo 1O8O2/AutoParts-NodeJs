@@ -1,3 +1,4 @@
+include ../../mixins/alert.pug
 doctype html
 html(lang="en")
   head
@@ -12,6 +13,8 @@ html(lang="en")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
 
   body
+    +alert-success(3000)
+    +alert-error(3000)
     .card
       .row
         .col-md-8.cart
@@ -114,3 +117,37 @@ html(lang="en")
           dialogOverlay.style.visibility = 'hidden';
         };
       }
+    script.
+      document.addEventListener('DOMContentLoaded', function() {
+        // Alert handling
+        const alerts = document.querySelectorAll('[show-alert]')
+        console.log(alerts);
+        alerts.forEach(alert => {
+            const time = parseInt(alert.getAttribute('data-time'));
+            const closeBtn = alert.querySelector('[close-alert]');
+
+            // Auto-hide after specified time
+            setTimeout(() => {
+                alert.classList.add('alert-hidden');
+                // Remove from DOM after animation completes
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300); // Match this with the animation duration
+            }, time);
+
+            // Manual close button
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    alert.classList.add('alert-hidden');
+                    // Remove from DOM after animation completes
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.parentNode.removeChild(alert);
+                        }
+                    }, 300);
+                });
+            }
+        });
+      });
