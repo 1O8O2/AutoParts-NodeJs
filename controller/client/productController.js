@@ -125,7 +125,7 @@ module.exports.deleteProduct = async (req, res) => {
             return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        const cus = await Customer.findByPk(acc.email);
+        const cus = await Customer.findByPk(res.locals.user.email);
         //console.log(cus)
         if (!cus) {
             req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
@@ -138,7 +138,7 @@ module.exports.deleteProduct = async (req, res) => {
             cart.products = cart.products.filter(item => item.product.productId !== productId);
             await cart.save(); // Hooks update ProductsInCart table
         }
-
+        req.flash('success', res.locals.messages.REMOVE_FROM_CART_SUCCESS);
         res.redirect(referer);
     } catch (error) {
         console.error('Error in deleteProduct:', error);
