@@ -21,12 +21,14 @@ module.exports.createOrder = async (req, res) => {
 
         const cus = await Customer.findByPk(acc.email);
         if (!cus) {
+
             return res.redirect('/AutoParts/account/login');
         }
         
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
-            throw new Error('Cart not found');
+            req.flash('error', res.locals.messages.CART_NOT_FOUND_WARNING);
+            return res.render('back');
         }
 
         let query='/AutoParts/order?';
@@ -124,8 +126,8 @@ module.exports.createOrder = async (req, res) => {
 
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
-        console.error('Error in createOrder:', error);
-        return res.redirect('/AutoParts/account/login');
+        req.flash('error', res.locals.messages.ORDER_CREATE_ERROR);
+        return res.redirect('back');
     }
 };
 
@@ -181,7 +183,8 @@ module.exports.showCart = async (req, res) => {
         const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
         console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
-            return res.render('client/pages/order/order', { message: 'No products selected' });
+            req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
+            return res.redirect('back');
         }
         //console.log('Selected products:', selectedProducts);
         const discounts = await Discount.getByCustomer(acc.email);

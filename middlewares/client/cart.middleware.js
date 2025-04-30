@@ -17,7 +17,7 @@ const createCartId = async (cart, res) => {
             httpOnly: true,
             sameSite: "strict"
         });
-        
+
         return cart;
     } catch (error) {
         console.error("Error creating cart:", error);
@@ -45,8 +45,16 @@ module.exports.cartId = async (req, res, next) => {
                 cart = await createCartId(cart, res);
             }
         }
-        
-        // Ensure cart has a products array even if cart creation failed
+        // get first image of each product
+        cart.products = cart.products.map(item => {
+            const product = item.product;
+            const imageUrl = product.imageUrls.split(',')[0];
+            product.imageUrl = imageUrl;
+            return {
+                product: product,
+                amount: item.amount
+            }
+        });
         res.locals.cart = cart || { products: [] };
     } catch (error) {
         console.error("Cart middleware error:", error);
