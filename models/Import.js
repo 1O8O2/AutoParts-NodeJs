@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
-const Employee = require('./Employee');
 const ImportDetail = require('./ImportDetail');
+const Employee = require('./Employee');
 
 const Import = sequelize.define('Import', {
     importId: {

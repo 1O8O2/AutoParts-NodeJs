@@ -4,9 +4,9 @@ const { RoleGroup } = require('./RoleGroup');
 
 const Account = sequelize.define('Account', {
     email: {
-        type: DataTypes.STRING(255),
-        primaryKey: true,
-        allowNull: false
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true
     },
     password: {
         type: DataTypes.STRING(255),
@@ -25,6 +25,7 @@ const Account = sequelize.define('Account', {
         defaultValue: 'Active',
         allowNull: true
     },
+
     createdAt: {
         type: DataTypes.DATE,
         allowNull: true,

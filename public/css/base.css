@@ -735,3 +735,91 @@
 	    top: 50%;
 	    transform: translateY(-50%);
 	}
+
+	.message.info {
+		position: fixed;
+		top: 20px;
+		right: 20px;
+		z-index: 1000;
+		max-width: 400px;
+	}
+	
+	.alert {
+		padding: 15px;
+		border-radius: 8px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		margin-bottom: 15px;
+		animation: slide-in 0.3s ease-out;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.alert-success {
+		background-color: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+	}
+	
+	.alert-danger {
+		background-color: #f8d7da;
+		color: #721c24;
+		border: 1px solid #f5c6cb;
+	}
+	
+	[close-alert] {
+		cursor: pointer;
+		font-weight: bold;
+		margin-left: 10px;
+		font-size: 18px;
+		opacity: 0.7;
+	}
+	
+	[close-alert]:hover {
+		opacity: 1;
+	}
+	
+	@keyframes slide-in {
+		from {
+			transform: translateX(100%);
+			opacity: 0;
+		}
+		to {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+	
+	@keyframes slide-out {
+		from {
+			transform: translateX(0);
+			opacity: 1;
+		}
+		to {
+			transform: translateX(100%);
+			opacity: 0;
+		}
+	}
+	
+	.alert-hidden {
+		animation: slide-out 0.3s forwards;
+	}
+	
+	/* Existing style for message success and error inside the form */
+	.message-success {
+		color: #155724;
+		background-color: #d4edda;
+		border-radius: 5px;
+		padding: 10px;
+		margin: 10px 0;
+		text-align: center;
+	}
+	
+	.message-error {
+		color: #721c24;
+		background-color: #f8d7da;
+		border-radius: 5px;
+		padding: 10px;
+		margin: 10px 0;
+		text-align: center;
+	}

@@ -1,4 +1,3 @@
-include ../../mixins/alert.pug
 doctype html
 html(lang="en")
   head
@@ -13,8 +12,6 @@ html(lang="en")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
 
   body
-    +alert-success(3000)
-    +alert-error(3000)
     .card
       .row
         .col-md-8.cart
@@ -25,24 +22,25 @@ html(lang="en")
                 h4
                   b Giỏ hàng
               div 
-              .col.align-self-center.text-right.text-muted #{selectedProducts.length} món
+              .col.align-self-center.text-right.text-muted #{selectedProducts ? selectedProducts.length : 0} món
           .cart-list
-            each product in selectedProducts
-              .row.border-bottom
-                .row.main.align-items-center
-                  .col-2
-                    img.img-fluid(src="https://html.themability.com/autoelite/assets/images/categories/1.png")
-                  .col
-                    .row.text-muted #{product.product.productId}
-                    .row #{product.product.productName}
-                    input.price(type="hidden" value=product.product.salePrice)
-                    | #{product.product.salePrice} ₫
-                  .col.updateQTY
-                    button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)") -
-                    input.input-updateQTY.quantity(type="number" data-product-id=product.product.productId value=product.amount min="1" max=product.product.stock)
-                    button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
-                  .col
-                    a(href=`/AutoParts/product/productDetail?productId=${product.product.productId}`) Xem chi tiết ->
+            if selectedProducts && selectedProducts.length > 0
+              each product in selectedProducts
+                .row.border-bottom
+                  .row.main.align-items-center
+                    .col-2
+                      img.img-fluid(src="https://html.themability.com/autoelite/assets/images/categories/1.png")
+                    .col
+                      .row.text-muted #{product.product.productId}
+                      .row #{product.product.productName}
+                      input.price(type="hidden" value=product.product.salePrice)
+                      | #{product.product.salePrice} ₫
+                    .col.updateQTY
+                      button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)") -
+                      input.input-updateQTY.quantity(type="number" data-product-id=product.product.productId value=product.amount min="1" max=product.product.stock)
+                      button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
+                    .col
+                      a(href=`/AutoParts/product/productDetail?productId=${product.product.productId}`) Xem chi tiết ->
           .back-to-shop
             a(href="/AutoParts")
               span ←
@@ -55,51 +53,154 @@ html(lang="en")
           .row
             .col(style="padding-left: 0;") Số lượng: #{cart.products.length}
             each product in cart.products
-              input(type="hidden" id=product.product.productId name=product.product.productId value=product.amount)
+              input(type="hidden" class="form-quantity" name=product.product.productId value=product.amount data-product-id=product.product.productId)
           .row
             input(type="text" name="shipAddress" placeholder="Địa chỉ" required)
           div
             p Loại vận chuyển
-            select
-              option.text-muted Vận chuyển thường- 20.000 ₫
-              option.text-muted Vận chuyển nhanh- 50.000 ₫
-              option.text-muted Vận chuyển tiết kiệm- 15.000 ₫
+            select(name="shippingType" id="shippingType")
+              option(value="" readonly) -- Chọn loại vận chuyển --
+              option(value="20000") Vận chuyển thường - 20.000 ₫
+              option(value="50000") Vận chuyển nhanh - 50.000 ₫
+              option(value="15000") Vận chuyển tiết kiệm - 15.000 ₫
             p Mã khuyến mãi
-            input#code(placeholder="Nhập mã khuyến mãi")
+            select(name="discountId" id="discountId")
           .row(style="border-top: 1px solid rgba(0, 0, 0, .1); padding: 2vh 0;")
             .col TỔNG TIỀN
             input.col.text-right#total(name="totalCost" value="" readonly)
             |  ₫
           button.btn ĐẶT HÀNG
 
+
+
+    script(type="text/javascript").
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get success and error message elements
+        const successMessage = document.querySelector('.alert-success');
+        const errorMessage = document.querySelector('.alert-danger');
+        
+        // If success message exists, hide it after 3 seconds
+        if (successMessage) {
+          setTimeout(function() {
+            successMessage.style.transition = 'opacity 0.5s';
+            successMessage.style.opacity = '0';
+            setTimeout(function() {
+              successMessage.style.display = 'none';
+            }, 500);
+          }, 3000);
+        }
+        
+        // If error message exists, hide it after 3 seconds
+        if (errorMessage) {
+          setTimeout(function() {
+            errorMessage.style.transition = 'opacity 0.5s';
+            errorMessage.style.opacity = '0';
+            setTimeout(function() {
+              errorMessage.style.display = 'none';
+            }, 500);
+          }, 3000);
+        }
+      });
+
     script.
       let totalInput = document.getElementById("total");
       let priceInputs = document.querySelectorAll(".price");
       let quantityInputs = document.querySelectorAll(".quantity");
+      let discountSelect = document.getElementById("discountId");
+      let shippingSelect = document.getElementById("shippingType");
 
-      console.log(totalInput, priceInputs, quantityInputs);
+      // Danh sách mã khuyến mãi từ server
+      const discounts = [
+        !{discounts.map((discount, index) => `{ id: "${discount.discountId}", code: "${discount.discountDesc.replace(/"/g, '\\"')}", amount: ${discount.discountAmount}, minOrderValue: ${discount.minimumAmount} }${index < discounts.length - 1 ? ',' : ''}`).join('')}
+      ];
+
+      console.log("Discounts: ", discounts);
+
+      function updateDiscountOptions(totalCost) {
+        const select = document.getElementById('discountId');
+        select.innerHTML = '<option value="">-- Chọn mã khuyến mãi --</option>';
+        discounts.forEach(discount => {
+          const option = document.createElement('option');
+          option.value = discount.id;
+          option.text = discount.code + " - Giảm " + discount.amount + "% (Tối thiểu: " + discount.minOrderValue.toLocaleString('vi-VN') + " VNĐ)";
+          if (discount.minOrderValue > totalCost) {
+            option.disabled = true;
+          }
+          select.appendChild(option);
+        });
+      }
+
+      function calculateTotalWithDiscount(baseTotal, discountId, shippingCost) {
+        let total = baseTotal;
+        if (discountId) {
+          const selectedDiscount = discounts.find(discount => discount.id === discountId);
+          if (selectedDiscount && selectedDiscount.minOrderValue <= baseTotal) {
+            total = total * (1 - selectedDiscount.amount / 100);
+          }
+        }
+        total += parseFloat(shippingCost || 0);
+        return total;
+      }
 
       function updateCost() {
-        let total = 0;
-        for(let i = 0; i < priceInputs.length; i++) {
+        let baseTotal = 0;
+        for (let i = 0; i < priceInputs.length; i++) {
           let price = parseFloat(priceInputs[i].value);
           let quantity = parseInt(quantityInputs[i].value);
-          console.log(price, quantity);
-          total += price * quantity;
+          baseTotal += price * quantity;
         }
-        console.log("update cost", total);
-        totalInput.value = total;
+        const selectedDiscountId = discountSelect.value;
+        const selectedShippingCost = shippingSelect.value;
+        const finalTotal = calculateTotalWithDiscount(baseTotal, selectedDiscountId, selectedShippingCost);
+        totalInput.value = finalTotal.toLocaleString('vi-VN');
+        updateDiscountOptions(baseTotal);
       }
+
+      // Lắng nghe sự kiện thay đổi mã giảm giá
+      discountSelect.addEventListener('change', function() {
+        let baseTotal = 0;
+        for (let i = 0; i < priceInputs.length; i++) {
+          let price = parseFloat(priceInputs[i].value);
+          let quantity = parseInt(quantityInputs[i].value);
+          baseTotal += price * quantity;
+        }
+        const selectedDiscountId = this.value;
+        const selectedShippingCost = shippingSelect.value;
+        const finalTotal = calculateTotalWithDiscount(baseTotal, selectedDiscountId, selectedShippingCost);
+        totalInput.value = finalTotal.toLocaleString('vi-VN');
+      });
+
+      // Lắng nghe sự kiện thay đổi loại vận chuyển
+      shippingSelect.addEventListener('change', function() {
+        let baseTotal = 0;
+        for (let i = 0; i < priceInputs.length; i++) {
+          let price = parseFloat(priceInputs[i].value);
+          let quantity = parseInt(quantityInputs[i].value);
+          baseTotal += price * quantity;
+        }
+        const selectedDiscountId = discountSelect.value;
+        const selectedShippingCost = this.value;
+        const finalTotal = calculateTotalWithDiscount(baseTotal, selectedDiscountId, selectedShippingCost);
+        totalInput.value = finalTotal.toLocaleString('vi-VN');
+      });
+
+      // Gọi hàm lần đầu khi trang tải
       updateCost();
 
       function updateQuantity(input, delta) {
         let value = parseInt(input.value) + delta;
         if (value < 1) {
           showDialog(input);
-        } else if (value > input.max) {
+        } else if (value > parseInt(input.max)) {
           return;
         } else {
           input.value = value;
+          // Update the corresponding hidden input
+          const productId = input.dataset.productId;
+          const hiddenInput = document.querySelector(`.form-quantity[data-product-id="${productId}"]`);
+          if (hiddenInput) {
+            hiddenInput.value = value;
+          }
           updateCost();
         }
       }

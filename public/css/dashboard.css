@@ -105,6 +105,12 @@
 	overflow: hidden;
 	transition: transform 0.2s;
 	background-color: #ffffff;
+	
+}
+
+.card * {
+	text-decoration: none;
+	color: black;
 }
 
 .card:hover {

@@ -36,10 +36,10 @@ html
               .card(style='width: 16rem;')
                 a(href=`/AutoParts/product/detail?productId=${product.productId}`)
                   img.card-img-top(src=product.imageUrls, alt='...')
-                .card-body
-                  h5.card-title #{product.productName}
-                  p.card-text #{product.description}
-                  p Giá bán: #{product.salePrice}đ
+                  .card-body
+                    h5.card-title #{product.productName}
+                    p.card-text #{product.description}
+                    p Giá bán: #{product.salePrice}đ
           div
             a(href='/AutoParts/product/search?keyword=') Xem tất cả
 

@@ -3,9 +3,8 @@ const Brand = require('../../models/Brand');
 const ProductGroup = require('../../models/ProductGroup');
 const Customer = require('../../models/Customer');
 const {Cart, ProductsInCart} = require('../../models/Cart');
-const systemConfig = require('../../configs/system');
- 
-// [GET] /product/detail
+
+// [GET] /product/productDetail
 module.exports.showProduct = async (req, res) => {
     try {
         const { productId } = req.query;
@@ -119,52 +118,28 @@ module.exports.addProduct = async (req, res) => {
 
 module.exports.deleteProduct = async (req, res) => {
     try {
-        const { productId } = req.query;
+        const { productId } = req.query; 
+        const referer = req.headers.referer || '/AutoParts'; 
 
         if (!res.locals.user) {
-            req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
-            return res.redirect('/AutoParts/account/login');
+            return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        const cus = await Customer.findByPk(res.locals.user.email);
+        const cus = await Customer.findByPk(acc.email);
+        //console.log(cus)
         if (!cus) {
             req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
             return res.redirect('/AutoParts/account/login');
         }
 
         const cart = await Cart.findByPk(cus.cartId);
-        if (!cart) {
-            req.flash('error', res.locals.messages.CART_NOT_FOUND);
-            return res.redirect('back');
+        if (cart && cart.products) {
+            // Filter out the product to delete
+            cart.products = cart.products.filter(item => item.product.productId !== productId);
+            await cart.save(); // Hooks update ProductsInCart table
         }
 
-        // Create a new array without the removed product
-        const newProductsInCart = cart.products.filter(item => item.product.productId != productId);
-        
-        // Update the cart's products array to trigger the beforeUpdate hook
-        cart.products = newProductsInCart;
-        cart.changed('products', true);
-        
-        // Save the cart to trigger the hooks
-        await cart.save()
-        .then(async (data) => {
-            
-            // Force a refresh of the cart from database to ensure consistent state
-            const updatedCart = await Cart.findByPk(cus.cartId);
-            
-            // Update the local cart reference
-            res.locals.cart = updatedCart;
-            
-            // Force a page reload by adding a timestamp to the URL
-            const timestamp = new Date().getTime();
-            req.flash('success', res.locals.messages.REMOVE_FROM_CART_SUCCESS);
-            res.redirect('back')
-        })
-        .catch(err => {
-            console.error('Error removing product from cart:', err);
-            req.flash('error', res.locals.messages.REMOVE_FROM_CART_FAILED);
-            res.redirect('back')
-        });
+        res.redirect(referer);
     } catch (error) {
         console.error('Error in deleteProduct:', error);
         req.flash('error', res.locals.messages.REMOVE_FROM_CART_FAILED);

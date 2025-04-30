@@ -16,7 +16,12 @@ const Cart = sequelize.define('Cart', {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: Sequelize.fn('GETDATE')
+    },
+    products: {
+        type: DataTypes.VIRTUAL,
+        defaultValue: []
     }
+
   }, {
     tableName: 'Cart',
     timestamps: true,

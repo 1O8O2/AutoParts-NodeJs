@@ -4,17 +4,22 @@ const { Cart, ProductsInCart } = require('../../models/Cart');
 const Product = require('../../models/Product');
 const Discount = require('../../models/Discount');
 const Order = require('../../models/Order');
+const Account = require('../../models/Account');
+
 
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
     try {
+        console.log('Creating order...');
+        const acc = await Account.findOne({
+            where: { token: req.cookies.tokenUser }
+        });
 
-
-        if (!res.locals.user) {
+        if (!acc) {
             return res.redirect('/AutoParts/account/login');
         }
 
-        const cus = await Customer.findByPk(res.locals.user.email);
+        const cus = await Customer.findByPk(acc.email);
         if (!cus) {
 
             return res.redirect('/AutoParts/account/login');
@@ -26,17 +31,49 @@ module.exports.createOrder = async (req, res) => {
             return res.render('back');
         }
 
+        let query='/AutoParts/order?';
+
         // Get all products from cart (virtual field populated by afterFind hook)
         const productsInCart = cart.products || [];
+        //console.log(req.body)
         const selectedProducts = productsInCart.filter(item => req.body[item.product.productId]);
+        const updatedSelectedProducts = selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] }));
+        for(const item of updatedSelectedProducts)
+            {
+                query+=item.productId+'='+item.amount+'&';
+            }
+            query=query.slice(0,-1);
+            console.log(query)
+        //console.log('updatedSelectedProducts:', updatedSelectedProducts);
+
+        //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
 
         if (selectedProducts.length === 0) {
             return res.render('client/pages/order/order', { message: 'No products selected for order' });
         }
 
-        const totalCost = parseFloat(req.body.totalCost);
-        const code = req.body.code || null;
+        const totalCost = parseFloat(req.body.totalCost) *1000;
+        const discountId = req.body.discountId || null;
         const shipAddress = req.body.shipAddress;
+        const shippingType = req.body.shippingType;
+
+        console.log(discountId, shipAddress, shippingType, totalCost);
+
+        if (!shippingType) {
+            console.log('Shipping type not selected');
+            req.flash('error', 'Vui lòng chọn loại vận chuyển');
+            return res.redirect(query);
+        }
+
+        const discount = await Discount.findByPk(discountId);
+        if(discount && discount.usageLimit<=0)
+        {
+            console.log('Discount usage limit exceeded');
+            req.flash('error', 'Mã giảm giá đã hết lượt sử dụng');
+            return res.redirect(query);
+        }
+
+        
 
         // Generate next order ID (assuming a custom method in Order model)
         // If this method doesn't exist, we'll need to implement it or use another way to generate IDs
@@ -48,8 +85,8 @@ module.exports.createOrder = async (req, res) => {
         // Create new order
         const newOrder = await Order.create({
             orderId: orderId,
-            discountId: code,
-            userEmail: res.locals.user.email,
+            discountId: discountId,
+            userEmail: acc.email,
             shipAddress: shipAddress,
             totalCost: totalCost,
             status: 'Pending',
@@ -58,21 +95,34 @@ module.exports.createOrder = async (req, res) => {
             deleted: false
         });
 
+        if(discount) await Discount.setUsedDiscount(acc.email, discountId);
+
         // Create order details and update cart
-        const updatedProductsInCart = productsInCart.filter(item => !selectedProducts.includes(item));
-        for (const product of selectedProducts) {
+        const updatedProductsInCart = productsInCart.filter(item => ![item.product]);
+        for (const item of updatedSelectedProducts) {
+            console.log(item)
+            console.log(item.productId)
+            console.log(item.amount)
+
+            product = await Product.findByPk(item.productId);
+
             await OrderDetail.create({
                 orderId: newOrder.orderId,
-                productId: product.product.productId,
-                productName: product.product.productName,
-                amount: product.amount,
-                unitPrice: product.product.salePrice
+                productId: product.productId,
+                productName: product.productName,
+                amount: item.amount,
+                unitPrice: product.salePrice
             });
+
+            
+            product.stock -= item.amount;
+            await product.save();
         }
 
         // Update cart by setting new products (hooks will handle ProductsInCart)
         cart.products = updatedProductsInCart;
         await cart.save();
+        console.log('Cart updated successfully');
 
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
@@ -107,12 +157,17 @@ module.exports.showDetail = async (req, res) => {
 // POST /order - Show cart and redirect to payment page
 module.exports.showCart = async (req, res) => {
     try {
-        if (!res.locals.user) {
+        console.log('Showing cart...');
+        const acc = await Account.findOne({
+            where: { token: req.cookies.tokenUser }
+        });
 
+        if (!acc) {
             return res.redirect('/AutoParts/account/login');
         }
 
-        const cus = await Customer.findByPk(res.locals.user.email);
+        const cus = await Customer.findByPk(acc.email);
+        //console.log(cus)
         if (!cus) {
             return res.redirect('/AutoParts/account/login');
         }
@@ -125,14 +180,46 @@ module.exports.showCart = async (req, res) => {
         let productsInCart = cart.products || [];
 
         // Remove products that are not selected
-        const selectedProducts = productsInCart.filter(item => req.query[item.product.productId])||[]
+        const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
+        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
             req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
             return res.redirect('back');
         }
-        res.render('client/pages/order/order', { selectedProducts });
+        //console.log('Selected products:', selectedProducts);
+        const discounts = await Discount.getByCustomer(acc.email);
+        //console.log(discounts)
+
+        res.render('client/pages/order/order', { selectedProducts, discounts});
     } catch (error) {
         console.error('Error in showCart:', error);
         return res.render('client/pages/order/order', { message: 'Error processing cart' });
+    }
+};
+
+
+// GET /order - Show order details
+module.exports.cancel = async (req, res) => {
+    try {
+        
+
+        const orderId = req.query.orderId;
+        const order = await Order.findByPk(orderId);
+        console.log(order.details)
+        for (const item of order.details) {
+            const product = await Product.findByPk(item.productId);
+            product.stock += item.amount;
+            await product.save();
+        }
+        
+        order.status = 'Cancelled';
+        order.deleted = true;
+        order.deletedAt = new Date(Date.now()).toISOString();;
+        await order.save();
+
+        
+    } catch (error) {
+        console.error('Error in showDetail:', error);
+        return res.redirect('/AutoParts/account/login');
     }
 };

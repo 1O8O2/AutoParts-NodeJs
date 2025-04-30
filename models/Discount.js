@@ -60,4 +60,52 @@ const Discount = sequelize.define('Discount', {
   timestamps: true
 });
 
+// Get discounts available for a customer (not used by the customer)
+Discount.getByCustomer = async (email) => {
+  try {
+
+      const sql = `
+          SELECT d.* FROM [dbo].[Discount] d
+          LEFT JOIN [dbo].[UsedDiscount] ud
+          ON d.discountId = ud.discountId AND ud.email = :email
+          WHERE ud.discountId IS NULL
+          AND d.status = 'Active'
+          AND d.usageLimit > 0
+          AND d.deleted = 0
+      `;
+
+      const discounts = await Discount.sequelize.query(sql, {
+          replacements: { email },
+          type: sequelize.QueryTypes.SELECT,
+          model: Discount, // Map results to Discount model
+          mapToModel: true // Ensure results are instances of Discount
+      });
+
+      return discounts;
+  } catch (error) {
+      console.error('Error in getByCustomer:', error);
+
+  }
+};
+
+
+Discount.setUsedDiscount = async(email, discountId) =>
+{
+    try {
+        const sql = `
+            INSERT INTO [dbo].[UsedDiscount] (email, discountId)
+            VALUES (:email, :discountId)
+        `;
+        await Discount.sequelize.query(sql, {
+            replacements: { email, discountId },
+            type: sequelize.QueryTypes.INSERT
+        });
+    } catch (error) {
+        console.error('Error in setUsedDiscount:', error);
+    }
+
+}
+
+
 module.exports = Discount;
+
