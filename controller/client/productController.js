@@ -3,6 +3,8 @@ const Brand = require('../../models/Brand');
 const ProductGroup = require('../../models/ProductGroup');
 const Customer = require('../../models/Customer');
 const {Cart, ProductsInCart} = require('../../models/Cart');
+const Account = require('../../models/Account');
+
 
 // [GET] /product/productDetail
 module.exports.showProduct = async (req, res) => {
@@ -78,24 +80,38 @@ module.exports.addProduct = async (req, res) => {
 
 module.exports.deleteProduct = async (req, res) => {
     try {
+        console.log('Delete product from cart');
+        const acc = await Account.findOne({
+            where: { token: req.cookies.tokenUser }
+        });
+
         const { productId } = req.query; 
         const referer = req.headers.referer || '/AutoParts'; 
+        console.log('Referer:', referer);
+        //console.log(productId)
+        //console.log(acc)
 
-        if (!res.locals.user) {
+        if (!acc) {
             return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 
-        const cus = await Customer.findByPk(res.locals.user.email);
+        const cus = await Customer.findByPk(acc.email);
+        //console.log(cus)
         if (!cus) {
             return res.redirect('/AutoParts/account/login');
         }
         
         const cart = await Cart.findByPk(cus.cartId);
+        //console.log(cart.products)
         if (cart && cart.products) {
-            // Filter out the product to delete
+            console.log('cart.products before filter:', cart.products);
             cart.products = cart.products.filter(item => item.product.productId !== productId);
-            await cart.save(); // Hooks update ProductsInCart table
+            console.log('cart.products after filter:', cart.products);
+            await cart.save();
+        } else {
+            console.log('cart or cart.products is undefined:', { cart, products: cart?.products });
         }
+        //console.log(cart.products)
 
         res.redirect(referer);
     } catch (error) {

@@ -122,7 +122,7 @@ module.exports.showProfile = async (req, res) => {
         }
         
         const customer = await Customer.findByPk(acc.email);
-        const orderLst = await Order.findAll({ where: { userEmail: acc.email } }); 
+        const orderLst = await Order.findAll({ where: { userEmail: acc.email, deleted : false} }); 
 
         return res.render('client/pages/user/profile', {
             customer,
@@ -239,3 +239,10 @@ module.exports.logOut = async(req, res) => {
     res.clearCookie("cartId");
     return res.redirect('/AutoParts');
 }
+
+
+// [GET] /account/forgot-password
+module.exports.showForgotPassword = async (req, res) => {
+    res.render('client/pages/user/forgot-password');
+}
+

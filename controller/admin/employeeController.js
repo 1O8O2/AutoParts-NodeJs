@@ -1,5 +1,5 @@
-const Employee = require('../../models/employee');
-const Account = require('../../models/account');
+const Employee = require('../../models/Employee');
+const Account = require('../../models/Account');
 const {RoleGroup,RoleGroupPermissions} = require('../../models/RoleGroup');
 
 module.exports.index = async (req, res) => {

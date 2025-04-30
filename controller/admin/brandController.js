@@ -1,4 +1,4 @@
-const Brand = require('../../models/brand');
+const Brand = require('../../models/Brand');
 const { Op } = require('sequelize');
 const systemConfig = require('../../configs/system');
 
