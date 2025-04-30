@@ -1,4 +1,6 @@
+include ../../mixins/alert.pug
 doctype html
+
 html
   head
     meta(charset='UTF-8')
@@ -7,22 +9,38 @@ html
     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', rel='stylesheet', integrity='sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC', crossorigin='anonymous')
     link(href='/css/profile.css', rel='stylesheet')
   body
+    +alert-error(3000)
+    +alert-success(3000)
     .sidebar
       form(method='POST', action='/AutoParts/account/edit', data-oc-toggle='ajax')
         img#user_icon(src='https://i.pinimg.com/474x/89/90/48/899048ab0cc455154006fdb9676964b3.jpg', width='100px', height='100px', alt='')
+        
+        if flash && flash.success
+          .message-success
+            p #{flash.success}
+        if flash && flash.error
+          .message-error
+            p #{flash.error}
+            
         p
           input(type='hidden', name='cartId', value=customer.cartId, required)
         p.input-field
+          label Email
+          input(type='email', name='email', value=customer.email, readonly, required)
+          span.error-message
+        p.input-field
           label Họ và tên
           input(type='text', name='fullName', value=customer.fullName, disabled, required)
+          span.error-message
         p.input-field
           label Số điện thoại
           input(type='tel', name='phone', value=customer.phone, disabled, required)
+          span.error-message
         p.input-field
           label Địa chỉ
           input(type='text', name='address', value=customer.address, disabled, required)
+          span.error-message
         p
-          label Trạng thái
           if customer.status === 'Active'
             label(style='color: green;') Đang hoạt động
           else if customer.status === 'Inactive'
@@ -33,16 +51,16 @@ html
       .menu
         a.order.choosed
           i.fa-solid.fa-box-open
-          | Thông tin đơn hàng
+          |  Thông tin đơn hàng
         a.setting
           i.fa-solid.fa-lock
-          | Đổi mật khẩu
+          |  Đổi mật khẩu
         a(href='/AutoParts')
           i.fa-solid.fa-house
-          | Trang chủ
+          |  Trang chủ
         a.delete-btn(href='/AutoParts/account/logout')
           i.fa-solid.fa-right-from-bracket
-          | Đăng xuất
+          |  Đăng xuất
     .content
       .orders
         header.header
@@ -62,17 +80,19 @@ html
               strong Trạng thái: 
               | #{order.status}
             a.button.nav-btn(href=`/AutoParts/order/detail?orderId=${order.orderId}`) Xem chi tiết đơn hàng
-      form.change-password.hide(action='/AutoParts/account/changepass', method='post')
+      form.change-password.hide(action='/AutoParts/account/changePass', method='post')
         h3 Đổi mật khẩu
         .form-item
-          input(type='password', name='pass', placeholder='Mật khẩu hiện tại', required)
+          input(type='password', name='pass', placeholder='Mật khẩu hiện tại', required, autocomplete='current-password')
           i.fa-solid.fa-eye
           i.fa-solid.fa-eye-slash
         .form-item
-          input(type='password', name='newpass', placeholder='Mật khẩu mới', required)
+          input(type='password', name='newpass', placeholder='Mật khẩu mới', required, autocomplete='new-password')
           i.fa-solid.fa-eye
           i.fa-solid.fa-eye-slash
         .form-item
-          input(type='password', placeholder='Xác nhận mật khẩu mới', required)
-        button Cập nhật
+          input(type='password', name='confirmpass', placeholder='Xác nhận mật khẩu mới', required, autocomplete='new-password')
+          i.fa-solid.fa-eye
+          i.fa-solid.fa-eye-slash
+        button(type='submit') Cập nhật
     script(src='/js/profile.js')

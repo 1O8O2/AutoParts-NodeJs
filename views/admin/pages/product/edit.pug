@@ -1,0 +1,158 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Sửa Sản Phẩm
+            .card-body
+                form(action=`${prefixAdmin}/product/edit?productId=${product.productId}` method="POST" enctype="multipart/form-data")
+                    .row
+                        .col-lg-6
+                            .form-group
+                                label(for="productId") Mã sản phẩm 
+                                    span.required-text *
+                                input.form-control(type="text" id="productId" name="productId" value=product.productId readonly required)
+                            .form-group
+                                label(for="productName") Tên sản phẩm 
+                                    span.required-text *
+                                input.form-control(type="text" id="productName" name="productName" value=product.productName placeholder="Nhập tên sản phẩm" required)
+                            .form-group
+                                label(for="brandName") Nhãn hàng sản phẩm 
+                                    span.required-text *
+                                select.form-control.mb-3(id="brandId" name="brandId" required)
+                                    option(value="" disabled) -- Chọn nhãn hàng của sản phẩm --
+                                    if brandList && brandList.length > 0
+                                        each brand in brandList
+                                            option(value=brand.brandId selected=brand.brandId === product.brandId)= brand.brandName
+                            .form-group
+                                label(for="groupName") Danh mục sản phẩm 
+                                    span.required-text *
+                                select.form-control.mb-3(id="productGroupId" name="productGroupId" required)
+                                    option(value="" disabled) -- Chọn danh mục của sản phẩm --
+                                    if productGroupList && productGroupList.length > 0
+                                        each group in productGroupList
+                                            option(value=group.productGroupId selected=group.productGroupId === product.productGroupId)= group.groupName
+                            .form-group
+                                label(for="costPrice") Giá gốc 
+                                    span.required-text *
+                                .input-group.mb-3
+                                    input.form-control(type="number" id="costPrice" name="costPrice" value=product.costPrice placeholder="Nhập giá tiền gốc của sản phẩm" required)
+                                    .input-group-append
+                                        span.input-group-text VNĐ
+                            .form-group
+                                label(for="salePrice") Giá bán 
+                                    span.required-text *
+                                .input-group.mb-3
+                                    input.form-control(type="number" id="salePrice" name="salePrice" value=product.salePrice placeholder="Nhập giá tiền bán của sản phẩm" required)
+                                    .input-group-append
+                                        span.input-group-text VNĐ
+                        .col-lg-6
+                            .form-group
+                                label(for="stock") Số lượng 
+                                    span.required-text *
+                                input.form-control(type="text" id="stock" name="stock" value=product.stock placeholder="Nhập số lượng sản phẩm" required)
+                            .form-group
+                                label(for="unit") Đơn vị 
+                                    span.required-text *
+                                select.form-control.mb-3(id="unit" name="unit" required)
+                                    option(value="" disabled) -- Chọn đơn vị của sản phẩm --
+                                    option(value="Cái" selected=product.unit === "Cái") Cái
+                                    option(value="Bộ" selected=product.unit === "Bộ") Bộ
+                                    option(value="Bình" selected=product.unit === "Bình") Bình
+                            .form-group
+                                label(for="imageUrls") Ảnh sản phẩm 
+                                    span.required-text *
+                                if product.imageUrls
+                                    input(type="hidden" name="imageUrls" value=product.imageUrls)
+                                .custom-file
+                                    input.custom-file-input(type="file" name="imageFiles" id="customFile" accept="image/*" multiple onchange="previewImages(this)")
+                                    label.custom-file-label(for="customFile") Chọn ảnh
+                                .mt-2#fileNameList(style="font-size: 0.9em; color: #666;")
+                                .mt-3#previewContainer
+                                    if product.imageUrls
+                                        each imageUrl in product.imageUrls.split(',')
+                                            if imageUrl.startsWith('https')
+                                                img(src=imageUrl alt="Current Image (External)" style="max-width: 100px; max-height: 100px; margin-right: 10px; margin-bottom: 10px;")
+                                            else
+                                                img(src=`/resources/img/${imageUrl}` alt="Current Image (Local)" style="max-width: 100px; max-height: 100px; margin-right: 10px; margin-bottom: 10px;")
+                                .mt-2
+                                    input(type="checkbox" name="confirmDeleteImg" id="confirmDeleteImg" value="confirm")
+                                    label.ml-2(for="confirmDeleteImg") Xóa ảnh cũ
+                            .form-group
+                                label(for="weight") Khối lượng 
+                                    span.required-text *
+                                .input-group.mb-3
+                                    input.form-control(type="number" name="weight" value=product.weight placeholder="Nhập khối lượng sản phẩm" required)
+                                    .input-group-append
+                                        span.input-group-text kg
+                            .form-group
+                                label(for="description") Mô tả sản phẩm 
+                                    span.required-text *
+                                textarea.form-control(id="description" name="description" rows="3" required)= product.description
+                            .form-group.d-flex
+                                label.mr-4(for="status") Trạng thái hoạt động 
+                                    span.required-text *
+                                .custom-control.custom-switch.ml-4
+                                    input.custom-control-input(type="checkbox" name="status" id="status" value="Active" checked=product.status === "Active")
+                                    label.custom-control-label(for="status") Hoạt động
+                            .d-flex.justify-content-end
+                                button.btn.btn-primary(type="submit") Xác nhận
+
+    // Modal Logout
+    #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title Đăng xuất
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn có muốn đăng xuất không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    a.btn.btn-primary(href=`${prefixAdmin}/logout`) Đăng xuất
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        function previewImages(input) {
+            const previewContainer = document.getElementById('previewContainer');
+            const fileLabel = input.nextElementSibling;
+            const fileNameList = document.getElementById('fileNameList');
+            previewContainer.innerHTML = ''; // Xóa preview cũ
+            fileNameList.innerHTML = '';
+
+            if (input.files && input.files.length > 0) {
+                fileLabel.textContent = 'Đã chọn ' + input.files.length + ' file';
+                const fileNames = Array.from(input.files)
+                    .map(file => file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name)
+                    .join(', ');
+                fileNameList.textContent = fileNames.length > 50 ? fileNames.substring(0, 47) + '...' : fileNames;
+
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Preview';
+                        img.style.maxWidth = '100px';
+                        img.style.maxHeight = '100px';
+                        img.style.marginRight = '10px';
+                        img.style.marginBottom = '10px';
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                fileLabel.textContent = 'Chọn ảnh';
+                fileNameList.innerHTML = '';
+            }
+        } 

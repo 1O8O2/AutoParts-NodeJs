@@ -28,10 +28,10 @@ div.header
           .header__cart-info
             i.header__cart-icon.fa-solid.fa-cart-shopping
             span.header__cart-text Giỏ hàng
-            span.header__cart-notice #{cart.products.length}
+            span.header__cart-notice #{(cart && cart.products) ? cart.products.length : 0}
           form.header__cart-list(action='/AutoParts/order', method='get')
             h4.header__cart-heading Sản phẩm đã thêm
-            if cart.products.length === 0
+            if (!cart || !cart.products || cart.products.length === 0)
               p Chưa có sản phẩm nào
             else
               ul.header__cart-list-item
@@ -50,7 +50,7 @@ div.header
                         span.header__cart-item-description
                           a(href=`/autopart/product/detailproduct.htm?productId=${product.productId}`) #{product.productId}
                         span.header__cart-item-remove
-                          a(href=`/autopart/product/delete.htm?productId=${product.productId}`) Xóa
+                          a(href=`/AutoParts/product/delete?productId=${product.product.productId}`) Xóa
             button.btn.btn--primary.header__cart-view-cart(type='submit') Thanh toán
   .header_menu
     ul.header_menu-list

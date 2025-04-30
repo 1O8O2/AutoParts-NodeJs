@@ -22,3 +22,9 @@
     .container div {
         display: block;
     }
+    
+    #products{
+        list-style: none;
+        max-height: 50%; /* Set a maximum height for the product list */
+   	 	overflow-y: auto;
+    }

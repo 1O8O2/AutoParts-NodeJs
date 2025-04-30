@@ -1,0 +1,58 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+
+            .form-actions
+                button.btn-profile.btn-save#edit(onclick="editAccount()")
+                    i.fa-solid.fa-pen-to-square
+                    |  Chỉnh sửa thông tin
+                button.btn-profile.btn-save#back(onclick="showInfoForm()")
+                    i.fa-solid.fa-left-long
+                    |  Quay lại
+                button.btn-profile.btn-change-password#change-pass(onclick="showPassForm()")
+                    i.fa-solid.fa-unlock-keyhole
+                    |  Đổi mật khẩu
+
+            form.user-form(action=`${prefixAdmin}/dashboard/profile/edit/${user.phone}` method="post")
+                .form-group
+                    label(for="fullName") Họ và tên :
+                    input#fullName.form-input(name="fullName" readonly placeholder="Họ và tên" value=user.fullName)
+                .form-group
+                    label(for="gender") Giới tính :
+                    select#gender(name="gender" disabled)
+                        option(value="Male" selected=(user.gender == "Male" ? true : false)) Nam
+                        option(value="Female" selected=(user.gender == "Female" ? true : false)) Nữ
+                .form-group
+                    label(for="phone") Số điện thoại :
+                    input#phone.form-input(name="phone" readonly value=user.phone placeholder="Số điện thoại")
+                .form-group
+                    label(for="email") Email :
+                    input#email.form-input(name="email" readonly value=user.email placeholder="Email")
+                .form-group
+                    label(for="birthDate") Ngày sinh :
+                    input#birthDate.form-input(type="date" name="birthDate" readonly value=user.birthDate)
+                .form-group
+                    label(for="address") Địa chỉ :
+                    input#address.form-input(name="address" readonly value=user.address placeholder="Địa chỉ")
+                .form-group
+                    label(for="educationLevel") Trình độ giáo dục :
+                    input#educationLevel.form-input(name="educationLevel" readonly value=user.educationLevel placeholder="Trình độ giáo dục")
+
+            form.pass-form#passForm(method="post" action=`${prefixAdmin}/profile/changepass`)
+                h2 Đổi mật khẩu
+                .pass-inputs
+                    input#pass(type="password" name="pass" placeholder="Nhập mật khẩu hiện tại" required)
+                    br
+                    input#newpass(type="password" name="newpass" placeholder="Nhập mật khẩu mới" oninput="validateInputs()" required)
+                    br
+                    input#confirmpass(type="password" name="confirmpass" placeholder="Nhập lại mật khẩu mới" oninput="validateInputs()" required)
+                    p#warning(style="color: red; display: none;") Hai ô nhập không khớp!
+                .pass-actions
+                    button.btn-profile.btn-save(type="submit" onclick="submitPasswordChange()") Xác nhận

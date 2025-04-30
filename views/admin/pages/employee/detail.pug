@@ -1,0 +1,72 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Chi Tiết Nhân Viên
+            .card-body#submit-form
+                h5 Thông Tin Nhân Viên
+                .row
+                    .col-lg-6.order-info-column
+                        .form-group
+                            label Họ và Tên:
+                            span.form-control-plaintext #{employee.fullName}
+                        .form-group
+                            label Giới Tính:
+                            if employee.gender === "Male"
+                                span.form-control-plaintext Nam
+                            else
+                                span.form-control-plaintext Nữ
+                        .form-group
+                            label Số Điện Thoại:
+                            span.form-control-plaintext #{employee.phone}
+                        .form-group
+                            label Email:
+                            span.form-control-plaintext #{employee.email}
+                        .form-group
+                            label Số CCCD:
+                            span.form-control-plaintext #{employee.citizenId}
+                    .col-lg-6.order-info-column
+                        .form-group
+                            label Ngày Sinh:
+                            span.form-control-plaintext #{employee.birthDate ? new Date(employee.birthDate).toLocaleDateString('vi-VN') : ''}
+                        .form-group
+                            label Ngày Bắt Đầu Làm Việc:
+                            span.form-control-plaintext #{employee.startDate ? new Date(employee.startDate).toLocaleDateString('vi-VN') : ''}
+                        .form-group
+                            label Địa Chỉ:
+                            span.form-control-plaintext #{employee.address}
+                        .form-group
+                            label Trình Độ Học Vấn:
+                            span.form-control-plaintext #{employee.educationLevel}
+                        .form-group
+                            label Trạng Thái:
+                            if employee.status === "Active"
+                                span.form-control-plaintext Hoạt động
+                            else
+                                span.form-control-plaintext Ngừng hoạt động
+                .d-flex.justify-content-end.mt-3
+                    a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/employee/edit?empPhone=${employee.phone}`) Chỉnh Sửa Thông Tin
+
+        // Modal Logout
+        #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
+            .modal-dialog(role="document")
+                .modal-content
+                    .modal-header
+                        h5#exampleModalLabelLogout.modal-title Đăng xuất
+                        button.close(type="button" data-dismiss="modal" aria-label="Close")
+                            span(aria-hidden="true") ×
+                    .modal-body
+                        p Bạn có muốn đăng xuất không?
+                    .modal-footer
+                        button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                        a.btn.btn-primary(href="login.html") Đăng xuất
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up

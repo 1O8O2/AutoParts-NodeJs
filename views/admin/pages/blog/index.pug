@@ -1,0 +1,58 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Danh Sách Bài Viết
+                a.btn.btn-primary(href=`${prefixAdmin}/blog/add`) + Thêm bài viết
+            .table-responsive.p-3
+                table#dataTable.table.align-items-center.table-flush
+                    thead.thead-light
+                        tr
+                        th Mã Bài Viết
+                        th Loại Bài Viết
+                        th Tiêu Đề
+                        th Trạng thái
+                        th Hoạt Động
+                    tbody
+                        each blog in blogs
+                            tr.product-item
+                                td.align-middle #{blog.blogId}
+                                td.align-middle #{blog.BlogGroup.groupName}
+                                td.align-middle #{blog.title}
+                                td.align-middle
+                                    if blog.status === 'Active'
+                                        a.change-status-blog(href="javascript:void(0);" data-id=`${blog.blogId}` data-status=`${blog.status}`)
+                                            span.badge.badge-success Hoạt động
+                                    else
+                                        a.change-status-blog(href="javascript:void(0);" data-id=`${blog.blogId}` data-status=`${blog.status}`)
+                                            span.badge.badge-danger Ngừng hoạt động
+                                td.align-middle
+                                    a.btn.btn-sm.btn-danger.delete-blog-btn.mr-1(href="javascript:void(0);" data-blog-id=`${blog.blogId}` data-toggle="modal" data-target="#DeleteModal") Xóa
+                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/blog/edit/${blog.blogId}`) Sửa
+                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/blog/detail/${blog.blogId}`) Xem
+
+    //- Modal Delete Item
+    #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    h5#exampleModalLabelLogout.modal-title Xóa bài viết
+                    button.close(type="button" data-dismiss="modal" aria-label="Close")
+                        span(aria-hidden="true") &times;
+                .modal-body
+                    p Bạn chắc chắn muốn xóa bài viết này không?
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
+                    button#delete-link.btn.btn-primary(type="button") Xóa
+
+    form(
+        action=""
+        method="POST"
+        id="delete-blog-item"
+    )

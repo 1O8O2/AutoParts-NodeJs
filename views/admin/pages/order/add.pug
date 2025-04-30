@@ -1,0 +1,70 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/currency.pug
+
+block main 
+    +alert-error(3000)
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold.text-primary Tạo Đơn Hàng
+        .card-body
+            form(action=`${prefixAdmin}/order/add` method="post")
+                .row
+                    .col-lg-12
+                        h5 Chọn Sản Phẩm
+                        .row
+                            .col-lg-6
+                                .form-group
+                                    label(for="productSearch") Tìm sản phẩm
+                                    input.form-control(type="text" id="productSearch" placeholder="Nhập tên sản phẩm")
+                                .product-list#productList
+                                    each product in products
+                                        .product-detail-item(data-product-id=product.productId data-product-name=product.productName data-product-stock=product.stock data-sale-price=product.salePrice)
+                                            | #{product.productName} 
+                                            +formatCurrency(product.salePrice)
+                            .col-lg-6
+                                .form-group
+                                    label Sản phẩm đã chọn
+                                    .selected-products#selectedProducts
+                .separation
+                .row
+                    .col-lg-12
+                        h5 Điền Thông Tin Cá Nhân
+                        .form-group
+                            label(for="orderId") Mã đơn hàng <span class="required-text">*</span>
+                            input.form-control(name="orderId" data-order-id=nextId value=nextId readonly)
+                        .form-group
+                            label(for="discountId") Mã giảm giá
+                            select.form-control.mb-3#discountSelect(name="discountId" path="discountId")
+                                option(value="") -- Chọn khuyến mãi --
+                                each discount in discounts
+                                    option(value=discount.discountId 
+                                            data-discount-amount=discount.discountAmount 
+                                            data-minimum-amount=discount.minimumAmount 
+                                            data-status=discount.status 
+                                            data-usage-limit=discount.usageLimit 
+                                            data-apply-start=discount.applyStartDate 
+                                            data-apply-end=discount.applyEndDate
+                                        ) #{discount.discountDesc} - #{discount.discountAmount}% - #{discount.minimumAmount}₫
+                        .form-group
+                            label(for="userName") Họ tên khách hàng <span class="required-text">*</span>
+                            input.form-control(name="userName" required placeholder="Nhập họ và tên")
+                        .form-group
+                            label(for="userPhone") Số điện thoại khách hàng <span class="required-text">*</span>
+                            input.form-control(name="userPhone" required placeholder="Nhập số điện thoại")
+                        .form-group
+                            label(for="shipAddress") Địa chỉ giao hàng <span class="required-text">*</span>
+                            input.form-control(name="shipAddress" required placeholder="Nhập địa chỉ giao hàng")
+                .row
+                    .col-lg-12
+                        .form-group.totalCost
+                            label Tổng tiền: <span id="totalCostlbl">0₫</span>
+                            input.form-control(type="hidden" id="totalCost" name="totalCost" value="0")
+                        #selectedProductsInputs
+                .d-flex.justify-content-end
+                    button.btn.btn-primary(type="submit") Lưu Đơn Hàng
+
+    script(src="/vendor/jquery/jquery.min.js")
+    script(src="/js/adminjs/order/order.js")
+        

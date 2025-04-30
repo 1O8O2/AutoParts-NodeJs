@@ -2,40 +2,53 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 
 const GeneralSettings = sequelize.define('GeneralSettings', {
-    websiteName: {
-        type: DataTypes.STRING(255), // NVARCHAR(255)
-        primaryKey: true,            // Primary key
-        allowNull: false             // NOT NULL
-    },
-    logo: {
-        type: DataTypes.STRING(255), // NVARCHAR(255)
-        allowNull: true              // NULL
-    },
-    phone: {
-        type: DataTypes.STRING(15),  // NVARCHAR(15)
-        allowNull: true              // NULL
-    },
-    email: {
-        type: DataTypes.STRING(255), // NVARCHAR(255)
-        allowNull: true              // NULL
-    },
-    address: {
-        type: DataTypes.STRING(255), // NVARCHAR(255)
-        allowNull: true              // NULL
-    },
-    copyright: {
-        type: DataTypes.STRING(255), // NVARCHAR(255)
-        allowNull: true              // NULL
-    },
-    updatedAt: {
-        type: DataTypes.DATE,        // DATETIME
-        allowNull: true,             // NULL
-        defaultValue: DataTypes.NOW  // DEFAULT GETDATE()
-    },
- 
+  websiteName: {
+    type: DataTypes.STRING(255),
+    primaryKey: true,
+    allowNull: false
+  },
+  logo: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  phone: {
+    type: DataTypes.STRING(15),
+    allowNull: true
+  },
+  email: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  address: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  copyright: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: sequelize.fn('GETDATE')
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
 }, {
-    tableName: 'GeneralSettings',    // Exact table name
-    timestamps: false                // Disable Sequelize's automatic timestamp management
+  tableName: 'GeneralSettings',
+  timestamps: true
 });
 
 module.exports = GeneralSettings;

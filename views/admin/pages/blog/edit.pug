@@ -1,0 +1,42 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold.text-primary Sửa Bài Viết
+        .card-body
+            form(action=`${prefixAdmin}/blog/edit/${blog.blogId}?_method=PATCH` method="post")
+                .row
+                    .col-lg-6
+                        .form-group
+                            label(for="blogId") Mã bài viết <span class="required-text">*</span>
+                            input.form-control(type="text" id="blogId" name="blogId" path="blogId" readonly value=blog.blogId)
+                        .form-group
+                            label(for="title") Tiêu đề bài viết <span class="required-text">*</span>
+                            input.form-control(required type="text" id="title" name="title" path="title" placeholder="Nhập tiêu đề blog" value=blog.title)
+                        .form-group
+                            label(for="description") Mô tả bài viết <span class="required-text">*</span>
+                            input.form-control(required type="text" id="description" name="description" placeholder="Nhập mô tả blog" value=blog.description)
+                        .form-group
+                            label(for="blogGroupId") Nhóm bài viết <span class="required-text">*</span>
+                            select.form-control.mb-3(required name="blogGroupId" path="blogGroupId")
+                                option(value="" disabled) -- Chọn nhóm blog --
+                                each group in blogGroups
+                                    option(value=group.blogGroupId selected=(group.blogGroupId == blog.blogGroupId))= group.groupName
+                        .form-group.d-flex
+                            label(for="status" class="mr-4") Trạng thái hoạt động <span class="required-text">*</span>
+                            .custom-control.custom-switch.ml-4
+                                if blog.status == 'Active'
+                                    input.custom-control-input(type="checkbox" name="status" id="status" value="Active" checked)
+                                else
+                                    input.custom-control-input(type="checkbox" name="status" id="status" value="Active")
+                                label.custom-control-label(for="status") Hoạt động
+                    .col-lg-6
+                        .form-group
+                            label(for="content") Nội dung bài viết <span class="required-text">*</span>
+                            textarea.form-control.scrollable-textarea(required id="content" name="content" path="description" rows="20" placeholder="Nhập nội dung bài viết")= blog.content
+                        .d-flex.justify-content-end
+                            button.btn.btn-primary(type="submit") Lưu bài viết

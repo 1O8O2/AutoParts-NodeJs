@@ -1,106 +1,111 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 const OrderDetail = require('./OrderDetail');
+const Discount = require('./Discount');
+const Customer = require('./Customer');
+const Employee = require('./Employee');
 
 const Order = sequelize.define('Order', {
     orderId: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         primaryKey: true,
         allowNull: false
     },
     discountId: {
-        type: DataTypes.STRING,
-        allowNull: true
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        references: {
+            model: Discount,
+            key: 'discountId'
+        }
     },
     userEmail: {
-        type: DataTypes.STRING,
-        allowNull: true
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        references: {
+            model: Customer,
+            key: 'email'
+        }
     },
     shipAddress: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true
     },
     totalCost: {
-        type: DataTypes.DECIMAL(15, 2), // Maps to BigDecimal
+        type: DataTypes.DECIMAL(18, 2),
         allowNull: true
     },
     orderDate: {
-        type: DataTypes.DATEONLY, // Maps to java.sql.Date (no time)
-        allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
-
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+        defaultValue: Sequelize.fn('GETDATE')
     },
     confirmedBy: {
-        type: DataTypes.STRING,
-        allowNull: true
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        references: {
+            model: Employee,
+            key: 'email'
+        }
     },
     status: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
+        defaultValue: 'Wait for confirmation',
         allowNull: true
     },
     deletedAt: {
-        type: DataTypes.DATE, // Maps to Timestamp
-        allowNull: true
-        
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
-
-    },
-    updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.fn('GETDATE') // SQL Server native function
-
-    },
-    deleted: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    },
-    updatedBy: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    details: {
-        type: DataTypes.VIRTUAL,
-        defaultValue: []
+    createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.fn('GETDATE')
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.fn('GETDATE')
+    },
+    deleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: true
+    },
+    updatedBy: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        references: {
+            model: Employee,
+            key: 'email'
+        }
     }
 }, {
-    tableName: '[Order]', // Match JPA's escaped table name
-    timestamps: false,
+    tableName: 'Order',
+    timestamps: true,
     hooks: {
         afterFind: async (orders, options) => {
-                    const ordersArray = Array.isArray(orders) ? orders : [orders];
-                    for (const order of ordersArray) {
-                        if (order && order.orderId) {
-                            const details = await OrderDetail.findAll({
-                                where: { orderId: order.orderId },
-                                transaction: options?.transaction
-                            });
-                            order.details = details;
-                        }
-                    }
+            const ordersArray = Array.isArray(orders) ? orders : [orders];
+            for (const order of ordersArray) {
+                if (order && order.orderId) {
+                    const details = await OrderDetail.findAll({
+                        where: { orderId: order.orderId },
+                        transaction: options?.transaction
+                    });
+                    order.details = details;
                 }
+            }
+        }
     }
 });
 
-Order.generateOrderId = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng từ 0-11, cộng 1 và thêm số 0 nếu cần
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    return `ORD${year}${month}${day}${hours}${minutes}${seconds}`;
-};
-
-// Set up the one-to-many relationship
+// Define relationships
 Order.hasMany(OrderDetail, { foreignKey: 'orderId', sourceKey: 'orderId' });
 OrderDetail.belongsTo(Order, { foreignKey: 'orderId', targetKey: 'orderId' });
+
+Order.belongsTo(Discount, { foreignKey: 'discountId', targetKey: 'discountId' });
+Order.belongsTo(Customer, { foreignKey: 'userEmail', targetKey: 'email' });
+Order.belongsTo(Employee, { foreignKey: 'confirmedBy', targetKey: 'email', as: 'confirmer' });
+Order.belongsTo(Employee, { foreignKey: 'updatedBy', targetKey: 'email', as: 'updater' });
 
 module.exports = Order;

@@ -1,73 +1,131 @@
 const OrderDetail = require('../../models/OrderDetail');
 const Customer = require('../../models/Customer');
-const { Cart, ProductsInCart } = require('../../models/Cart'); // Updated import
+const { Cart, ProductsInCart } = require('../../models/Cart');
 const Product = require('../../models/Product');
 const Discount = require('../../models/Discount');
-const Order = require('../../models/Order')
+const Order = require('../../models/Order');
+const Account = require('../../models/Account');
+
 
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
     try {
-        if (!res.locals.user) {
-            return res.redirect('/AutoParts/account/login'); // Or handle differently
+        console.log('Creating order...');
+        const acc = await Account.findOne({
+            where: { token: req.cookies.tokenUser }
+        });
+
+        if (!acc) {
+            return res.redirect('/AutoParts/account/login');
         }
 
-        const cus = await Customer.findOne({ where: { phone: res.locals.user.phone } });
+        const cus = await Customer.findByPk(acc.email);
+        if (!cus) {
+            return res.redirect('/AutoParts/account/login');
+        }
+        
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
             throw new Error('Cart not found');
         }
 
+        let query='/AutoParts/order?';
+
         // Get all products from cart (virtual field populated by afterFind hook)
         const productsInCart = cart.products || [];
+        //console.log(req.body)
         const selectedProducts = productsInCart.filter(item => req.body[item.product.productId]);
+        const updatedSelectedProducts = selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] }));
+        for(const item of updatedSelectedProducts)
+            {
+                query+=item.productId+'='+item.amount+'&';
+            }
+            query=query.slice(0,-1);
+            console.log(query)
+        //console.log('updatedSelectedProducts:', updatedSelectedProducts);
+
+        //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
 
         if (selectedProducts.length === 0) {
-            console.log('----------------------------------------------------------------------------------------Failed')
             return res.render('client/pages/order/order', { message: 'No products selected for order' });
         }
 
-        const totalCost = parseFloat(req.body.totalCost);
-        const code = req.body.code || null;
+        const totalCost = parseFloat(req.body.totalCost) *1000;
+        const discountId = req.body.discountId || null;
         const shipAddress = req.body.shipAddress;
+        const shippingType = req.body.shippingType;
+
+        console.log(discountId, shipAddress, shippingType, totalCost);
+
+        if (!shippingType) {
+            console.log('Shipping type not selected');
+            req.flash('error', 'Vui lòng chọn loại vận chuyển');
+            return res.redirect(query);
+        }
+
+        const discount = await Discount.findByPk(discountId);
+        if(discount && discount.usageLimit<=0)
+        {
+            console.log('Discount usage limit exceeded');
+            req.flash('error', 'Mã giảm giá đã hết lượt sử dụng');
+            return res.redirect(query);
+        }
+
+        
 
         // Generate next order ID (assuming a custom method in Order model)
-        const orderId = await Order.generateOrderId(); // Implement this in your Order model
+        // If this method doesn't exist, we'll need to implement it or use another way to generate IDs
+        let orderId = 'ORD' + Date.now().toString().substring(6);
+        if (typeof Order.generateOrderId === 'function') {
+            orderId = await Order.generateOrderId();
+        }
 
         // Create new order
         const newOrder = await Order.create({
-            orderId:orderId,
-            discountId: code,
-            userPhone: res.locals.user.phone,
+            orderId: orderId,
+            discountId: discountId,
+            userEmail: acc.email,
             shipAddress: shipAddress,
             totalCost: totalCost,
             status: 'Pending',
             deletedAt: null,
-            confirmedBy:null,
+            confirmedBy: null,
             deleted: false
         });
 
+        if(discount) await Discount.setUsedDiscount(acc.email, discountId);
+
         // Create order details and update cart
         const updatedProductsInCart = productsInCart.filter(item => ![item.product]);
-        for (const item of selectedProducts) {
-            console.log(item.product.productId)
+        for (const item of updatedSelectedProducts) {
+            console.log(item)
+            console.log(item.productId)
+            console.log(item.amount)
+
+            product = await Product.findByPk(item.productId);
+
             await OrderDetail.create({
                 orderId: newOrder.orderId,
-                productId: item.product.productId,
-                productName: item.product.productName,
+                productId: product.productId,
+                productName: product.productName,
                 amount: item.amount,
-                unitPrice: item.product.salePrice
+                unitPrice: product.salePrice
             });
+
+            
+            product.stock -= item.amount;
+            await product.save();
         }
 
         // Update cart by setting new products (hooks will handle ProductsInCart)
         cart.products = updatedProductsInCart;
         await cart.save();
+        console.log('Cart updated successfully');
 
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
         console.error('Error in createOrder:', error);
-        return res.redirect('/login');
+        return res.redirect('/AutoParts/account/login');
     }
 };
 
@@ -75,38 +133,43 @@ module.exports.createOrder = async (req, res) => {
 module.exports.showDetail = async (req, res) => {
     try {
         if (!res.locals.user) {
-            return res.redirect('/AutoParts/account/login'); // Or handle differently
+            return res.redirect('/AutoParts/account/login');
         }
-
-        console.log('Testing')
 
         const orderId = req.query.orderId;
         const order = await Order.findByPk(orderId);
         if (!order) {
-            return res.render('orderdetail', { message: 'Order not found' });
+            return res.render('client/pages/order/orderDetail', { message: 'Order not found' });
         }
 
-        
         res.render('client/pages/order/orderDetail', {
             order,
             products: order.details
         });
     } catch (error) {
         console.error('Error in showDetail:', error);
-        return res.redirect('/login');
+        return res.redirect('/AutoParts/account/login');
     }
 };
 
 // POST /order - Show cart and redirect to payment page
 module.exports.showCart = async (req, res) => {
     try {
-        if (!res.locals.user) {
-            return res.redirect('/AutoParts/account/login'); // Or handle differently
+        console.log('Showing cart...');
+        const acc = await Account.findOne({
+            where: { token: req.cookies.tokenUser }
+        });
+
+        if (!acc) {
+            return res.redirect('/AutoParts/account/login');
         }
 
-        console.log('---------------------------------------------------------------------------------' + res.locals.user.phone)
-
-        const cus = await Customer.findOne({ where: { phone: res.locals.user.phone } });
+        const cus = await Customer.findByPk(acc.email);
+        //console.log(cus)
+        if (!cus) {
+            return res.redirect('/AutoParts/account/login');
+        }
+        
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
             return res.render('client/pages/order/order', { message: 'Cart not found' });
@@ -116,13 +179,44 @@ module.exports.showCart = async (req, res) => {
 
         // Remove products that are not selected
         const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
+        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
             return res.render('client/pages/order/order', { message: 'No products selected' });
         }
+        //console.log('Selected products:', selectedProducts);
+        const discounts = await Discount.getByCustomer(acc.email);
+        //console.log(discounts)
 
-        res.render('client/pages/order/order', {selectedProducts});
+        res.render('client/pages/order/order', { selectedProducts, discounts});
     } catch (error) {
         console.error('Error in showCart:', error);
-        return res.redirect('client/pages/order/order');
+        return res.render('client/pages/order/order', { message: 'Error processing cart' });
+    }
+};
+
+
+// GET /order - Show order details
+module.exports.cancel = async (req, res) => {
+    try {
+        
+
+        const orderId = req.query.orderId;
+        const order = await Order.findByPk(orderId);
+        console.log(order.details)
+        for (const item of order.details) {
+            const product = await Product.findByPk(item.productId);
+            product.stock += item.amount;
+            await product.save();
+        }
+        
+        order.status = 'Cancelled';
+        order.deleted = true;
+        order.deletedAt = new Date(Date.now()).toISOString();;
+        await order.save();
+
+        
+    } catch (error) {
+        console.error('Error in showDetail:', error);
+        return res.redirect('/AutoParts/account/login');
     }
 };

@@ -1,0 +1,45 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold.text-primary Chỉnh Sửa Khuyến Mãi
+        .card-body
+            form(action=`${prefixAdmin}/discount/edit/${discount.discountId}?_method=PATCH` method="post")
+                .row
+                    .col-lg-6
+                        .form-group
+                            label(for="discountId") Mã khuyến mãi <span class="required-text">*</span>
+                            input.form-control(type="text" id="discountId" name="discountId" path="discountId" value=discount.discountId readonly required)
+                        .form-group
+                            label(for="discountDesc") Mô tả khuyến mãi <span class="required-text">*</span>
+                            input.form-control(type="text" id="discountDesc" name="discountDesc" path="discountDesc" placeholder="Nhập mô tả khuyến mãi" value=discount.discountDesc required)
+                        .form-group
+                            label(for="discountAmount") Số tiền giảm giá <span class="required-text">*</span>
+                            input.form-control(type="number" id="discountAmount" name="discountAmount" path="discountAmount" placeholder="Nhập số tiền giảm (VND)" value=discount.discountAmount required)
+                        .form-group
+                            label(for="minimumAmount") Số tiền tối thiểu <span class="required-text">*</span>
+                            input.form-control(type="number" step="0.01" id="minimumAmount" name="minimumAmount" path="minimumAmount" placeholder="Nhập số tiền tối thiểu (VND)" value=discount.minimumAmount required)
+                    .col-lg-6
+                        .form-group
+                            label(for="usageLimit") Giới hạn sử dụng <span class="required-text">*</span>
+                            input.form-control(type="number" id="usageLimit" name="usageLimit" path="usageLimit" placeholder="Nhập số lần sử dụng tối đa" value=discount.usageLimit required)
+                        .form-group
+                            label(for="applyStartDate") Ngày bắt đầu <span class="required-text">*</span>
+                            input.form-control(type="date" id="applyStartDate" name="applyStartDate" path="applyStartDate" value=discount.applyStartDate required)
+                        .form-group
+                            label(for="applyEndDate") Ngày kết thúc <span class="required-text">*</span>
+                            input.form-control(type="date" id="applyEndDate" name="applyEndDate" path="applyEndDate" value=discount.applyEndDate required)
+                        .form-group.d-flex
+                            label.mr-4(for="status") Trạng thái hoạt động <span class="required-text">*</span>
+                            .custom-control.custom-switch.ml-4
+                                if discount.status == 'Active'
+                                    input.custom-control-input(type="checkbox" name="status" id="status" value="Active" checked)
+                                else
+                                    input.custom-control-input(type="checkbox" name="status" id="status" value="Active")
+                                label.custom-control-label(for="status") Hoạt động
+                        .d-flex.justify-content-end
+                            button.btn.btn-primary(type="submit") Cập nhật khuyến mãi

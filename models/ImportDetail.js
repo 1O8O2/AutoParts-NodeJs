@@ -1,28 +1,39 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
-const Import = require('./Import');
+const Product = require('./Product');
 
 const ImportDetail = sequelize.define('ImportDetail', {
-    importId: {
-        type: DataTypes.STRING(50), // VARCHAR(50)
-        allowNull: true,            // NULL (though typically NOT NULL in practice)
-    },
-    productId: {
-        type: DataTypes.STRING(50), // VARCHAR(50)
-        allowNull: true,            // NULL (though typically NOT NULL in practice)
-    },
-    price: {
-        type: DataTypes.DECIMAL(18, 2), // DECIMAL(18,2)
-        allowNull: true                 // NULL
-    },
-    amount: {
-        type: DataTypes.INTEGER,    // INT
-        allowNull: true             // NULL
+  importId: {
+    type: DataTypes.STRING(50),
+    primaryKey: true,
+    allowNull: false
+  },
+  productId: {
+    type: DataTypes.STRING(50),
+    primaryKey: true,
+    allowNull: false,
+    references: {
+      model: Product,
+      key: 'productId'
     }
+  },
+  price: {
+    type: DataTypes.DECIMAL(18, 2),
+    allowNull: true
+  },
+  amount: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  }
 }, {
-    tableName: 'ImportDetail',  // Exact table name
-    timestamps: false           // No automatic timestamps
+  tableName: 'ImportDetail',
+  timestamps: false
 });
 
+// Define associations
+ImportDetail.belongsTo(Product, {
+  foreignKey: 'productId',
+  targetKey: 'productId'
+});
 
 module.exports = ImportDetail;

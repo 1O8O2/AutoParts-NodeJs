@@ -1,0 +1,38 @@
+doctype html 
+html 
+    head 
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title #{pageTitle}
+
+        link(rel="icon" href="/img/logo.webp")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css")
+        link(rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css" type="text/css")
+        link(rel="stylesheet" href="/css/adminCss/profile.css")
+        link(rel="stylesheet" href="/css/adminCss/base.css")
+        link(rel="stylesheet" href="/vendor/datatables/dataTables.bootstrap4.css")
+        link(rel="stylesheet" href="/css/admincss/employee.css")
+        
+        // Add jQuery in head
+        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+        
+    body 
+        #wrapper
+            include ../partials/navbar.pug
+
+            #content-wrapper.d-flex.flex-column
+                #content
+                    include ../partials/header.pug
+
+                    .container-fluid#container-wrapper
+                        block main
+
+        script(src="/vendor/bootstrap/js/bootstrap.bundle.min.js")
+        script(src="/vendor/jquery-easing/jquery.easing.min.js")
+        script(src="/js/ruang-admin.min.js")
+        script(src="/vendor/datatables/jquery.dataTables.min.js")
+        script(src="/vendor/datatables/dataTables.bootstrap4.min.js")
+        script(src="/js/adminjs/profile.js")
+        script(src="/js/adminjs/script.js")
+        
+        block scripts

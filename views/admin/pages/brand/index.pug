@@ -1,0 +1,175 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .col-lg-12
+            .card.mb-4
+                .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                    h6.m-0.font-weight-bold.text-primary Danh Sách Nhãn Hàng
+                    a.btn.btn-primary(href=`${prefixAdmin}/brand/add`) + Thêm nhãn hàng
+                .table-responsive.p-3
+                    table.table.align-items-center.table-flush#dataTable
+                        thead.thead-light
+                            tr
+                                th Mã Nhãn Hàng
+                                th Tên Nhãn Hàng
+                                th Trạng thái
+                                th Hoạt Động
+                        tbody
+                            if brands && brands.length > 0
+                                each brand in brands
+                                    tr.brand-item
+                                        td.align-middle #{brand.brandId}
+                                        td.align-middle #{brand.brandName}
+                                        td.align-middle
+                                            a.change-status-link(href="javascript:void(0);" data-brand-id=brand.brandId data-brand-name=brand.brandName data-brand-status=brand.status)
+                                                if brand.status === 'Active'
+                                                    span.badge.badge-success Hoạt động
+                                                else
+                                                    span.badge.badge-danger Ngừng hoạt động
+                                        td.align-middle
+                                            a.btn.btn-sm.btn-danger.edit-btn.mr-1(href="javascript:void(0);" data-brand-id=brand.brandId data-brand-name=brand.brandName data-toggle="modal" data-target="#EditModal") Sửa
+                                            a.btn.btn-sm.btn-dark.detail-btn(href="javascript:void(0);" data-brand-id=brand.brandId data-brand-name=brand.brandName data-toggle="modal" data-target="#DetailModal") Chi tiết
+                            else
+                                tr
+                                    td(colspan="4" class="text-center") Không có nhãn hàng nào
+
+    // Edit Modal
+    #EditModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="EditModal" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalCenterTitle Sửa Thông Tin Nhãn Hàng
+                    button.close(type="button" data-dismiss="modal" aria-label="Close" aria-hidden="true")
+                        span &times;
+                .modal-body
+                    form#editBrandForm(action=`${prefixAdmin}/brand/edit` method="POST")
+                        .form-group
+                            label(for="brandName")
+                                strong Tên Nhãn Hàng:
+                            input.form-control#brandName(type="text" name="brandName" required)
+                        .form-group
+                            label(for="status")
+                                strong Trạng Thái:
+                            select.form-control#status(name="status" required)
+                                option(value="Active") Hoạt động
+                                option(value="Inactive") Ngừng hoạt động
+                        input(type="hidden" name="brandId")
+                .modal-footer
+                    button.btn.btn-outline-secondary(type="button" data-dismiss="modal") Đóng
+                    button.btn.btn-primary(type="submit" form="editBrandForm") Lưu Thay Đổi
+
+    // Detail Modal
+    #DetailModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DetailModal" aria-hidden="true")
+        .modal-dialog.modal-dialog-centered(role="document")
+            .modal-content
+                .modal-header
+                    h5.modal-title#exampleModalCenterTitle Chi Tiết Nhãn Hàng
+                    button.close(type="button" data-dismiss="modal" aria-label="Close" aria-hidden="true")
+                        span &times;
+                .modal-body
+                    p
+                        strong Mã Nhãn Hàng: 
+                        span#detail-brandId
+                    p
+                        strong Tên Nhãn Hàng: 
+                        span#detail-brandName
+                    p
+                        strong Trạng Thái: 
+                        span#detail-status
+                .modal-footer
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal" aria-label="Close") Close
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up
+
+block append scripts
+    script.
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#dataTable').DataTable({
+                "language": {
+                    "search": "Tìm kiếm",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
+                    "paginate": {
+                        "previous": "Trước", 
+                        "next": "Tiếp"
+                    }
+                }
+            });
+
+            // Handle status change
+            $('#dataTable').on('click', '.change-status-link', function(event) {
+                event.preventDefault(); 
+                const brandId = $(this).data('brand-id');
+                const currentStatus = $(this).data('brand-status');
+                
+                if (!brandId) {
+                    console.error("Brand ID is undefined");
+                    alert("Lỗi: Không tìm thấy ID nhãn hàng");
+                    return;
+                }
+
+                $.ajax({
+                    url: '#{prefixAdmin}/brand/changeStatus',
+                    type: 'POST',
+                    data: { brandId: brandId },
+                    success: function(response) {
+                        if (response.success) {
+                            var badge = $(event.target).closest('.change-status-link').find('.badge');
+                            var link = $(event.target).closest('.change-status-link');
+                            
+                            if (currentStatus === "Inactive") { 
+                                badge.removeClass('badge-danger').addClass('badge-success').text('Hoạt động');
+                                link.data('brand-status', 'Active');
+                            } else {
+                                badge.removeClass('badge-success').addClass('badge-danger').text('Ngừng hoạt động');
+                                link.data('brand-status', 'Inactive');
+                            }
+                        } else {
+                            alert("Lỗi khi thay đổi trạng thái: " + (response.error || "Không xác định"));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error changing status:", error);
+                        alert("Lỗi khi thay đổi trạng thái. Vui lòng thử lại sau.");
+                    }
+                });
+            });
+
+            // Handle edit button click
+            $('#dataTable').on('click', '.edit-btn', function() {
+                const brandId = $(this).data('brand-id');
+                const brandName = $(this).data('brand-name');
+                const status = $(this).closest('tr').find('.change-status-link').data('brand-status');
+
+                // Set form values
+                $('#editBrandForm input[name="brandId"]').val(brandId);
+                $('#editBrandForm input[name="brandName"]').val(brandName);
+                $('#editBrandForm select[name="status"]').val(status);
+
+                // Show modal
+                $('#EditModal').modal('show');
+            });
+
+            // Handle detail button click
+            $('#dataTable').on('click', '.detail-btn', function() {
+                const brandId = $(this).data('brand-id');
+                const brandName = $(this).data('brand-name');
+                const status = $(this).closest('tr').find('.change-status-link').data('brand-status');
+
+                // Set detail values
+                $('#detail-brandId').text(brandId);
+                $('#detail-brandName').text(brandName);
+                $('#detail-status').text(status === 'Active' ? 'Hoạt động' : 'Ngừng hoạt động');
+
+                // Show modal
+                $('#DetailModal').modal('show');
+            });
+        }); 

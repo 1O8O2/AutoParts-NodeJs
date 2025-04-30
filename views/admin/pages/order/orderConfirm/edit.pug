@@ -1,0 +1,84 @@
+extends ../../../layouts/default.pug
+include ../../../mixins/alert.pug
+include ../../../mixins/currency.pug
+
+block main 
+    +alert-error(3000)
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold.text-primary Sửa Đơn Hàng
+        .card-body
+            form(action=`${prefixAdmin}/order/edit/${order.orderId}?_method=PATCH` method="post")
+                .row
+                    .col-lg-12
+                        h5 Chọn Sản Phẩm
+                        .row
+                            .col-lg-6
+                                .form-group
+                                    label(for="productSearch") Tìm sản phẩm
+                                    input.form-control(type="text" id="productSearch" placeholder="Nhập tên sản phẩm")
+                                .product-list#productList
+                                    each product in products
+                                        .product-detail-item(data-product-id=product.productId data-product-name=product.productName data-product-stock=product.stock data-sale-price=product.salePrice)
+                                            | #{product.productName} 
+                                            +formatCurrency(product.salePrice)
+                            .col-lg-6
+                                .form-group
+                                    label Chi tiết đơn hàng
+                                    .selected-products#selectedProducts
+                                        each detail, index in orderDetails
+                                            .selected-item(data-index=index data-product-id=detail.productId data-product-name=detail.productName data-unit-price=detail.unitPrice data-amount=detail.amount)
+                                                div
+                                                    div #{detail.productName}
+                                                    div Giá: 
+                                                        +formatCurrency(detail.unitPrice)
+                                                .d-flex.justify-content-end
+                                                    input.quantity-input(type="number" name=`orderDetails[${index}].amount` min="1" value=detail.amount onchange=`updateQuantity('${detail.productId}', this.value)`)
+                                                    input(type="hidden" name=`orderDetails[${index}].productId` value=detail.productId path=`orderDetails[${index}].productId`)
+                                                    input(type="hidden" name=`orderDetails[${index}].productName` value=detail.productName path=`orderDetails[${index}].productName`)
+                                                    input(type="hidden" name=`orderDetails[${index}].unitPrice` value=detail.unitPrice path=`orderDetails[${index}].unitPrice`)
+                                                    button.btn.btn-danger.btn-sm(type="button" onclick=`removeProduct('${detail.productId}')`) Xóa
+                .separation
+                .row
+                    .col-lg-12
+                        h5 Điền Thông Tin Cá Nhân
+                        .form-group
+                            label(for="orderId") Mã đơn hàng <span class="required-text">*</span>
+                            input.form-control(name="orderId" data-order-id=order.orderId value=order.orderId readonly)
+                        .form-group
+                            label(for="discountId") Mã giảm giá
+                            select.form-control.mb-3#discountSelect(name="discountId" data-order-discount-id=order.discountId)
+                                option(value="" data-discount-amount="0") -- Chọn khuyến mãi --
+                                each discount in discounts
+                                    option(value=discount.discountId 
+                                        data-discount-amount=discount.discountAmount 
+                                        data-minimum-amount=discount.minimumAmount 
+                                        data-status=discount.status 
+                                        data-usage-limit=discount.usageLimit 
+                                        data-apply-start=discount.applyStartDate 
+                                        data-apply-end=discount.applyEndDate
+                                        selected=(discount.discountId == order.discountId)
+                                    ) #{discount.discountDesc} - #{discount.discountAmount}% - #{discount.minimumAmount}₫
+                        .form-group
+                            label(for="userName") Họ tên khách hàng <span class="required-text">*</span>
+                            input.form-control(name="userName" value=customer.fullName required placeholder="Nhập họ và tên")
+                        .form-group
+                            label(for="userPhone") Số điện thoại khách hàng <span class="required-text">*</span>
+                            input.form-control(name="userPhone" value=order.userPhone required placeholder="Nhập số điện thoại")
+                        .form-group
+                            label(for="shipAddress") Địa chỉ giao hàng <span class="required-text">*</span>
+                            input.form-control(name="shipAddress" value=order.shipAddress required placeholder="Nhập địa chỉ giao hàng")
+                .row
+                    .col-lg-12
+                        .form-group.totalCost
+                            label Tổng tiền: <span id="totalCostlbl">
+                                +formatCurrency(order.totalCost)    
+                            </span>
+                            input.form-control(type="hidden" id="totalCost" name="totalCost" value=order.totalCost)
+                        #selectedProductsInputs
+                .d-flex.justify-content-end
+                    button.btn.btn-primary(type="submit") Lưu Đơn Hàng
+
+    script(src="/vendor/jquery/jquery.min.js")
+    script(src="/js/adminjs/order/order.js")
