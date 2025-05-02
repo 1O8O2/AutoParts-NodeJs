@@ -12,6 +12,8 @@ const blogRoute = require('./blog.route');
 const accountRoute = require('./account.route')
 const productRoute = require('./product.route')
 const orderRoute = require('./order.route')
+const forgotPasswordRoute = require('./forgotPassword.route')
+
 
 
 module.exports = (app) => {
@@ -28,4 +30,5 @@ module.exports = (app) => {
     app.use(PATH_URL + '/account', accountRoute);
     app.use(PATH_URL + '/product', productRoute);
     app.use(PATH_URL + '/order', orderRoute);
+    app.use(PATH_URL + '/forgot-password', forgotPasswordRoute);
 }

@@ -37,7 +37,8 @@ const Order = sequelize.define('Order', {
     },
     orderDate: {
         type: DataTypes.DATEONLY,
-        allowNull: true
+        allowNull: false,
+        defaultValue: Sequelize.fn('GETDATE')
     },
     confirmedBy: {
         type: DataTypes.STRING(255),
@@ -53,17 +54,17 @@ const Order = sequelize.define('Order', {
         allowNull: true
     },
     deletedAt: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true
     },
     createdAt: {
         type: DataTypes.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: Sequelize.fn('GETDATE')
     },
     updatedAt: {
         type: DataTypes.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: Sequelize.fn('GETDATE')
     },
     deleted: {

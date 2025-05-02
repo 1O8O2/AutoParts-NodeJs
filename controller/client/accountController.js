@@ -3,6 +3,7 @@ const Account = require('../../models/Account');
 const Customer = require('../../models/Customer');
 const {Cart, ProductsInCart} = require('../../models/Cart');
 const Order = require('../../models/Order');
+const systemConfig = require('../../configs/system');
 
 // Helper
 const generate = require("../../helpers/generateToken");
@@ -15,15 +16,20 @@ module.exports.showRegister = async (req, res) => {
 // [POST] /account/register
 module.exports.register = async (req, res) => {
     const { email, password, repassword, phone, address, fullName } = req.body;
+    if( !email || !password || !repassword || !phone || !address || !fullName) {
+        req.flash('error', res.locals.messages.REGISTER_ERROR);
+        res.redirect('back');
+
+    }
 
     if (password !== repassword) {
-        req.session.message = 'Mật khẩu không khớp';
-        return res.render('client/pages/user/register', { message: req.session.message });
+        req.flash('error', res.locals.messages.NOT_MATCH_PASSWORD_WARNING);
+        res.redirect('back');
     }
 
     if (!email) {
-        req.session.message = 'Email là bắt buộc';
-        return res.render('client/pages/user/register', { message: req.session.message });
+        req.flash('error', res.locals.messages.EMAIL_REQUIRED_WARNING);
+        return res.render('back');
     }
 
     try {
@@ -31,8 +37,8 @@ module.exports.register = async (req, res) => {
         const cartId = 'CART' + Date.now().toString().substring(8);
         const newCart = await Cart.create({ cartId });
         if (!newCart) {
-            req.session.message = 'Không thể thêm tài khoản';
-            return res.render('client/pages/user/register', { message: req.session.message });
+            req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
+            return res.render('client/pages/user/register', { });
         }
 
         // Create a new Account
@@ -46,8 +52,8 @@ module.exports.register = async (req, res) => {
             deleted: false
         });
         if (!newAccount) {
-            req.session.message = 'Không thể thêm tài khoản';
-            return res.render('client/pages/user/register', { message: req.session.message });
+            req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
+            return res.render('back');
         }
         res.cookie("tokenUser", newAccount.token);
 
@@ -61,27 +67,32 @@ module.exports.register = async (req, res) => {
             status: 'Active'
         });
         if (newCustomer) {
-            req.session.message = 'Đăng ký thành công, vui lòng đăng nhập';
-            return res.redirect('/AutoParts/account/login');
+            req.flash('success', res.locals.messages.ACCOUNT_CREATE_SUCCESS);
+            return res.redirect(systemConfig.prefixUrl+'/account/login');
         } else {
             // Rollback Account if Customer creation fails
             await Account.destroy({ where: { email: email } });
-            req.session.message = 'Không thể thêm tài khoản';
-            return res.render('client/pages/user/register', { message: req.session.message });
+            req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
+            return res.render('back');       
         }
     } catch (error) {
         console.error("Registration error:", error);
-        req.session.message = 'Đăng ký thất bại, có lỗi xảy ra';
-        return res.render('client/pages/user/register', { message: req.session.message });
+        req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
+        return res.render('back');
     }
 }
 
 // [GET] /account/login
 module.exports.showLogIn = async (req, res) => {
     if (req.cookies?.tokenUser) {
-        return res.redirect('/AutoParts/account/profile');
+        return res.redirect(systemConfig.prefixUrl+'/account/profile');
     }
-    return res.render('client/pages/user/login');
+
+    return res.render('client/pages/user/login',
+        {
+            messagelist: res.locals.messages,
+        }
+    );
 };
 
 // [POST] /account/login
@@ -90,16 +101,19 @@ module.exports.logIn = async (req, res) => {
 
     // Validation
     if (!password || !email) {
-        return res.render('client/pages/user/login', { message: 'Dữ liệu không hợp lệ' });
+        req.flash('error', res.locals.messages.LACK_INFO_WARNING);
+        return res.redirect('back')
     }
 
     const account = await Account.findOne({ where: { email: email } });
     if (!account) {
-        return res.render('client/pages/user/login', { message: 'Không tìm thấy tài khoản' });
+        req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
+        return res.redirect('back');
     }
 
     if (password !== account.password) {
-        return res.render('client/pages/user/login', { message: 'Sai email hoặc mật khẩu' }); 
+        req.flash('error', res.locals.messages.PASSWORD_OR_EMAIL_INCORRECT_WARNING);
+        return res.redirect('back');
     } 
 
     const customer = await Customer.findByPk(account.email);
@@ -108,7 +122,7 @@ module.exports.logIn = async (req, res) => {
     res.cookie("cartId", cart.cartId);
     res.cookie("tokenUser", account.token);
 
-    return res.redirect('/AutoParts');
+    return res.redirect(systemConfig.prefixUrl+'/account/profile');
 }
 
 // [GET] /account/profile
@@ -118,19 +132,21 @@ module.exports.showProfile = async (req, res) => {
     try {
         const acc = await Account.findOne({ where: { token: tokenUser } });
         if (!acc) {
-            return res.redirect('/AutoParts/account/login');
+            return res.redirect(systemConfig.prefixUrl+'account/login');
         }
         
         const customer = await Customer.findByPk(acc.email);
-        const orderLst = await Order.findAll({ where: { userEmail: acc.email } }); 
+        const orderLst = await Order.findAll({ where: { userEmail: acc.email, deleted : false} }); 
 
         return res.render('client/pages/user/profile', {
             customer,
-            orders: orderLst
+            orders: orderLst,
+            messagelist: res.locals.messages,
         });
     } catch (error) {
         console.error('Error fetching profile:', error);
-        return res.render('client/pages/user/profile', { message: 'Đã xảy ra lỗi khi tải thông tin' });
+        req.flash('error', res.locals.messages.DATA_ERROR);
+        return res.render('back');
     }
 }
 
@@ -139,33 +155,38 @@ module.exports.accountEdit = async(req, res) => {
     const acc = await Account.findOne({
         where: { token: req.cookies.tokenUser }
     });
-    console.log(req.body)
     if (!acc) {
-        return res.redirect('/AutoParts/account/login');
+        return res.redirect(systemConfig.prefixUrl+'account/login');
     }
+    console.log(req.body)
+    if( !acc ||!req.body.phone || !req.body.fullName || !req.body.address ||!req.body.status|| !req.body.email) {
+        req.flash('error', res.locals.messages.EDIT_PROFILE_ERROR);
+        return res.redirect("back");
+    }
+
     if (req.body.phone.length < 10) {
         req.flash('error', res.locals.messages.INVALID_PHONE_WARNING);
-        return res.redirect('back');
+        return res.redirect("back")
     }
     if (req.body.fullName.length < 6) {
         req.flash('error', res.locals.messages.INVALID_NAME_WARNING);
-        return res.redirect('back');
+        return res.redirect("back")
     }
     if (req.body.address.length < 6) {
         req.flash('error', res.locals.messages.INVALID_ADDRESS_WARNING);
-        return res.redirect('back');
+        return res.redirect("back")
     }
     if (req.body.fullName === acc.fullName && req.body.phone === acc.phone && req.body.address === acc.address) {
         req.flash('error', res.locals.messages.NO_CHANGE_WARNING);
-        return res.redirect('back');
+        return res.redirect("back")
     }
     if (req.body.email !== acc.email) {
         req.flash('error', res.locals.messages.EMAIL_CHANGE_WARNING);
-        return res.redirect('back');
+        return res.redirect("back")
     }
     if (req.body.status !== acc.status) {
         req.flash('error', res.locals.messages.STATUS_CHANGE_WARNING);
-        return res.redirect('back');
+        return res.redirect("back")
     }
 
     try {
@@ -177,9 +198,8 @@ module.exports.accountEdit = async(req, res) => {
                 } 
             }
         );
-        console.log("Update customer successfully",res.locals.messages.EDIT_PROFILE_SUCCESS)
         req.flash('success', res.locals.messages.EDIT_PROFILE_SUCCESS);
-        return res.redirect('back');
+        return res.redirect(systemConfig.prefixUrl+'/account/profile');   
     } catch (error) {
         req.flash('error', res.locals.messages.EDIT_PROFILE_ERROR);
         return res.redirect('back');
@@ -193,7 +213,8 @@ module.exports.changePassword = async(req, res) => {
     });
     
     if (!acc) {
-        return res.redirect('/AutoParts/account/login');
+        req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
+        return res.redirect(systemConfig.prefixUrl+'/account/login');
     }
     
     try {
@@ -221,8 +242,8 @@ module.exports.changePassword = async(req, res) => {
                     } 
                 }
             );
-            req.flash('success', res.locals.messages.EDIT_PROFILE_SUCCESS);
-            return res.redirect('/AutoParts/account/profile');
+            req.flash('success', res.locals.messages.CHANGE_PASSWORD_SUCCESS);
+            return res.redirect('back');
         } else {
             req.flash('error', res.locals.messages.INCORRECT_PASSWORD_WARNING);
             return res.redirect('back');
@@ -237,5 +258,14 @@ module.exports.changePassword = async(req, res) => {
 module.exports.logOut = async(req, res) => {
     res.clearCookie("tokenUser");
     res.clearCookie("cartId");
-    return res.redirect('/AutoParts');
+    req.flash('success', res.locals.messages.LOGOUT_SUCCESS);
+    return res.redirect(systemConfig.prefixUrl+'/account/login');
 }
+
+
+
+// [GET] /account/forgot-password
+module.exports.showForgotPassword = async (req, res) => {
+    res.render('client/pages/user/forgot-password');
+}
+
