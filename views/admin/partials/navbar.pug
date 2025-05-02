@@ -4,60 +4,75 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
             img(src="/img/logo.webp")
         .sidebar-brand-text.mx-3 BaoLong Autopart
     hr.sidebar-divider.my-0
-    li.nav-item.active
-        a.nav-link(href=`${prefixAdmin}/statistic`)
-            i.fa-solid.fa-chart-column
-            span Thống kê
+    if (permission.includes("THONG_KE"))
+        li.nav-item.active
+            a.nav-link(href=`${prefixAdmin}/statistic`)
+                i.fa-solid.fa-chart-column
+                span Thống kê
     li.nav-item
         a.nav-link.collapsed(href="#" data-toggle="collapse" data-target="#productPage" aria-expanded="true" aria-controls="collapsePage")
             i.fas.fa-fw.fa-solid.fa-gears
             span Quản lý sản phẩm
         #productPage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
-                a.collapse-item(href=`${prefixAdmin}/product/import`) Nhập hàng
-                a.collapse-item(href=`${prefixAdmin}/product`) Quản lý sản phẩm
-                a.collapse-item(href=`${prefixAdmin}/productGroup`) Quản lý danh mục
-                a.collapse-item(href=`${prefixAdmin}/brand`) Quản lý nhãn hàng
-    li.nav-item
-        a.nav-link(href=`${prefixAdmin}/customer`)
-            i.fa-solid.fa-person
-            span Danh sách khách hàng
-    li.nav-item
-        a.nav-link(href=`${prefixAdmin}/employee`)
-            i.fa-regular.fa-id-card
-            span Danh sách nhân viên
-    li.nav-item
-        a.nav-link(href=`${prefixAdmin}/blog`)
-            i.fa-solid.fa-book-open-reader
-            span Quản lý bài viết
-    li.nav-item
-        a.nav-link(href=`${prefixAdmin}/discount`)
-            i.fa-solid.fa-ticket
-            span Quản lý khuyến mãi
-    li.nav-item
-        a.nav-link(href=`${prefixAdmin}/generalSettings`)
-            i.fa-solid.fa-hammer
-            span Thông số chung
-    li.nav-item
-        a.nav-link.collapsed(href="#" data-toggle="collapse" data-target="#orderPage" aria-expanded="true" aria-controls="orderPage")
-            i.fa-solid.fa-truck
-            span Quản lý đơn hàng
-        #orderPage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
-            .bg-white.py-2.collapse-inner.rounded
-                a.collapse-item(href=`${prefixAdmin}/order/add`) Tạo đơn hàng
-                a.collapse-item(href=`${prefixAdmin}/order/Pending`) Đơn hàng chờ xác nhận
-                a.collapse-item(href=`${prefixAdmin}/order/Processing`) Đơn hàng chờ đóng gói
-                a.collapse-item(href=`${prefixAdmin}/order/Delivery`) Đơn hàng đang giao
-                a.collapse-item(href=`${prefixAdmin}/order/History`) Lịch sử đơn hàng
+                if (permission.includes("PHIEU_NHAP_XEM"))
+                    a.collapse-item(href=`${prefixAdmin}/product/import`) Nhập hàng
+                if (permission.includes("QUAN_LY_SAN_PHAM_XEM"))
+                    a.collapse-item(href=`${prefixAdmin}/product`) Quản lý sản phẩm
+                if (permission.includes("DANH_MUC_SAN_PHAM_XEM"))
+                    a.collapse-item(href=`${prefixAdmin}/productGroup`) Quản lý danh mục
+                if (permission.includes("QUAN_LY_NHAN_HANG_XEM"))
+                    a.collapse-item(href=`${prefixAdmin}/brand`) Quản lý nhãn hàng
+    if (permission.includes("DANH_SACH_KHACH_HANG_XEM"))
+        li.nav-item
+            a.nav-link(href=`${prefixAdmin}/customer`)
+                i.fa-solid.fa-person
+                span Danh sách khách hàng
+    if (permission.includes("DANH_SACH_NHAN_VIEN_XEM"))
+        li.nav-item
+            a.nav-link(href=`${prefixAdmin}/employee`)
+                i.fa-regular.fa-id-card
+                span Danh sách nhân viên
+    if (permission.includes("QUAN_LY_BAI_VIET_XEM"))
+        li.nav-item
+            a.nav-link(href=`${prefixAdmin}/blog`)
+                i.fa-solid.fa-book-open-reader
+                span Quản lý bài viết
+    if (permission.includes("QUAN_LY_KHUYEN_MAI_XEM"))
+        li.nav-item
+            a.nav-link(href=`${prefixAdmin}/discount`)
+                i.fa-solid.fa-ticket
+                span Quản lý khuyến mãi
+    if (permission.includes("CAI_DAT_CHUNG_XEM"))
+        li.nav-item
+            a.nav-link(href=`${prefixAdmin}/generalSetting`)
+                i.fa-solid.fa-hammer
+                span Thông số chung
+    if (permission.includes("QUAN_LY_DON_HANG_XEM"))
+        li.nav-item
+            a.nav-link.collapsed(href="#" data-toggle="collapse" data-target="#orderPage" aria-expanded="true" aria-controls="orderPage")
+                i.fa-solid.fa-truck
+                span Quản lý đơn hàng
+            #orderPage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
+                .bg-white.py-2.collapse-inner.rounded
+                    if (permission.includes("QUAN_LY_DON_HANG_THEM"))
+                        a.collapse-item(href=`${prefixAdmin}/order/add`) Tạo đơn hàng
+                    a.collapse-item(href=`${prefixAdmin}/order/Pending`) Đơn hàng chờ xác nhận
+                    a.collapse-item(href=`${prefixAdmin}/order/Processing`) Đơn hàng chờ đóng gói
+                    a.collapse-item(href=`${prefixAdmin}/order/Delivery`) Đơn hàng đang giao
+                    a.collapse-item(href=`${prefixAdmin}/order/History`) Lịch sử đơn hàng
     li.nav-item
         a.nav-link.collapsed(href="#" data-toggle="collapse" data-target="#collapsePage" aria-expanded="true" aria-controls="collapsePage")
             i.fa-solid.fa-file-invoice
             span Cài đặt tài khoản
         #collapsePage.collapse(aria-labelledby="headingPage" data-parent="#accordionSidebar")
             .bg-white.py-2.collapse-inner.rounded
-                a.collapse-item(href=`${prefixAdmin}/account`) Danh sách
-                a.collapse-item(href=`${prefixAdmin}/role`) Nhóm quyền
-                a.collapse-item(href=`${prefixAdmin}/role/permission`) Phân quyền
+                if (permission.includes("DANH_SACH_TAI_KHOAN_XEM"))
+                    a.collapse-item(href=`${prefixAdmin}/account`) Danh sách
+                if (permission.includes("NHOM_QUYEN_XEM"))
+                    a.collapse-item(href=`${prefixAdmin}/role`) Nhóm quyền
+                if (permission.includes("PHAN_QUYEN"))
+                    a.collapse-item(href=`${prefixAdmin}/role/permissions`) Phân quyền
 
     script.
         document.addEventListener('DOMContentLoaded', function() {

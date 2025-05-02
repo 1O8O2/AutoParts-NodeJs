@@ -28,6 +28,19 @@ label {
   box-shadow: none;
 }
 
+.roleName:hover {
+  cursor: pointer;
+}
+
+/* Import detail */
+.detail-table {
+  margin-top: 20px;
+}
+.detail-table th, .detail-table td {
+  vertical-align: middle;
+}
+/* End Import detail */
+
 /* Order detail */
 .order-info-column {
   padding: 15px;
@@ -38,12 +51,12 @@ label {
   margin-bottom: 5px;
 }
 
-.order-info-column span {
+/* .order-info-column span {
   display: block;
   padding: 5px;
   background-color: #f8f9fa;
   border-radius: 4px;
-}
+} */
 /* End Order detail */
 
 /* Add order */

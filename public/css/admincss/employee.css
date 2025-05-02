@@ -17,24 +17,3 @@
     flex-grow: 1;
 }
 
-#totalCostlbl {
-    text-transform: uppercase;
-    font-weight: bold;
-    color: #ff6f61;
-}
-
-.order-info-column {
-    padding: 15px;
-}
-
-.order-info-column label {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.order-info-column span {
-    display: block;
-    padding: 5px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-} 

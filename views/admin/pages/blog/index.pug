@@ -9,7 +9,8 @@ block main
         .card.mb-4
             .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
                 h6.m-0.font-weight-bold.text-primary Danh Sách Bài Viết
-                a.btn.btn-primary(href=`${prefixAdmin}/blog/add`) + Thêm bài viết
+                if (permission.includes("QUAN_LY_BAI_VIET_THEM"))
+                    a.btn.btn-primary(href=`${prefixAdmin}/blog/add`) + Thêm bài viết
             .table-responsive.p-3
                 table#dataTable.table.align-items-center.table-flush
                     thead.thead-light
@@ -27,15 +28,24 @@ block main
                                 td.align-middle #{blog.title}
                                 td.align-middle
                                     if blog.status === 'Active'
-                                        a.change-status-blog(href="javascript:void(0);" data-id=`${blog.blogId}` data-status=`${blog.status}`)
+                                        if (permission.includes("QUAN_LY_BAI_VIET_SUA"))    
+                                            a.change-status-blog(href="javascript:void(0);" data-id=`${blog.blogId}` data-status=`${blog.status}`)
+                                                span.badge.badge-success Hoạt động
+                                        else 
                                             span.badge.badge-success Hoạt động
                                     else
-                                        a.change-status-blog(href="javascript:void(0);" data-id=`${blog.blogId}` data-status=`${blog.status}`)
+                                        if (permission.includes("QUAN_LY_BAI_VIET_SUA"))
+                                            a.change-status-blog(href="javascript:void(0);" data-id=`${blog.blogId}` data-status=`${blog.status}`)
+                                                span.badge.badge-danger Ngừng hoạt động
+                                        else 
                                             span.badge.badge-danger Ngừng hoạt động
                                 td.align-middle
-                                    a.btn.btn-sm.btn-danger.delete-blog-btn.mr-1(href="javascript:void(0);" data-blog-id=`${blog.blogId}` data-toggle="modal" data-target="#DeleteModal") Xóa
-                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/blog/edit/${blog.blogId}`) Sửa
-                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/blog/detail/${blog.blogId}`) Xem
+                                    if (permission.includes("QUAN_LY_BAI_VIET_XOA"))
+                                        a.btn.btn-sm.btn-danger.delete-blog-btn.mr-1(href="javascript:void(0);" data-blog-id=`${blog.blogId}` data-toggle="modal" data-target="#DeleteModal") Xóa
+                                    if (permission.includes("QUAN_LY_BAI_VIET_SUA"))
+                                        a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/blog/edit/${blog.blogId}`) Sửa
+                                    if (permission.includes("QUAN_LY_BAI_VIET_XEM"))
+                                        a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/blog/detail/${blog.blogId}`) Xem
 
     //- Modal Delete Item
     #DeleteModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true")

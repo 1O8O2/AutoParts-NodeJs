@@ -1,19 +1,22 @@
-// const generalSetting = require("../../models/")
+const GeneralSetting = require("../../models/GeneralSettings");
+
+const systemConfig = require('../../configs/system');
 
 
 // [GET] /AutoParts/admin/generalSetting
 module.exports.index = async (req, res) => {
   try {
-    const generalSetting = await GeneralSetting.findAll(
+    const generalSetting = await GeneralSetting.findOne(
       {
         where: {
           deleted: false
         }
       }
     );
-    
-    res.render('client/pages/generalSetting/index', {
-      generalSetting: generalSetting
+
+    res.render('admin/pages/generalSetting/index', {
+      pageTitle: "Thông số chung",
+      generalSetting: generalSetting || {}
     });
   } catch (err) {
     res.status(500).send('Server error');
@@ -22,18 +25,26 @@ module.exports.index = async (req, res) => {
 
 // [POST] /AutoParts/admin/generalSetting/update
 module.exports.update = async (req, res) => {
-    try {
-        await GeneralSetting.destroy({
-            where: {}, 
-            truncate: false 
-        });
-        
-        await GeneralSetting.create(req.body);
+  try {
+    const settingData = {
+      websiteName: req.body.websiteName || '',
+      phone: req.body.phone || '',
+      email: req.body.email || '',
+      address: req.body.address || '',
+      copyright: req.body.copyright || '',
+      logo: req.file ? `${req.file.filename}` : req.body.existingLogo || ''
+    };
 
-        req.flash('success', "Cập nhật các thông số chung thành công!");
-        res.redirect("back");
-    } catch (err) {
-        req.flash('error', "Cập nhật các thông số chung thất bại!");
-        res.status(500).send('Server error');
-    }
-  };
+    // Cập nhật hoặc tạo mới bản ghi
+    const [setting, created] = await GeneralSetting.upsert(settingData, {
+        where: { deleted: false }
+    });
+
+    req.flash('success', "Cập nhật các thông số chung thành công!");
+    res.redirect("back");
+  } catch (err) {
+    console.error('Error:', err);
+    req.flash('error', "Cập nhật các thông số chung thất bại!");
+    res.redirect("back");
+  }
+};

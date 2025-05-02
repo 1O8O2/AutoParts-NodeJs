@@ -3,28 +3,28 @@
     button.close(type="button" data-dismiss="modal" aria-label="Close" aria-hidden="true")
         span ×
 .modal-body
-    form#editAccountForm(action=`${prefixAdmin}/account/edit/${account.phone}?_method=PATCH` method="post")
+    form#editAccountForm(action=`${prefixAdmin}/account/edit/${account.email}?_method=PATCH` method="post")
         .form-group
-            label(for="phone")
-                strong Số Điện Thoại:
-            input.form-control(type="text" path="phone" value=account.phone readonly required)
+            label(for="email")
+                strong Email:
+            input.form-control(type="text" path="email" value=account.email readonly required)
         .form-group
             label(for="password")
                 strong Mật Khẩu:
-            input.form-control(type="text" path="password" value=account.password required)
+            input.form-control(type="password" path="password" value=account.password required)
         .form-group
             label(for="permission")
                 strong Nhóm Quyền:
             select.form-control.mb-3(name="permission" path="permission" required)
                 option(value="" disabled) -- Chọn nhóm quyền --
-                each role in roleGroup
+                each role in roleGroups
                     option(value=role.roleGroupId selected=role.roleGroupId == account.permission) #{role.roleGroupName}
         .form-group
             label(for="status")
                 strong Trạng Thái:
             select.form-control(name="status" path="status" required)
-                option(value="Active" selected=account.status == 'Active') Hoạt động
-                option(value="Inactive" selected=account.status == 'Inactive') Ngừng hoạt động
+                option(value="Active" selected=(account.status == 'Active')) Hoạt động
+                option(value="Inactive" selected=(account.status == 'Inactive')) Ngừng hoạt động
 .modal-footer
     button.btn.btn-outline-secondary(type="button" data-dismiss="modal") Đóng
     button.btn.btn-primary(type="submit" form="editAccountForm") Lưu Thay Đổi

@@ -1,0 +1,24 @@
+.modal-header
+    h5.modal-title#EditModalLabel Sửa Nhóm Quyền
+    button.close(type="button" data-dismiss="modal" aria-label="Close")
+        span(aria-hidden="true") ×
+.modal-body
+    form#editRoleGroupForm(action=`${prefixAdmin}/role/edit/${roleGroup.roleGroupId}?_method=PATCH` method="POST")
+        .form-group
+            label(for="editRoleGroupId") Mã Nhóm Quyền
+            input.form-control(type="text" id="editRoleGroupId" name="roleGroupId" value=roleGroup.roleGroupId readonly required)
+        .form-group
+            label(for="editRoleGroupName") Tên Nhóm Quyền
+            input.form-control(type="text" id="editRoleGroupName" name="roleGroupName" placeholder="Nhập tên nhóm quyền" value=roleGroup.roleGroupName required)
+        .form-group
+            label(for="editDescription") Mô Tả
+            textarea.form-control(id="editDescription" name="description" placeholder="Nhập mô tả" rows="3") #{roleGroup.description}
+        .form-group
+            label(for="status")
+                strong Trạng Thái:
+            select.form-control(id="status" name="status" required)
+                option(value="Active" selected=roleGroup.status == 'Active') Hoạt động
+                option(value="Inactive" selected=roleGroup.status == 'Inactive') Ngừng hoạt động
+.modal-footer
+    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Hủy
+    button.btn.btn-primary(type="submit" form="editRoleGroupForm") Lưu

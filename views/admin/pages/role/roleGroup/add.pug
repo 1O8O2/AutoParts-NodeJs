@@ -1,0 +1,28 @@
+extends ../../../layouts/default.pug
+include ../../../mixins/alert.pug
+
+block main 
+    +alert-error(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Thêm Nhóm Quyền
+            .card-body
+                form#addRoleGroupForm(action=`${prefixAdmin}/role/add` method="POST")
+                    .form-group
+                        label(for="addRoleGroupId") Mã Nhóm Quyền
+                        input.form-control(type="text" id="addRoleGroupId" name="roleGroupId" value=nextId readonly required)
+                    .form-group
+                        label(for="addRoleGroupName") Tên Nhóm Quyền
+                        input.form-control(type="text" id="addRoleGroupName" name="roleGroupName" placeholder="Nhập tên nhóm quyền" required)
+                    .form-group
+                        label(for="addDescription") Mô Tả
+                        textarea.form-control(id="addDescription" name="description" placeholder="Nhập mô tả" rows="3")
+                    .form-group.d-flex
+                        label.mr-4(for="status") Trạng thái hoạt động
+                        .custom-control.custom-switch.ml-4
+                            input.custom-control-input(type="checkbox" name="status" id="status" value="Active" checked)
+                            label.custom-control-label(for="status") Hoạt động
+                    .d-flex.justify-content-end
+                        button.btn.btn-primary(type="submit") Lưu
