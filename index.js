@@ -5,6 +5,10 @@ require("dotenv").config();
 const express = require('express');
 const app = express();
 const port = 3000;
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
 // Library to handle Date-Time
 const moment = require("moment");
@@ -45,6 +49,30 @@ app.use(messagesMiddleware.loadMessageCodes);
 const systemConfig = require("./configs/system");
 app.locals.prefixAdmin = systemConfig.prefixAdmin;
 
+// Socket.IO configuration
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Join a chat room
+  socket.on('join_room', (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room: ${roomId}`);
+  });
+
+  // Listen for chat messages
+  socket.on('send_message', async (data) => {
+    // Broadcast message to the room
+    io.to(data.chatRoomId).emit('receive_message', data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Make io available throughout the app
+app.set('socketio', io);
+
 // Connect to routes
 const route = require('./routes/client/index.route')
 const routeAdmin = require('./routes/admin/index.route')
@@ -83,6 +111,6 @@ const sequelize = dbInstance.getSequelize();
 })();
 
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

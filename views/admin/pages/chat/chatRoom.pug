@@ -1,0 +1,93 @@
+extends ../../layouts/default.pug
+
+block main
+  .container-fluid
+    .d-sm-flex.align-items-center.justify-content-between.mb-4
+      h1.h3.mb-0.text-gray-800 Chat với #{customer.fullName}
+      a.d-none.d-sm-inline-block.btn.btn-sm.btn-primary.shadow-sm(href="/AutoParts/admin/chat") Quay lại
+
+    // Apply chat CSS using style tag with link instead of include
+    style
+      | /* Chat-specific styles */
+      | .chat-container {
+      |   height: 400px;
+      |   overflow-y: auto;
+      |   padding: 15px;
+      |   border: 1px solid #e3e6f0;
+      |   border-radius: 5px;
+      |   background-color: #f8f9fc;
+      | }
+      | .message {
+      |   margin-bottom: 15px;
+      |   max-width: 80%;
+      | }
+      | .message-incoming {
+      |   margin-right: auto;
+      | }
+      | .message-outgoing {
+      |   margin-left: auto;
+      | }
+      | .message-content {
+      |   padding: 10px 15px;
+      |   border-radius: 18px;
+      |   position: relative;
+      | }
+      | .message-incoming .message-content {
+      |   background-color: #e9ecef;
+      |   border-bottom-left-radius: 5px;
+      | }
+      | .message-outgoing .message-content {
+      |   background-color: #4e73df;
+      |   color: white;
+      |   border-bottom-right-radius: 5px;
+      | }
+      | .message-time {
+      |   font-size: 0.75rem;
+      |   margin-top: 5px;
+      |   opacity: 0.7;
+      | }
+      | .chat-input {
+      |   margin-top: 20px;
+      | }
+      | .customer-info {
+      |   display: flex;
+      |   align-items: center;
+      | }
+      | .customer-info i {
+      |   margin-right: 8px;
+      | }
+
+    .card.shadow.mb-4
+      .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+        h6.m-0.font-weight-bold.text-primary.customer-info
+          i.fas.fa-user(style='font-family: "Nunito", sans-serif;')  #{customer.fullName} (#{customer.email})
+      .card-body
+        // Messages container
+        #messages-container.chat-container
+          if messages && messages.length > 0
+            each message in messages
+              div(class=message.senderType === 'employee' && message.userEmail === adminEmail ? 'message message-outgoing' : 'message message-incoming')
+                .message-content
+                  .message-text= message.content
+                  .message-time= new Date(message.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+          else
+            .text-center.text-muted
+              p Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!
+        
+        // Chat input
+        .chat-input.mt-3
+          .d-flex
+            input#message-input.form-control(type="text", placeholder="Nhập tin nhắn...", required)
+            button#send-button.btn.btn-primary.ml-2(type="button" style='font-family: "Nunito", sans-serif;') Gửi
+        
+        // Hidden fields for JavaScript
+        input#chatRoomId(type="hidden", value=chatRoomId)
+        input#adminEmail(type="hidden", value=adminEmail)
+        input#customerEmail(type="hidden", value=customer.email)
+
+block scripts
+  // Include Socket.IO client 
+  script(src="/socket.io/socket.io.js")
+
+  // Include custom chat admin JS
+  script(src="/js/chat/admin-chat.js")

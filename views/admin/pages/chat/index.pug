@@ -1,0 +1,48 @@
+extends ../../layouts/default.pug
+block main
+  .container-fluid
+    .d-sm-flex.align-items-center.justify-content-between.mb-4
+      h1.h3.mb-0.text-gray-800 Trò chuyện với khách hàng
+
+    .card.shadow.mb-4
+      .card-header.py-3
+        h6.m-0.font-weight-bold.text-primary Danh sách khách hàng có tin nhắn
+      .card-body
+        .table-responsive
+          table#dataTable.table.table-bordered(width="100%", cellspacing="0")
+            thead
+              tr
+                th Họ tên
+                th Email
+                th Số điện thoại
+                th Trạng thái
+                th Tin nhắn chưa đọc
+                th Thao tác
+            tbody
+              if customers && customers.length > 0
+                each customer in customers
+                  tr
+                    td= customer.fullName
+                    td= customer.email
+                    td= customer.phone
+                    td
+                      span(class="badge " + (customer.status === 'Active' ? 'badge-success' : 'badge-danger'))
+                        = customer.status
+                    td
+                      if customer.unreadCount > 0
+                        span.badge.badge-danger= customer.unreadCount
+                      else
+                        span.badge.badge-secondary 0
+                    td
+                      a.btn.btn-primary.btn-sm(href=`/AutoParts/admin/chat/${customer.email}`)
+                        i.fas.fa-comments  Chat
+              else
+                tr
+                  td.text-center(colspan="6") Chưa có cuộc trò chuyện nào với khách hàng
+
+block scripts
+  // Include Socket.IO client
+  script(src="/socket.io/socket.io.js")
+  
+  // Include admin chat notification script
+  script(src="/js/admin-chat-notification.js")

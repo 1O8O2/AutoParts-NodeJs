@@ -9,6 +9,15 @@ ul.navbar-nav.sidebar.sidebar-light.accordion#accordionSidebar
             a.nav-link(href=`${prefixAdmin}/statistic`)
                 i.fa-solid.fa-chart-column
                 span Thống kê
+    
+    // Add the Chat menu item
+    if (permission.includes("CHAT_XEM"))
+        li.nav-item
+            a.nav-link(href=`${prefixAdmin}/chat`)
+                i.fa-solid.fa-comments
+                span Chat với khách hàng
+                span.chat-notification-icon(style="display: none; position: absolute; background-color: #e74a3b; color: white; border-radius: 50%; font-size: 12px; width: 20px; height: 20px; text-align: center; line-height: 20px; top: 10px; right: 20px;") 0
+                
     li.nav-item
         a.nav-link.collapsed(href="#" data-toggle="collapse" data-target="#productPage" aria-expanded="true" aria-controls="collapsePage")
             i.fas.fa-fw.fa-solid.fa-gears

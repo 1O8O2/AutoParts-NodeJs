@@ -72,6 +72,7 @@ module.exports.createOrder = async (req, res) => {
         {
             console.log('Discount usage limit exceeded');
             req.flash('error', res.locals.messages.DISCOUNT_LIMIT_EXCEEDED);
+        
             return res.redirect(query);
         }
 
