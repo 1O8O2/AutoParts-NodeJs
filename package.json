@@ -26,7 +26,9 @@
     "nodemailer": "^6.10.1",
     "pug": "^3.0.3",
     "sequelize": "^6.37.6",
-    "streamifier": "^0.1.1"
+    "socket.io": "^4.8.1",
+    "streamifier": "^0.1.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

@@ -60,8 +60,19 @@ div.header
             button.btn.btn--primary.header__cart-view-cart(type='submit') 
               i.fa-solid.fa-credit-card
               |  Thanh toán
+      if user
+        .header_chat
+          a.nav-link(href='/AutoParts/chat', aria-current='page')
+            button.header-right_chat(type='button')
+              .header-chat_button
+                i.fa-solid.fa-comments.logo-chat
+                span.title-chat Hỗ trợ
   .header_menu
     ul.header_menu-list
+      li
+        a.menu-item(href='#products')
+          | Sản phẩm
+          i.fa.fa-angle-down(aria-hidden='true')
       li
         a.menu-item(href='#categories')
           | Danh mục
@@ -75,10 +86,6 @@ div.header
                   .mini-menu
                     each child in value 
                       p.mini-item #{child}
-      li
-        a.menu-item(href='#products')
-          | Sản phẩm
-          i.fa.fa-angle-down(aria-hidden='true')
       li
         a(href='#contact')
           | Liên hệ

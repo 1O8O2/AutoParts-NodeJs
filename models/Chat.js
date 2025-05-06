@@ -1,8 +1,15 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/database');
 const Account = require('./Account');
+const { v4: uuidv4 } = require('uuid');
 
 const Chat = sequelize.define('Chat', {
+  messageId: {
+    type: DataTypes.STRING(36),
+    primaryKey: true,
+    defaultValue: () => uuidv4(),
+    allowNull: false
+  },
   userEmail: {
     type: DataTypes.STRING(255),
     allowNull: false,
@@ -13,31 +20,35 @@ const Chat = sequelize.define('Chat', {
   },
   chatRoomId: {
     type: DataTypes.STRING(50),
-    primaryKey: true,
-    allowNull: false
+    allowNull: false,
   },
   content: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
+  },
+  senderType: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    defaultValue: 'customer' // Options: 'customer', 'employee', 'system'
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: DataTypes.NOW,
   },
   status: {
     type: DataTypes.STRING(50),
-    defaultValue: 'Active',
+    defaultValue: 'Unread',
     allowNull: true
   },
   deletedAt: {
     type: DataTypes.DATE,
     allowNull: true
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
-  },
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: DataTypes.NOW
   },
   deleted: {
     type: DataTypes.BOOLEAN,
@@ -46,7 +57,47 @@ const Chat = sequelize.define('Chat', {
   }
 }, {
   tableName: 'Chat',
-  timestamps: true
+  timestamps: true,
+  // No longer need composite primary key since we have messageId
+  id: false,
+  indexes: [
+    {
+      name: 'idx_chat_room_id',
+      fields: ['chatRoomId']
+    },
+    {
+      name: 'idx_chat_user_email',
+      fields: ['userEmail']
+    },
+    {
+      name: 'idx_chat_status',
+      fields: ['status']
+    }
+  ],
+  hooks: {
+    beforeCreate: (instance) => {
+      if (!instance.messageId) {
+        instance.messageId = uuidv4();
+      }
+    },
+    beforeUpdate: (instance) => {
+      // Remove timezone information from dates to prevent SQL Server conversion errors
+      if (instance.createdAt && instance.changed('createdAt')) {
+        if (typeof instance.createdAt === 'string') {
+          // Format date to SQL Server compatible format
+          instance.createdAt = instance.createdAt.split('+')[0].trim();
+        }
+      }
+    },
+    beforeBulkUpdate: (options) => {
+      // Handle date formatting in bulk updates (e.g., when using update() method)
+      if (options.where && options.where.createdAt) {
+        if (typeof options.where.createdAt === 'string') {
+          options.where.createdAt = options.where.createdAt.split('+')[0].trim();
+        }
+      }
+    }
+  }
 });
 
 // Define relationship with Account
