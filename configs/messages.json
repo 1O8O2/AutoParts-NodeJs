@@ -45,7 +45,7 @@
   "UPDATE_PRODUCT_SUCCESS": "Cập nhật sản phẩm thành công!",
   "UPDATE_PRODUCT_ERROR": "Cập nhật sản phẩm thất bại!",
   "DELETE_PRODUCT_SUCCESS": "Xóa sản phẩm thành công!",
-  "DELETE_PRODUCT_ERROR": "Xóa sản phẩm thất bại!"
+  "DELETE_PRODUCT_ERROR": "Xóa sản phẩm thất bại!",
   "REGISTER_ERROR": "Đăng ký thất bại!",
   "EMAIL_REQUIRED_WARNING": "Email là bắt buộc!",
   "ACCOUNT_CREATE_SUCCESS": "Đăng ký tài khoản thành công!",
@@ -73,5 +73,7 @@
   "ADD_TO_CART_FAILED": "Thêm sản phẩm vào giỏ hàng thất bại!",
   "REMOVE_FROM_CART_SUCCESS": "Xóa sản phẩm khỏi giỏ hàng thành công!",
   "REMOVE_FROM_CART_FAILED": "Xóa sản phẩm khỏi giỏ hàng thất bại!",
-  "NO_PRODUCT_SELECTED": "Vui lòng chọn sản phẩm!"
+  "NO_PRODUCT_SELECTED": "Vui lòng chọn sản phẩm!",
+  "LOADING_ERROR": "Đã xảy ra lỗi khi tải dữ liệu!",
+  "CUSTOMER_NOT_FOUND_WARNING": "Không tìm thấy thông tin khách hàng!"
 }

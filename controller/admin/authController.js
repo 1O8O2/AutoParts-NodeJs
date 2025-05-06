@@ -16,7 +16,7 @@ module.exports.loginPost = async (req, res) => {
   try {
     const account = await Account.findByPk(req.body.email);
     
-    if (account != null && account.password == req.body.password && account.status != 'Deleted') {
+    if (account != null && account.password == req.body.password && account.status != 'Deleted' && account.roleGroupId != 'RG002') {
       res.cookie("token", account.token);
       return res.redirect(`${systemConfig.prefixAdmin}/dashboard/profile`);
     }

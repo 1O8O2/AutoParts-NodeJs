@@ -18,7 +18,6 @@ module.exports.showProduct = async (req, res) => {
         const brand = await Brand.findByPk(product.brandId);
         const group = await ProductGroup.findByPk(product.productGroupId);
         const inStock = product.stock > 0;
-
         res.render('client/pages/product/productDetail', {
             product,
             imgUrls,
@@ -27,6 +26,8 @@ module.exports.showProduct = async (req, res) => {
             inStock,
         });
     } catch (error) {
+        console.error('Error in showProduct:', error);
+        req.flash('error', res.locals.messages.LOADING_ERROR);
         res.render('client/pages/product/productDetail', { message: 'Đã xảy ra lỗi khi tải sản phẩm' });
     }
 };
@@ -101,14 +102,14 @@ module.exports.addProduct = async (req, res) => {
                 // Refresh cart data
                 const updatedCart = await Cart.findByPk(cart.cartId);
                 res.locals.cart = updatedCart;
+                req.flash('success', res.locals.messages.ADD_TO_CART_SUCCESS);
+                return res.redirect('back');
             } catch (err) {
                 console.error('Error in addProduct:', err);
                 req.flash('error', res.locals.messages.ADD_TO_CART_FAILED);
                 return res.redirect('back');
             }
         }
-
-        res.redirect('back');
     } catch (error) {
         console.error('Error in addProduct:', error);
         req.flash('error', res.locals.messages.ADD_TO_CART_FAILED);
@@ -122,6 +123,7 @@ module.exports.deleteProduct = async (req, res) => {
         const referer = req.headers.referer || '/AutoParts'; 
 
         if (!res.locals.user) {
+            req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
             return res.redirect('/AutoParts/account/login'); // Or handle differently
         }
 

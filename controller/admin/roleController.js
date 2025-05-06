@@ -1,6 +1,7 @@
 const { RoleGroup } = require("../../models/RoleGroup");
 const generateId = require("../../helpers/generateId");
 const systemConfig = require("../../configs/system");
+const { Op } = require("sequelize");
 
 // [GET] /AutoParts/admin/role
 module.exports.index = async (req, res) => {
@@ -175,6 +176,9 @@ module.exports.changeStatus = async (req, res) => {
 module.exports.permissions = async (req, res) => {
   const roleGroup = await RoleGroup.findAll({
     where: {
+      roleGroupId: {
+        [Op.ne]: 'RG002'
+      },
       status: 'Active',
       deleted: false
     }

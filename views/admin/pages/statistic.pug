@@ -3,9 +3,7 @@ include ../mixins/alert.pug
 include ../mixins/currency.pug
 
 block main
-    +alert-error(3000)
-    +alert-success(3000)
-
+    #alertContainer
     .d-sm-flex.align-items-center.justify-content-between.mb-4
         h1.h3.mb-0.text-gray-800 Thống kê
 
@@ -138,7 +136,7 @@ block main
                             tr
                                 th Mã đơn hàng
                                 th Ngày đặt
-                                th Số điện thoại
+                                th Email
                                 th Trạng thái
                                 th Hoạt động
                         tbody
@@ -147,9 +145,21 @@ block main
                                     td
                                         a(href="#") #{order.orderId}
                                     td #{order.orderDate}
-                                    td #{order.userPhone}
+                                    td #{order.userEmail}
                                     td
-                                        span.badge.badge-success #{order.status}
+                                        case order.status
+                                            when "Pending"
+                                                span.badge.badge-warning Chờ xác nhận
+                                            when "Completed"
+                                                span.badge.badge-success Đã hoàn thành
+                                            when "Cancelled"
+                                                span.badge.badge-danger Đã hủy
+                                            when "Processing"
+                                                span.badge.badge-info Đang xử lý
+                                            when "Shipping"
+                                                span.badge.badge-primary Đang vận chuyển
+                                            default
+                                                span.badge.badge-secondary #{order.status}
                                     td
                                         a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi tiết
 

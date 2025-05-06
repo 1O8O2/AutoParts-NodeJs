@@ -11,13 +11,14 @@ module.exports.statistic = async (req, res) => {
     const today = new Date();
     today.setHours(23, 59, 59, 999); // Set to end of day
 
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0); // Set to start of day
+    
+    // Get first date of current year
+    const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+    firstDayOfYear.setHours(0, 0, 0, 0); // Set to start of day
 
     // Get date range from query parameters or use defaults (today and yesterday)
-    let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : yesterday;
-    let toDate = req.query.toDate ? new Date(req.query.toDate) : today;
+    let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : firstDayOfYear;
+    let toDate = req.query.toDate ? new Date(req.query.toDate) : today; 
 
     // Ensure fromDate starts at beginning of day and toDate ends at end of day
     fromDate.setHours(0, 0, 0, 0);
