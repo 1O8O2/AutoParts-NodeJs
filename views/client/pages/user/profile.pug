@@ -224,6 +224,13 @@ html
               isValid = false;
               errorMessage = window.messages.INVALID_PASSWORD_ERROR;
             }
+            
+            // Check if new password is the same as current password
+            const currentPassword = document.querySelector('input[name="pass"]').value;
+            if (input.value === currentPassword) {
+              isValid = false;
+              errorMessage = window.messages.NOT_DIFFERENT_PASSWORD_WARNING;
+            }
           } else if (input.name === 'confirmpass') {
             const newPassword = document.querySelector('input[name="newpass"]').value;
             const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
