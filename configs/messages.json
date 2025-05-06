@@ -28,6 +28,7 @@
   "CREATE_ORDER_ERROR": "Đặt hàng thất bại!",
 
   "INVALID_PRODUCT_NUMBER": "Số lượng sản phẩm không hợp lệ!",
+  "INVALID_PRODUCT_COST_PRICE": "Giá nhập sản phẩm không hợp lệ!",
   "INVALID_ADDRESS_WARNING": "Địa chỉ không hợp lệ!",
   "INVALID_PHONE_WARNING": "Số điện thoại không hợp lệ!",
   "INVALID_EMAIL_WARNING": "Email không hợp lệ!",
@@ -45,7 +46,7 @@
   "UPDATE_PRODUCT_SUCCESS": "Cập nhật sản phẩm thành công!",
   "UPDATE_PRODUCT_ERROR": "Cập nhật sản phẩm thất bại!",
   "DELETE_PRODUCT_SUCCESS": "Xóa sản phẩm thành công!",
-  "DELETE_PRODUCT_ERROR": "Xóa sản phẩm thất bại!"
+  "DELETE_PRODUCT_ERROR": "Xóa sản phẩm thất bại!",
   "REGISTER_ERROR": "Đăng ký thất bại!",
   "EMAIL_REQUIRED_WARNING": "Email là bắt buộc!",
   "ACCOUNT_CREATE_SUCCESS": "Đăng ký tài khoản thành công!",
