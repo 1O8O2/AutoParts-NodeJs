@@ -5,6 +5,10 @@ require("dotenv").config();
 const express = require('express');
 const app = express();
 const port = 3000;
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
 // Library to handle Date-Time
 const moment = require("moment");
@@ -20,19 +24,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: true })); // Middleware để parse form
 app.use(express.json());
 
-// Connect to Express Flash library to show notification when changing things
-const flash = require("express-flash");
-const cookieParser = require("cookie-parser");
-const session = require("express-session");
-
-app.use(cookieParser("keyboard cat"));
-app.use(session({ 
-    cookie: { maxAge: 86400000 }, // Increase to 24 hours (1 day)
-    resave: false,
-    saveUninitialized: true,
-    secret: "keyboard cat" 
-}));
-app.use(flash());
+// Initialize session using the SessionManager singleton
+const sessionManager = require('./services/SessionManager');
+sessionManager.initialize(app);
 
 // Set Pug as the view engine
 app.set('views', `${__dirname}/views`);
@@ -55,6 +49,30 @@ app.use(messagesMiddleware.loadMessageCodes);
 const systemConfig = require("./configs/system");
 app.locals.prefixAdmin = systemConfig.prefixAdmin;
 
+// Socket.IO configuration
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Join a chat room
+  socket.on('join_room', (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room: ${roomId}`);
+  });
+
+  // Listen for chat messages
+  socket.on('send_message', async (data) => {
+    // Broadcast message to the room
+    io.to(data.chatRoomId).emit('receive_message', data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Make io available throughout the app
+app.set('socketio', io);
+
 // Connect to routes
 const route = require('./routes/client/index.route')
 const routeAdmin = require('./routes/admin/index.route')
@@ -69,68 +87,30 @@ routeAdmin(app);
 // });
 
 // Sequelize database setup
-const sequelize = require('./configs/database');
+const { DatabaseSingleton } = require('./configs/database');
 
-// Sync database (optional, for development)
-// sequelize.sync({ force: false }).then(() => {
-//   console.log('Database synced');
-//   console.log(Cart.findAll())
-// }).catch(err => {
-//   console.error('Error syncing database:', err);
-// });
+// Get the database instance
+const dbInstance = new DatabaseSingleton().getInstance();
+const sequelize = dbInstance.getSequelize();
 
+// Test and sync the database connection
 (async () => {
   try {
+    // Test connection
+    const isConnected = await dbInstance.testConnection();
+    if (isConnected) {
+      console.log('Database connection ready to use');
+      
+      // Sync database models
       await sequelize.sync({ force: false });
-      console.log('Database synced');
+      console.log('Database models synced successfully');
+    }
+  } catch (err) {
+    console.error('Database initialization error:', err);
   }
-  catch (err) {
-    console.error('Error', err);
-}
 })();
 
-// (async () => {
-//   try {
-//       // Fetch product groups
-//       const pgLst = await ProductGroup.findAll();
-//       const parentGroups = pgLst.filter(pg => !pg.parentGroupId);
-//       const groups = {};
-//       parentGroups.forEach(pg => {
-//           const childGroups = pgLst
-//               .filter(pgr => pgr.parentGroupId && pgr.parentGroupId === pg.productGroupId && pgr.productGroupId !== pg.productGroupId)
-//               .map(pgr => pgr.groupName);
-//           groups[pg.groupName] = childGroups;
-//       });
 
-//       // Fetch brands và blogGroups
-//       const brands = await Brand.findAll();
-//       const blogGroups = await BlogGroup.findAll();
-
-//       // Lưu vào app.locals
-//       app.locals.groups = groups;
-//       app.locals.brands = brands;
-//       app.locals.blogGroups = blogGroups;
-
-//       let cart = { products: ['adsadas'] }; // Default to empty array for consistency
-//       if (acc) {
-//         const cus = await Customer.findByPk(acc.phone);
-//         if (cus) {
-//           const foundCart = await Cart.findByPk(cus.cartId);
-//           console.log(foundCart)
-//           cart = foundCart || { products: ['dsadadasd'] }; // Fallback to empty array if null
-//         }
-//       }
-  
-//       req.session.cart = cart;
-//       console.log("session:",req.session)
-
-//       console.log('Dữ liệu toàn cục đã được tải thành công');
-//   } catch (error) {
-//       console.error('Lỗi khi tải dữ liệu toàn cục:', error);
-//   }
-// })();
-
-
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

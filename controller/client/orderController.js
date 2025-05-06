@@ -16,12 +16,13 @@ module.exports.createOrder = async (req, res) => {
         });
 
         if (!acc) {
+            req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
             return res.redirect('/AutoParts/account/login');
         }
 
         const cus = await Customer.findByPk(acc.email);
         if (!cus) {
-
+            req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND_WARNING);
             return res.redirect('/AutoParts/account/login');
         }
         
@@ -49,6 +50,7 @@ module.exports.createOrder = async (req, res) => {
         //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
 
         if (selectedProducts.length === 0) {
+            req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
             return res.render('client/pages/order/order', { message: 'No products selected for order' });
         }
 
@@ -69,7 +71,8 @@ module.exports.createOrder = async (req, res) => {
         if(discount && discount.usageLimit<=0)
         {
             console.log('Discount usage limit exceeded');
-            req.flash('error', 'Mã giảm giá đã hết lượt sử dụng');
+            req.flash('error', res.locals.messages.DISCOUNT_LIMIT_EXCEEDED);
+        
             return res.redirect(query);
         }
 
@@ -141,6 +144,7 @@ module.exports.showDetail = async (req, res) => {
         const orderId = req.query.orderId;
         const order = await Order.findByPk(orderId);
         if (!order) {
+            req.flash('error', res.locals.messages.ORDER_NOT_FOUND);
             return res.render('client/pages/order/orderDetail', { message: 'Order not found' });
         }
 
@@ -150,6 +154,7 @@ module.exports.showDetail = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in showDetail:', error);
+        req.flash('error', res.locals.messages.ORDER_DETAIL_ERROR);
         return res.redirect('/AutoParts/account/login');
     }
 };
@@ -163,17 +168,21 @@ module.exports.showCart = async (req, res) => {
         });
 
         if (!acc) {
+            req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
             return res.redirect('/AutoParts/account/login');
         }
 
         const cus = await Customer.findByPk(acc.email);
         //console.log(cus)
         if (!cus) {
+
+            req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND_WARNING);
             return res.redirect('/AutoParts/account/login');
         }
         
         const cart = await Cart.findByPk(cus.cartId);
         if (!cart) {
+            req.flash('error', res.locals.messages.CART_NOT_FOUND_WARNING);
             return res.render('client/pages/order/order', { message: 'Cart not found' });
         }
 
@@ -193,6 +202,7 @@ module.exports.showCart = async (req, res) => {
         res.render('client/pages/order/order', { selectedProducts, discounts});
     } catch (error) {
         console.error('Error in showCart:', error);
+        req.flash('error', res.locals.messages.CART_ERROR);
         return res.render('client/pages/order/order', { message: 'Error processing cart' });
     }
 };
@@ -216,9 +226,11 @@ module.exports.cancel = async (req, res) => {
         order.deleted = true;
         order.deletedAt = new Date(Date.now()).toISOString();;
         await order.save();
-
+        req.flash('success', res.locals.messages.ORDER_CANCEL_SUCCESS);
+        return res.redirect('/AutoParts/account/profile');
         
     } catch (error) {
+        req.flash('error', res.locals.messages.ORDER_CANCEL_ERROR);
         console.error('Error in showDetail:', error);
         return res.redirect('/AutoParts/account/login');
     }

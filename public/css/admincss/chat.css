@@ -1,0 +1,162 @@
+/* Chat styles for admin chat interface */
+/* Adding consistent font-family for admin chat */
+.chat-container, 
+.message, 
+.message-text, 
+.chat-input,
+#message-input,
+#send-button,
+.card-header h6,
+.customer-info {
+  font: "Nunito", sans-serif;
+}
+
+/* Chat styles for admin chat interface */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  background-color: #f8f9fc;
+  border-radius: 8px;
+  padding: 15px;
+  height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background-color: #a9b2cd;
+  border-radius: 3px;
+}
+
+.message {
+  max-width: 70%;
+  padding: 12px 15px;
+  border-radius: 15px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  position: relative;
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-incoming {
+  align-self: flex-start;
+  background-color: #f1f3f5;
+  color: #212529;
+  border-bottom-left-radius: 5px;
+}
+
+.message-outgoing {
+  align-self: flex-end;
+  background-color: #4e73df;
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-text {
+  word-break: break-word;
+}
+
+.message-time {
+  font-size: 0.7rem;
+  margin-top: 3px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.chat-input {
+  margin-top: 15px;
+}
+
+.chat-input .d-flex {
+  gap: 10px;
+}
+
+#message-input {
+  border-radius: 20px;
+  padding: 10px 15px;
+  border: 1px solid #d1d3e2;
+  transition: border-color 0.3s;
+}
+
+#message-input:focus {
+  border-color: #4e73df;
+  box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+  outline: none;
+}
+
+#send-button {
+  border-radius: 20px;
+  padding: 8px 20px;
+  background-color: #4e73df;
+  border-color: #4e73df;
+  transition: all 0.3s;
+}
+
+#send-button:hover {
+  background-color: #2e59d9;
+  border-color: #2653d4;
+  transform: translateY(-2px);
+}
+
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+  background-color: #f8f9fc;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.card-header h6 {
+  color: #4e73df;
+}
+
+.text-muted {
+  padding: 20px 0;
+}
+
+/* Customer info display */
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-info i {
+  color: #4e73df;
+}
+
+/* Unread message indicator */
+#unread-message-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #e74a3b;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  min-width: 20px;
+  height: 20px;
+  box-shadow: 0 2px 5px rgba(231, 74, 59, 0.3);
+}

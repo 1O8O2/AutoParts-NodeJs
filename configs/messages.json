@@ -74,5 +74,7 @@
   "ADD_TO_CART_FAILED": "Thêm sản phẩm vào giỏ hàng thất bại!",
   "REMOVE_FROM_CART_SUCCESS": "Xóa sản phẩm khỏi giỏ hàng thành công!",
   "REMOVE_FROM_CART_FAILED": "Xóa sản phẩm khỏi giỏ hàng thất bại!",
-  "NO_PRODUCT_SELECTED": "Vui lòng chọn sản phẩm!"
+  "NO_PRODUCT_SELECTED": "Vui lòng chọn sản phẩm!",
+  "LOADING_ERROR": "Đã xảy ra lỗi khi tải dữ liệu!",
+  "CUSTOMER_NOT_FOUND_WARNING": "Không tìm thấy thông tin khách hàng!"
 }

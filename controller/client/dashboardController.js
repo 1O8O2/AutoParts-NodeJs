@@ -19,6 +19,7 @@ module.exports.index = async (req, res) => {
       products: newProLst
     });
   } catch (error) {
+    req.flash('error', res.locals.messages.LOADING_ERROR);
     res.render('dashboard', { message: 'Đã xảy ra lỗi khi tải trang' });
   }
 };

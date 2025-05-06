@@ -29,7 +29,7 @@ module.exports.register = async (req, res) => {
 
     if (!email) {
         req.flash('error', res.locals.messages.EMAIL_REQUIRED_WARNING);
-        return res.render('back');
+        return res.redirect('back');
     }
 
     try {
@@ -53,7 +53,7 @@ module.exports.register = async (req, res) => {
         });
         if (!newAccount) {
             req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
-            return res.render('back');
+            return res.redirect('back');
         }
         res.cookie("tokenUser", newAccount.token);
 
@@ -73,12 +73,12 @@ module.exports.register = async (req, res) => {
             // Rollback Account if Customer creation fails
             await Account.destroy({ where: { email: email } });
             req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
-            return res.render('back');       
+            return res.redirect('back');       
         }
     } catch (error) {
         console.error("Registration error:", error);
         req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
-        return res.render('back');
+        return res.redirect('back');
     }
 }
 
@@ -87,7 +87,7 @@ module.exports.showLogIn = async (req, res) => {
     if (req.cookies?.tokenUser) {
         return res.redirect(systemConfig.prefixUrl+'/account/profile');
     }
-
+    req.flash('error', res.locals.messages.LOGIN_ERROR);
     return res.render('client/pages/user/login',
         {
             messagelist: res.locals.messages,
@@ -121,7 +121,7 @@ module.exports.logIn = async (req, res) => {
 
     res.cookie("cartId", cart.cartId);
     res.cookie("tokenUser", account.token);
-
+    req.flash('success', res.locals.messages.LOGIN_SUCCESS);
     return res.redirect(systemConfig.prefixUrl+'/account/profile');
 }
 
@@ -146,7 +146,7 @@ module.exports.showProfile = async (req, res) => {
     } catch (error) {
         console.error('Error fetching profile:', error);
         req.flash('error', res.locals.messages.DATA_ERROR);
-        return res.render('back');
+        return res.redirect('back');
     }
 }
 
@@ -156,6 +156,7 @@ module.exports.accountEdit = async(req, res) => {
         where: { token: req.cookies.tokenUser }
     });
     if (!acc) {
+        req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
         return res.redirect(systemConfig.prefixUrl+'account/login');
     }
     console.log(req.body)
@@ -190,6 +191,7 @@ module.exports.accountEdit = async(req, res) => {
     }
 
     try {
+
         await Customer.update(
             req.body,
             { 
@@ -223,7 +225,7 @@ module.exports.changePassword = async(req, res) => {
             req.flash('error', res.locals.messages.NOT_MATCH_PASSWORD_WARNING);
             return res.redirect('back');
         }
-        if (newpass.length < 6||pass.length < 6 ||confirmpass.length < 6) {
+        if (newpass.length < 4||pass.length < 4 ||confirmpass.length < 4) {
             req.flash('error', res.locals.messages.INVALID_PASSWORD_WARNING);
             return res.redirect('back');
         }
@@ -242,6 +244,7 @@ module.exports.changePassword = async(req, res) => {
                     } 
                 }
             );
+
             req.flash('success', res.locals.messages.CHANGE_PASSWORD_SUCCESS);
             return res.redirect('back');
         } else {
@@ -266,6 +269,7 @@ module.exports.logOut = async(req, res) => {
 
 // [GET] /account/forgot-password
 module.exports.showForgotPassword = async (req, res) => {
+    
     res.render('client/pages/user/forgot-password');
 }
 
