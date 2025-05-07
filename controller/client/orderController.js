@@ -85,7 +85,7 @@ module.exports.createOrder = async (req, res) => {
 
         if (!shippingType) {
             console.log('Shipping type not selected');
-            req.flash('error', 'Vui lòng chọn loại vận chuyển');
+            req.flash('error',  messages.BLANK_SHIPPING_TYPE);
             return res.redirect(query);
         }
 
@@ -93,7 +93,7 @@ module.exports.createOrder = async (req, res) => {
         if(discount && discount.usageLimit<=0)
         {
             console.log('Discount usage limit exceeded');
-            req.flash('error', 'Mã giảm giá đã hết lượt sử dụng');
+            req.flash('error', messages.DISCOUNT_QUANTITY_EXCEEDED);
             return res.redirect(query);
         }
 
@@ -157,7 +157,7 @@ module.exports.createOrder = async (req, res) => {
 
         return res.render('client/pages/order/success'); // Render success page
    } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra trong quá trình tạo đơn hàng');
+        req.flash('error',  messages.CREATE_ORDER_ERROR);
         return res.redirect('back');
     }
 };
