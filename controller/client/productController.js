@@ -37,18 +37,28 @@ module.exports.addProduct = async (req, res) => {
     try {
         const { productId, quantity } = req.body; // From form data (POST)
 
-        if (!res.locals.user) {
-            return res.redirect('/AutoParts/account/login'); // Or handle differently
+        let acc, cus, cart;
+        if(req.cookies.tokenUser!=null)
+        {
+            acc = await Account.findOne({
+                where: { token: req.cookies.tokenUser }
+            });
         }
-
-        const cus = await Customer.findByPk(res.locals.user.email);
-        if (!cus) {
-            return res.redirect('/AutoParts/account/login');
+         
+        if(acc)
+        {
+            cus = await Customer.findByPk(acc.email);
+            console.log(cus)
         }
-
-        const cart = await Cart.findByPk(cus.cartId);
-        if (!cart) {
-            return res.render('client/pages/product/productDetail', { message: 'Giỏ hàng không tồn tại' });
+        
+        if (cus) {
+            // return res.render('client/pages/order/order', { message: 'Cart not found' });
+            cart = await Cart.findByPk(cus.cartId);
+        }
+        else
+        {
+            cart = await Cart.findByPk(req.cookies.cartId);
+            console.log(cart.cartId)
         }
 
         const product = await Product.findByPk(productId);
@@ -81,27 +91,37 @@ module.exports.addProduct = async (req, res) => {
 module.exports.deleteProduct = async (req, res) => {
     try {
         console.log('Delete product from cart');
-        const acc = await Account.findOne({
-            where: { token: req.cookies.tokenUser }
-        });
+
+        let acc, cus, cart;
+        if(req.cookies.tokenUser!=null)
+        {
+            acc = await Account.findOne({
+                where: { token: req.cookies.tokenUser }
+            });
+        }
+         
+        if(acc)
+        {
+            cus = await Customer.findByPk(acc.email);
+            console.log(cus)
+        }
+        
+        if (cus) {
+            // return res.render('client/pages/order/order', { message: 'Cart not found' });
+            cart = await Cart.findByPk(cus.cartId);
+        }
+        else
+        {
+            cart = await Cart.findByPk(req.cookies.cartId);
+            console.log(cart.cartId)
+        }
 
         const { productId } = req.query; 
         const referer = req.headers.referer || '/AutoParts'; 
         console.log('Referer:', referer);
         //console.log(productId)
         //console.log(acc)
-
-        if (!acc) {
-            return res.redirect('/AutoParts/account/login'); // Or handle differently
-        }
-
-        const cus = await Customer.findByPk(acc.email);
-        //console.log(cus)
-        if (!cus) {
-            return res.redirect('/AutoParts/account/login');
-        }
         
-        const cart = await Cart.findByPk(cus.cartId);
         //console.log(cart.products)
         if (cart && cart.products) {
             console.log('cart.products before filter:', cart.products);

@@ -5,29 +5,53 @@ const Product = require('../../models/Product');
 const Discount = require('../../models/Discount');
 const Order = require('../../models/Order');
 const Account = require('../../models/Account');
+const messages = require('../../configs/messages.json'); // Adjust the path as needed
 
 
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
     try {
         console.log('Creating order...');
-        const acc = await Account.findOne({
-            where: { token: req.cookies.tokenUser }
-        });
+        let acc, cus, cart;
+        console.log(acc, cus, cart)
+        if(req.cookies.tokenUser!=null)
+        {
+            acc = await Account.findOne({
+                where: { token: req.cookies.tokenUser }
+            });
 
-        if (!acc) {
-            return res.redirect('/AutoParts/account/login');
+            cus = await Customer.findByPk(acc.email);
+            console.log(cus)
+
+            cart = await Cart.findByPk(cus.cartId);
+        }
+        else
+        {
+            acc = await Account.create({
+                email: req.body.email,
+                password: "",
+                token: null,
+                permission: 'RG002', 
+                status: 'Guest',
+                deleted: false
+            });
+
+            console.log('Account created:', acc)
+
+            cus = await Customer.create({
+                email: req.body.email,
+                cartId: req.cookies.cartId,
+                fullName: "",
+                phone : null,
+                address : null,
+                status: 'Guest'
+            });
+            console.log('Customer created:', cus)
+
+            cart = await Cart.findByPk(req.cookies.cartId);
         }
 
-        const cus = await Customer.findByPk(acc.email);
-        if (!cus) {
-            return res.redirect('/AutoParts/account/login');
-        }
-        
-        const cart = await Cart.findByPk(cus.cartId);
-        if (!cart) {
-            throw new Error('Cart not found');
-        }
+        console.log(acc, cus, cart)
 
         let query='/AutoParts/order?';
 
@@ -46,11 +70,13 @@ module.exports.createOrder = async (req, res) => {
 
         //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
 
+        
         if (selectedProducts.length === 0) {
             return res.render('client/pages/order/order', { message: 'No products selected for order' });
         }
 
         const totalCost = parseFloat(req.body.totalCost) *1000;
+        console.log('Total cost:', totalCost);
         const discountId = req.body.discountId || null;
         const shipAddress = req.body.shipAddress;
         const shippingType = req.body.shippingType;
@@ -86,14 +112,21 @@ module.exports.createOrder = async (req, res) => {
             discountId: discountId,
             userEmail: acc.email,
             shipAddress: shipAddress,
+            shippingType: shippingType,
             totalCost: totalCost,
             status: 'Pending',
             deletedAt: null,
             confirmedBy: null,
             deleted: false
         });
+        
 
-        if(discount) await Discount.setUsedDiscount(acc.email, discountId);
+        if(discount) 
+        {
+            await Discount.setUsedDiscount(acc.email, discountId);
+            discount.usageLimit -= 1;
+            await discount.save();
+        }
 
         // Create order details and update cart
         const updatedProductsInCart = productsInCart.filter(item => ![item.product]);
@@ -123,9 +156,9 @@ module.exports.createOrder = async (req, res) => {
         console.log('Cart updated successfully');
 
         return res.render('client/pages/order/success'); // Render success page
-    } catch (error) {
-        console.error('Error in createOrder:', error);
-        return res.redirect('/AutoParts/account/login');
+   } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra trong quá trình tạo đơn hàng');
+        return res.redirect('back');
     }
 };
 
@@ -156,38 +189,49 @@ module.exports.showDetail = async (req, res) => {
 module.exports.showCart = async (req, res) => {
     try {
         console.log('Showing cart...');
-        const acc = await Account.findOne({
-            where: { token: req.cookies.tokenUser }
-        });
-
-        if (!acc) {
-            return res.redirect('/AutoParts/account/login');
+        let acc, cus, cart;
+        if(req.cookies.tokenUser!=null)
+        {
+            acc = await Account.findOne({
+                where: { token: req.cookies.tokenUser }
+            });
         }
-
-        const cus = await Customer.findByPk(acc.email);
-        //console.log(cus)
-        if (!cus) {
-            return res.redirect('/AutoParts/account/login');
+         
+        if(acc)
+        {
+            cus = await Customer.findByPk(acc.email);
+            console.log(cus)
         }
         
-        const cart = await Cart.findByPk(cus.cartId);
-        if (!cart) {
-            return res.render('client/pages/order/order', { message: 'Cart not found' });
+        if (cus) {
+            // return res.render('client/pages/order/order', { message: 'Cart not found' });
+            cart = await Cart.findByPk(cus.cartId);
+        }
+        else
+        {
+            cart = await Cart.findByPk(req.cookies.cartId);
+            //console.log(cart)
         }
 
         let productsInCart = cart.products || [];
 
         // Remove products that are not selected
         const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
-        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
+        //console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
             return res.render('client/pages/order/order', { message: 'No products selected' });
         }
         //console.log('Selected products:', selectedProducts);
-        const discounts = await Discount.getByCustomer(acc.email);
+        let discounts = [];
+        if (acc) {
+            const discountData = await Discount.getByCustomer(acc.email);
+            discounts = Array.isArray(discountData) ? discountData : []; // Ensure discounts is an array
+            console.log(discounts)
+        }
         //console.log(discounts)
+        //console.log(messages)
 
-        res.render('client/pages/order/order', { selectedProducts, discounts});
+        res.render('client/pages/order/order', { selectedProducts, discounts, user : cus, messageList : messages});
     } catch (error) {
         console.error('Error in showCart:', error);
         return res.render('client/pages/order/order', { message: 'Error processing cart' });
@@ -211,7 +255,7 @@ module.exports.cancel = async (req, res) => {
         
         order.status = 'Cancelled';
         order.deleted = true;
-        order.deletedAt = new Date(Date.now()).toISOString();;
+        order.deletedAt = new Date(Date.now()).toISOString();
         await order.save();
 
         

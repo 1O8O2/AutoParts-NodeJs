@@ -59,14 +59,18 @@ html(lang="en")
           hr
           .row
             .col(style="padding-left: 0;") Số lượng: #{cart.products.length}
-            each product in cart.products
+            each product in cart.products   
               input(type="hidden" class="form-quantity" name=product.product.productId value=product.amount data-product-id=product.product.productId)
+          p Email
           .row
-            input(type="text" name="shipAddress" placeholder="Địa chỉ" required)
+            input#email(type="email" name="email" placeholder="Email" required value=user && user.email ? user.email : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_EMAIL}')` oninput="this.setCustomValidity('')")
+          p Địa chỉ giao hàng
+          .row
+            input#shipAddress(type="text" name="shipAddress" placeholder="Địa chỉ" required value=user && user.address ? user.address : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_ADDRESS}')` oninput="this.setCustomValidity('')")
           div
             p Loại vận chuyển
             select(name="shippingType" id="shippingType")
-              option(value="" readonly) -- Chọn loại vận chuyển --
+              option(value="" disabled  selected) -- Chọn loại vận chuyển --
               option(value="20000") Vận chuyển thường - 20.000 ₫
               option(value="50000") Vận chuyển nhanh - 50.000 ₫
               option(value="15000") Vận chuyển tiết kiệm - 15.000 ₫
@@ -115,12 +119,16 @@ html(lang="en")
       let quantityInputs = document.querySelectorAll(".quantity");
       let discountSelect = document.getElementById("discountId");
       let shippingSelect = document.getElementById("shippingType");
+      console.log(!{JSON.stringify(messageList)})
+
 
       // Danh sách mã khuyến mãi từ server
       const discounts = [
         !{discounts.map((discount, index) => `{ id: "${discount.discountId}", code: "${discount.discountDesc.replace(/"/g, '\\"')}", amount: ${discount.discountAmount}, minOrderValue: ${discount.minimumAmount} }${index < discounts.length - 1 ? ',' : ''}`).join('')}
       ];
 
+      console.log(`${discounts}`);
+      
       console.log("Discounts: ", discounts);
 
       function updateDiscountOptions(totalCost) {
