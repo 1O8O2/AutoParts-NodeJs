@@ -32,5 +32,6 @@ block main
                                 td.align-middle 
                                     +formatCurrency(order.totalCost)
                                 td.align-middle
-                                    a.btn.btn-sm.btn-primary.mr-1(href=`${prefixAdmin}/order/edit/${order.orderId}`) Sửa
+                                    if (permission.includes("QUAN_LY_DON_HANG_SUA"))
+                                        a.btn.btn-sm.btn-primary.mr-1(href=`${prefixAdmin}/order/edit/${order.orderId}`) Sửa
                                     a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi Tiết

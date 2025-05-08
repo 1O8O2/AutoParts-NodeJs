@@ -8,21 +8,21 @@ const generateNextBrandId = async () => {
         const maxBrand = await Brand.findOne({
             where: {
                 brandId: {
-                    [Op.like]: 'BR%'
+                    [Op.like]: 'BRAND%'
                 }
             },
             order: [['brandId', 'DESC']]
         });
 
         if (!maxBrand) {
-            return 'BR001';
+            return 'BRAND000';
         }
 
-        const currentNum = parseInt(maxBrand.brandId.substring(2));
-        return `BR${String(currentNum + 1).padStart(3, '0')}`;
+        const currentNum = parseInt(maxBrand.brandId.substring(6));
+        return `BRAND${String(currentNum + 1).padStart(3, '0')}`;
     } catch (error) {
         console.error('Error generating brand ID:', error);
-        return 'BR001';
+        return 'BRAND000';
     }
 };
 

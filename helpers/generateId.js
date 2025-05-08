@@ -55,3 +55,23 @@ module.exports.generateNextOrderId = async () => {
         return 'ORD0000'; 
     }
 }
+
+module.exports.generateNextRoleGroupId = async () => {
+    try {
+        const [results] = await sequelize.query(
+            "SELECT MAX(roleGroupId) AS maxId FROM RoleGroup WHERE roleGroupId LIKE 'RG%'",
+            { type: sequelize.QueryTypes.SELECT }
+        );
+
+        const maxId = results ? results.maxId : null;
+
+        if (!maxId) {
+            return 'RG001'; 
+        }
+        
+        const currentNum = parseInt(maxId.substring(2), 10);
+        return `RG${String(currentNum + 1).padStart(3, '0')}`;
+    } catch (error) {
+        return 'RG001'; 
+    }
+}

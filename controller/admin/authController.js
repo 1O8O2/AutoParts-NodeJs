@@ -14,9 +14,9 @@ module.exports.login = async (req, res) => {
 // [POST] /AutoParts/admin/auth/login
 module.exports.loginPost = async (req, res) => {
   try {
-    const account = await Account.findByPk(req.body.phone);
+    const account = await Account.findByPk(req.body.email);
     
-    if (account != null && account.password == req.body.password && account.status != 'Deleted') {
+    if (account != null && account.password == req.body.password && account.status != 'Deleted' && account.roleGroupId != 'RG002') {
       res.cookie("token", account.token);
       return res.redirect(`${systemConfig.prefixAdmin}/dashboard/profile`);
     }
@@ -40,4 +40,12 @@ module.exports.logout = async (req, res) => {
   }
 };
 
+// [GET] /AutoParts/admin/auth/access-denied
+module.exports.accessDenied = async (req, res) => {
+  try {
+    res.render('admin/pages/account/access-denied');
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+};
 

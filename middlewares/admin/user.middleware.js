@@ -2,6 +2,7 @@ const systemConfig = require("../../configs/system");
 
 const Account = require("../../models/Account");
 const Employee = require("../../models/Employee");
+const { RoleGroup } = require("../../models/RoleGroup");
 
 module.exports.infoUser = async (req, res, next) => {
     if (req.cookies.token) {
@@ -17,7 +18,13 @@ module.exports.infoUser = async (req, res, next) => {
                 where: { email: account.email }
             });
             res.locals.user = user;
-            res.locals.systemConfig = systemConfig;
+
+            const permission = await RoleGroup.findOne({
+                where: {
+                    roleGroupId: account.permission
+                }
+            })
+            res.locals.permission = permission.permissions;
 
             next();
         }

@@ -91,19 +91,6 @@ block main
 block append scripts
     script.
         $(document).ready(function() {
-            // Initialize DataTable
-            $('#dataTable').DataTable({
-                "language": {
-                    "search": "Tìm kiếm",
-                    "lengthMenu": "Hiển thị _MENU_ dòng",
-                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
-                    "paginate": {
-                        "previous": "Trước", 
-                        "next": "Tiếp"
-                    }
-                }
-            });
-
             // Handle status change
             $('#dataTable').on('click', '.change-status-link', function(event) {
                 event.preventDefault(); 

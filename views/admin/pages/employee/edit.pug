@@ -11,7 +11,6 @@ block main
                 h6.m-0.font-weight-bold.text-primary Chỉnh Sửa Thông Tin Nhân Viên
             .card-body
                 form(action=`${prefixAdmin}/employee/edit` method="POST")
-                    input(type="hidden" name="phone" value=employee.phone)
                     .row
                         // Cột 1
                         .col-lg-6.order-info-column
@@ -28,11 +27,11 @@ block main
                             .form-group
                                 label(for="phone") Số Điện Thoại 
                                     span.text-danger *
-                                input#phone.form-control(type="text" value=employee.phone readonly)
+                                input#phone.form-control(type="tel" value=employee.phone required)
                             .form-group
                                 label(for="email") Email 
                                     span.text-danger *
-                                input#email.form-control(type="email" name="email" value=employee.email required)
+                                input#email.form-control(type="email" name="email" value=employee.email readonly required)
                             .form-group
                                 label(for="citizenId") Số CCCD 
                                     span.text-danger *
@@ -55,6 +54,16 @@ block main
                                 label(for="educationLevel") Trình Độ Học Vấn 
                                     span.text-danger *
                                 input#educationLevel.form-control(type="text" name="educationLevel" value=employee.educationLevel required)
+                            .form-group
+                                label(for="permission") Phân Quyền 
+                                    span.text-danger *
+                                select#permission.form-control(name="permission" required)
+                                    each roleGroup in roleGroups
+                                        if roleGroup.roleGroupId != 'RG002' 
+                                            option(
+                                                value=roleGroup.roleGroupId
+                                                selected=(employee.Account.permission == roleGroup.roleGroupId)
+                                            ) #{roleGroup.roleGroupName}
                             .form-group.d-flex
                                 label.mr-4(for="status") Trạng thái hoạt động 
                                     span.text-danger *

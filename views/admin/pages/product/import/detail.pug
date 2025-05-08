@@ -1,0 +1,65 @@
+extends ../../../layouts/default.pug
+include ../../../mixins/alert.pug
+include ../../../mixins/currency.pug
+include ../../../mixins/moment.pug
+
+block main
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .container-fluid#container-wrapper
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Chi Tiết Phiếu Nhập
+            .card-body
+                if error
+                    .alert.alert-danger #{error}
+
+                .row
+                    // Cột 1: Thông tin phiếu nhập
+                    .col-lg-6.order-info-column
+                        .form-group
+                            label Mã Phiếu Nhập:
+                            p #{importRecord.importId}
+                        .form-group
+                            label Nhân Viên Nhập:
+                            p #{employeeFullName} (SĐT: #{importRecord.employeePhone})
+                        .form-group
+                            label Ngày Nhập:
+                            p
+                                +formatDate(importRecord.importDate, "dd/MM/yyyy")
+                        .form-group
+                            label Tổng Chi Phí:
+                            p
+                                +formatCurrency(importRecord.importCost)
+
+                // Bảng chi tiết sản phẩm
+                .table-responsive.detail-table
+                    table.table.table-bordered
+                        thead
+                            tr
+                                th STT
+                                th Mã Sản Phẩm
+                                th Tên Sản Phẩm
+                                th Số Lượng
+                                th Giá Nhập
+                                th Thành Tiền
+                        tbody
+                            each detail, index in importRecord.importDetails
+                                - const product = productList.find(p => p.productId === detail.productId) || null
+                                tr
+                                    td #{index + 1}
+                                    td #{detail.productId}
+                                    td #{product ? product.productName : 'Không xác định'}
+                                    td #{detail.amount}
+                                    td
+                                        +formatCurrency(detail.price)
+                                    td
+                                        +formatCurrency(detail.price * detail.amount)
+
+                .d-flex.justify-content-end.mt-3
+                    a.btn.btn-secondary(href=`${prefixAdmin}/product/import`) Quay Lại
+
+    // Scroll to top
+    a.scroll-to-top.rounded(href="#page-top")
+        i.fas.fa-angle-up

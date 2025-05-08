@@ -11,16 +11,10 @@ html
   body
     +alert-error(3000)
     +alert-success(3000)
+    #alertContainer
     .sidebar
-      form(method='POST', action='/AutoParts/account/edit', data-oc-toggle='ajax')
+      form(method='POST', action='/AutoParts/account/edit')
         img#user_icon(src='https://i.pinimg.com/474x/89/90/48/899048ab0cc455154006fdb9676964b3.jpg', width='100px', height='100px', alt='')
-        
-        if flash && flash.success
-          .message-success
-            p #{flash.success}
-        if flash && flash.error
-          .message-error
-            p #{flash.error}
             
         p
           input(type='hidden', name='cartId', value=customer.cartId, required)
@@ -86,13 +80,202 @@ html
           input(type='password', name='pass', placeholder='Mật khẩu hiện tại', required, autocomplete='current-password')
           i.fa-solid.fa-eye
           i.fa-solid.fa-eye-slash
+          span.error-message
         .form-item
           input(type='password', name='newpass', placeholder='Mật khẩu mới', required, autocomplete='new-password')
           i.fa-solid.fa-eye
           i.fa-solid.fa-eye-slash
+          span.error-message
         .form-item
           input(type='password', name='confirmpass', placeholder='Xác nhận mật khẩu mới', required, autocomplete='new-password')
           i.fa-solid.fa-eye
           i.fa-solid.fa-eye-slash
+          span.error-message
         button(type='submit') Cập nhật
+    script.
+      const formPass = document.querySelector('.change-password');
+      const formEdit = document.querySelector('.sidebar form');
+      const editBtn = document.querySelector('#edit-btn');
+      window.messages = !{JSON.stringify(messagelist || {})};
+
+      formPass.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (validateForm(this)) {
+          this.submit();
+        }
+      });
+
+          // Select DOM elements
+      let textInputs = document.querySelectorAll(".input-field input[disabled]");
+      textInputs.forEach(input => {
+          input.addEventListener('blur', function() {
+              const errorElement = this.parentElement.querySelector('.error-message');
+              validateInput(this, errorElement);
+            });
+      });
+      let passInputs = document.querySelectorAll(".form-item input[type='password']");
+      passInputs.forEach(input => {
+          input.addEventListener('blur', function() {
+              const errorElement = this.parentElement.querySelector('.error-message');
+              validateInput(this, errorElement);
+            });
+      });
+      console.log(passInputs, textInputs);
+      // Edit button toggle and form submission
+      if (editBtn) {
+        editBtn.onclick = function(event) {
+          event.preventDefault();
+            if (editBtn.innerHTML != "Lưu") {
+                // Enable text inputs and phone for editing, except email and status
+                textInputs.forEach(input => {
+                    input.disabled = false;
+                });
+                // Email remains readonly
+                editBtn.innerHTML = "Lưu"; // Change button text to "Save"
+            }
+            else{
+              if (validateForm(formEdit)) {
+                formEdit.submit();
+              }
+            }
+        };
+      }
+      function showAlertClientSide(message, type = 'success', duration = 3000) {
+        const existingAlerts = document.querySelectorAll('.message.info');
+        existingAlerts.forEach(alert => alert.remove());
+        // Determine alert class based on type
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        // Create alert HTML
+        const alertHtml = `
+            <div class="message info">
+                <div class="alert ${alertClass}" data-time="${duration}" show-alert role="alert">
+                    ${message} <span close-alert>X</span>
+                </div>
+            </div>
+        `;
+
+        // Append to a container (e.g., at the top of the form)
+        const container = document.getElementById('alertContainer') || document.querySelector('.container-fluid');
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+
+        // Handle auto-dismissal (if you have existing logic for this)
+        const alertElement = container.querySelector('.alert[show-alert]');
+        if (duration > 0) {
+            setTimeout(() => {
+                alertElement.parentElement.remove();
+            }, duration);
+        }
+
+        // Add click handler for manual close
+        const closeButton = alertElement.querySelector('[close-alert]');
+        closeButton.addEventListener('click', () => {
+            alertElement.parentElement.remove();
+        });
+      }
+      // Input validation functions
+        const validateInput = (input, errorElement) => {
+          let isValid = true;
+          let errorMessage = '';
+          
+          input.parentElement.classList.remove('error');
+          
+          // Validation rules based on input type
+          if (input.value.trim() === '') {
+            isValid = false;
+            if (input.name === 'fullName') {
+              errorMessage = window.messages.BLANK_NAME;
+            } else if (input.name === 'email') {
+              errorMessage = window.messages.BLANK_EMAIL;
+            } else if (input.name === 'phone') {
+              errorMessage = window.messages.BLANK_PHONE;
+            } else if (input.name === 'address') {
+              errorMessage = window.messages.BLANK_ADDRESS;
+            } else {
+              errorMessage = window.messages.BLANK_PASSWORD;
+            }
+          } else if (input.type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages.INVALID_EMAIL_WARNING;
+            }
+          } else if (input.type === 'tel') {
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages.INVALID_PHONE_WARNING;
+            }
+          } else if (input.name === 'fullName' && input.value.trim().length < 6) {
+            isValid = false;
+            errorMessage = window.messages.INVALID_NAME_WARNING;
+          } else if (input.name === 'address' && input.value.trim().length < 6) {
+            isValid = false;
+            errorMessage = window.messages.INVALID_ADDRESS_WARNING;
+          } else if (input.name === 'pass') {
+            const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
+            if (!passwordRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages.INVALID_PASSWORD_ERROR;
+            }
+          } else if (input.name === 'newpass') {
+            const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
+            if (!passwordRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages.INVALID_PASSWORD_ERROR;
+            }
+            
+            // Check if new password is the same as current password
+            const currentPassword = document.querySelector('input[name="pass"]').value;
+            if (input.value === currentPassword) {
+              isValid = false;
+              errorMessage = window.messages.NOT_DIFFERENT_PASSWORD_WARNING;
+            }
+          } else if (input.name === 'confirmpass') {
+            const newPassword = document.querySelector('input[name="newpass"]').value;
+            const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
+            if (!passwordRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages.INVALID_PASSWORD_ERROR;
+            }
+            if (input.value !== newPassword) {
+              isValid = false;
+              errorMessage = window.messages.NOT_MATCH_PASSWORD_WARNING;
+            }
+          }
+          
+          if (!isValid) {
+            input.parentElement.classList.add('error');
+            if (errorElement) {
+              errorElement.textContent = errorMessage;
+              errorElement.style.visibility = 'visible';
+              showAlertClientSide(errorMessage, 'danger');
+              
+              setTimeout(() => {
+                errorElement.style.visibility = 'hidden';
+                input.parentElement.classList.remove('error');
+              }, 3000);
+            }
+          } else if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.visibility = 'hidden';
+          }
+          
+          return isValid;
+        };
+        
+        // Validate form
+        const validateForm = (form) => {
+          const inputs = form.querySelectorAll('input:not([readonly]):not([type="hidden"])');
+          let isValid = true;
+          
+          inputs.forEach(input => {
+            const errorElement = input.parentElement.querySelector('.error-message');
+            if (!validateInput(input, errorElement)) {
+              isValid = false;
+            }
+          });
+          
+          return isValid;
+        };
     script(src='/js/profile.js')

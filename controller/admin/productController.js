@@ -4,12 +4,14 @@ const ProductGroup = require('../../models/ProductGroup');
 const Import = require('../../models/Import');
 const ImportDetail = require('../../models/ImportDetail');
 const Employee = require('../../models/Employee');
+
 const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const systemConfig = require('../../configs/system');
 const { format } = require('date-fns');
+const moment = require('moment');
 
 // Configure multer for image upload
 const storage = multer.diskStorage({
@@ -90,6 +92,7 @@ const generateNextProductId = async () => {
     }
 };
 
+// [GET] /admin/product
 module.exports.index = async (req, res) => {
     try {
         const products = await Product.findAll({
@@ -99,11 +102,10 @@ module.exports.index = async (req, res) => {
         });
 
         // Process image URLs
-        const baseUrl = req.protocol + '://' + req.get('host') + '/img/';
         products.forEach(product => {
             if (product.imageUrls) {
                 const imgArray = product.imageUrls.split(',');
-                product.imageUrls = imgArray;
+                product.imageUrl = imgArray[0];
             }
         });
 
@@ -117,6 +119,7 @@ module.exports.index = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/add
 module.exports.add = async (req, res) => {
     try {
         const brands = await Brand.findAll({
@@ -141,6 +144,7 @@ module.exports.add = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/add
 module.exports.addPost = async (req, res) => {
     try {
         const productData = req.body;
@@ -163,15 +167,15 @@ module.exports.addPost = async (req, res) => {
             imageUrls
         });
 
-        req.flash('success', 'Thêm sản phẩm thành công!');
-        res.redirect('/admin/product');
+        req.flash('success', res.locals.messages.CREATE_PRODUCT_SUCCESS);
+        res.redirect(`${systemConfig.prefixAdmin}/product`);
     } catch (err) {
-        console.error(err);
-        req.flash('error', 'Thêm sản phẩm thất bại!');
+        req.flash('error', res.locals.messages.CREATE_PRODUCT_ERROR);
         res.redirect('back');
     }
 };
 
+// [GET] /admin/product/edit
 module.exports.edit = async (req, res) => {
     try {
         const product = await Product.findByPk(req.query.productId);
@@ -190,6 +194,7 @@ module.exports.edit = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/edit
 module.exports.editPost = async (req, res) => {
     try {
         const productData = req.body;
@@ -218,32 +223,34 @@ module.exports.editPost = async (req, res) => {
 
         await product.update(productData);
 
-        req.flash('success', 'Cập nhật sản phẩm thành công!');
+        req.flash('success', res.locals.messages.UPDATE_PRODUCT_SUCCESS);
         res.redirect(`${systemConfig.prefixAdmin}/product`);
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Cập nhật sản phẩm thất bại!');
+        req.flash('error', res.locals.messages.UPDATE_PRODUCT_ERROR);
         res.redirect('back');
     }
 };
 
+// [DELETE] /admin/product/delete/:productId
 module.exports.delete = async (req, res) => {
     try {
-        const product = await Product.findByPk(req.query.productId);
+        const productId = req.params.productId;
+        const product = await Product.findByPk(productId);
         await product.update({ deleted: true });
 
-        req.flash('success', 'Xóa sản phẩm thành công!');
+        req.flash('success', res.locals.messages.DELETE_PRODUCT_SUCCESS);
         res.redirect(`${systemConfig.prefixAdmin}/product`);
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Xóa sản phẩm thất bại!');
+        req.flash('error', res.locals.messages.DELETE_PRODUCT_ERROR);
         res.redirect('back');
     }
 };
 
+// [GET] /admin/product/detail
 module.exports.detail = async (req, res) => {
     try {
-        console.log(req.query.productId);
         const productId = req.query.productId;
         const product = await Product.findByPk(productId);
 
@@ -267,11 +274,12 @@ module.exports.detail = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Có lỗi xảy ra khi tải chi tiết sản phẩm');
+        req.flash('error', res.locals.messages.LOAD_ERROR);
         res.redirect(`${systemConfig.prefixAdmin}/product`);
     }
 };
 
+// [POST] /admin/product/changeStatus
 module.exports.changeStatus = async (req, res) => {
     try {
         const product = await Product.findByPk(req.body.productId);
@@ -285,6 +293,7 @@ module.exports.changeStatus = async (req, res) => {
     }
 };
 
+// [GET] /admin/product/import
 module.exports.import = async (req, res, next) => {
     try {
         const imports = await Import.findAll({
@@ -306,23 +315,25 @@ module.exports.import = async (req, res, next) => {
             imports: imports
         });
     } catch (error) {
-        console.error('Error in import:', error);
-        req.flash('error', 'Có lỗi xảy ra khi tải danh sách nhập hàng');
+        req.flash('error', res.locals.messages.LOAD_ERROR);
         res.redirect(req.get('Referrer') || '/');
     }
 };
 
+// [GET] /admin/product/import/add
 module.exports.importAdd = async (req, res) => {
     try {
-        const employeeList = await Employee.findAll({ where: { deleted: false }});
         const productList = await Product.findAll({ where: { deleted: false }});
         const nextImportId = await generateNextImportId();
+        const messages = res.locals.messages;
+        const currentDate = moment().format('DD/MM/YYYY');
 
         res.render('admin/pages/product/import/add', {
             pageTitle: "Thêm phiếu nhập",
-            employeeList,
             productList,
-            nextImportId
+            nextImportId,
+            currentDate,
+            messages
         });
     } catch (err) {
         console.error(err);
@@ -330,61 +341,86 @@ module.exports.importAdd = async (req, res) => {
     }
 };
 
+// [POST] /admin/product/import/add
 module.exports.importAddPost = async (req, res) => {
     try {
         const importData = req.body;
+        importData.employeeEmail = res.locals.user.email;
         
-        // Create import record
         const importRecord = await Import.create({
             ...importData,
             importDate: new Date()
         });
 
-        // Process import details and update product stock
-        if (importData.details) {
-            for (const detail of importData.details) {
-                await ImportDetail.create({
-                    importId: importRecord.importId,
-                    productId: detail.productId,
-                    amount: detail.amount,
-                    price: detail.price
-                });
+        const importDetails = [];
+        const detailKeys = Object.keys(importData).filter(key => key.startsWith('importDetails['));
+        const indices = [...new Set(detailKeys.map(key => key.match(/\[(\d+)\]/)[1]))]; // Lấy các index duy nhất
 
-                // Update product stock
-                const product = await Product.findByPk(detail.productId);
-                await product.update({
-                    stock: product.stock + parseInt(detail.amount)
-                });
-            }
+        for (const index of indices) {
+            const detail = {
+                id: {
+                    importId: importData[`importDetails[${index}].id.importId`],
+                    productId: importData[`importDetails[${index}].id.productId`]
+                },
+                amount: parseInt(importData[`importDetails[${index}].amount`]),
+                price: parseFloat(importData[`importDetails[${index}].price`])
+            };
+            importDetails.push(detail);
         }
 
-        req.flash('success', 'Thêm phiếu nhập thành công!');
+        // Process import details and update product stock
+        for (const detail of importDetails) {
+            await ImportDetail.create({
+                importId: importRecord.importId,
+                productId: detail.id.productId,
+                amount: detail.amount,
+                price: detail.price
+            });
+
+            const product = await Product.findByPk(detail.id.productId);
+            await product.update({
+                stock: product.stock + detail.amount
+            });
+        }
+
+        req.flash('success', res.locals.messages.CREATE_IMPORT_SUCCESS);
         res.redirect(`${systemConfig.prefixAdmin}/product/import`);
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Thêm phiếu nhập thất bại!');
+        req.flash('error', res.locals.messages.CREATE_IMPORT_ERROR);
         res.redirect('back');
     }
 };
 
+// [GET] /admin/product/import/detail/:importId
 module.exports.importDetail = async (req, res) => {
     try {
         const importRecord = await Import.findByPk(req.params.importId, {
             include: [
-                { model: ImportDetail, include: [Product] },
+                { 
+                    model: ImportDetail, 
+                    as: 'importDetails',
+                    include: [Product] 
+                },
                 { model: Employee }
             ]
         });
-
         if (!importRecord) {
-            req.flash('error', 'Phiếu nhập không tồn tại!');
+            req.flash('error', res.locals.messages.IMPORT_NOT_EXIST);
             return res.redirect(`${systemConfig.prefixAdmin}/product/import`);
         }
+
+        const productList = await Product.findAll({
+            where: {
+                deleted: false
+            }
+        });
 
         res.render('admin/pages/product/import/detail', {
             pageTitle: "Chi tiết phiếu nhập",
             importRecord,
-            employeeFullName: importRecord.Employee ? importRecord.Employee.fullName : 'Không xác định'
+            employeeFullName: importRecord.Employee ? importRecord.Employee.fullName : 'Không xác định',
+            productList
         });
     } catch (err) {
         console.error(err);

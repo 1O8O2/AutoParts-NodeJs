@@ -13,17 +13,22 @@
         strong Phần Trăm Khuyến Mãi: 
         | #{discount.discountAmount}%
     p
-        strong Số Tiền Tối Thiểu: 
-        | !{`<fmt:formatNumber value="${discount.minimumAmount}" type="number" maxFractionDigits="0" groupingUsed="true"/> ₫`}
+        strong Số Tiền Tối Thiểu:
+        - function formatPrice(data) {
+        -   if (data === undefined || data === null) return '0';
+        -   return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        - }
+
+        span #{formatPrice(discount.minimumAmount)}₫ 
     p
-        strong Số Lượng: 
+        strong Số Lượng:  
         | #{discount.usageLimit}
     p
         strong Ngày Bắt Đầu: 
-        | !{`<fmt:formatDate value="${discount.applyStartDate}" pattern="dd/MM/yyyy" />`}
+        span #{moment(discount.applyStartDate).format("DD/MM/YYYY")}
     p
         strong Ngày Kết Thúc: 
-        | !{`<fmt:formatDate value="${discount.applyEndDate}" pattern="dd/MM/yyyy" />`}
+        span #{moment(discount.applyEndDate).format("DD/MM/YYYY")}
     p
         strong Trạng Thái: 
         if discount.status == 'Active'

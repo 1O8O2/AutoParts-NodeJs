@@ -1,4 +1,7 @@
+include ../mixins/alert.pug
 div.header
+  +alert-success(3000)
+  +alert-error(3000)
   .header_container.header-inner
     .header_logo
       a(href='/AutoParts')
@@ -32,47 +35,57 @@ div.header
           form.header__cart-list(action='/AutoParts/order', method='get')
             h4.header__cart-heading Sản phẩm đã thêm
             if (!cart || !cart.products || cart.products.length === 0)
-              p Chưa có sản phẩm nào
+              p.empty-cart-message Chưa có sản phẩm nào
+              img.empty-cart-img(src='/img/no_cart.png', alt='Empty Cart')
             else
               ul.header__cart-list-item
                 each product in cart.products
                   li.header__cart-item
-                    input(type='checkbox', name=product.product.productId, value=product.amount)
-                    img.header__cart-img(src='https://img.freepik.com/free-photo/fashion-portrait-young-elegant-woman_1328-2743.jpg?w=1480&t=st=1701357403~exp=1701358003~hmac=435f00eded774f42e172f48f4be677658485206407baa84eaef2058b11f1431f', alt='')
+                    input(type='checkbox', name=product.product.productId, value=product.amount, id=`cart-item-${product.product.productId}`)
+                    img.header__cart-img(src=product.product.imageUrl || 'https://img.freepik.com/free-photo/fashion-portrait-young-elegant-woman_1328-2743.jpg?w=1480&t=st=1701357403~exp=1701358003~hmac=435f00eded774f42e172f48f4be677658485206407baa84eaef2058b11f1431f', alt=product.product.productName)
                     .header__cart-item-info
                       .header__cart-item-head
                         h5.header__cart-item-name #{product.product.productName}
                         .header__cart-item-wrap
-                          span.header__cart-item-price
+                          span.header__cart-item-price #{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.product.salePrice)}
                           span.header__cart-item-multiply x
                           span.header__cart-item-qnt #{product.amount}
                       .header__cart-item-body
                         span.header__cart-item-description
-                          a(href=`/autopart/product/detailproduct.htm?productId=${product.productId}`) #{product.productId}
+                          a(href=`/AutoParts/product/detail?productId=${product.product.productId}`) Xem chi tiết
                         span.header__cart-item-remove
-                          a(href=`/AutoParts/product/delete?productId=${product.product.productId}`) Xóa
-            button.btn.btn--primary.header__cart-view-cart(type='submit') Thanh toán
+                          a(href=`/AutoParts/product/remove?productId=${product.product.productId}`) 
+                            i.fa-solid.fa-trash-can
+                            |  Xóa
+            button.btn.btn--primary.header__cart-view-cart(type='submit') 
+              i.fa-solid.fa-credit-card
+              |  Thanh toán
+      if user
+        .header_chat
+          a.nav-link(href='/AutoParts/chat', aria-current='page')
+            button.header-right_chat(type='button')
+              .header-chat_button
+                i.fa-solid.fa-comments.logo-chat
+                span.title-chat Hỗ trợ
   .header_menu
     ul.header_menu-list
       li
-        a(href='#dashboard') Trang chủ
+        a.menu-item(href='#products')
+          | Sản phẩm
+          i.fa.fa-angle-down(aria-hidden='true')
       li
         a.menu-item(href='#categories')
           | Danh mục
           i.fa.fa-angle-down(aria-hidden='true')
           .items
             each value, key in groups 
-              h4.item
-                | #{key} 
+              .item(data-brand=key)
+                | #{key}
                 if value.length > 0 
                   i.fa-solid.fa-arrow-right
                   .mini-menu
                     each child in value 
                       p.mini-item #{child}
-      li
-        a.menu-item(href='#products')
-          | Sản phẩm
-          i.fa.fa-angle-down(aria-hidden='true')
       li
         a(href='#contact')
           | Liên hệ
@@ -82,7 +95,71 @@ div.header
           | Nhãn hàng
           i.fa.fa-angle-down(aria-hidden='true')
           .items
-            each brand in brands
-              h4.item #{brand.brandName}
+              each brand in brands
+                .item
+                  | #{brand.brandName}
       li
         a(href='/AutoParts/blog', target='_blank') Bài viết
+script(src='/js/dropdown-navigation.js')
+script.
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle clicks on cart items
+    const cartItems = document.querySelectorAll('.header__cart-item');
+    
+    cartItems.forEach(item => {
+      // Make the entire item clickable, not just the checkbox
+      item.addEventListener('click', function(e) {
+        // Prevent click handling when clicking on specific elements
+        if (e.target.closest('.header__cart-item-remove') || 
+            e.target.closest('a[href]') || 
+            e.target.tagName === 'INPUT') {
+          return;
+        }
+        
+        // Toggle the checkbox when clicking on the item
+        const checkbox = this.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+        }
+      });
+      
+      // Prevent checkbox clicks from triggering the item click handler
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      if (checkbox) {
+        checkbox.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+    });
+    // Alert handling
+    const alerts = document.querySelectorAll('[show-alert]')
+    console.log(alerts);
+    alerts.forEach(alert => {
+        const time = parseInt(alert.getAttribute('data-time'));
+        const closeBtn = alert.querySelector('[close-alert]');
+        
+        // Auto-hide after specified time
+        setTimeout(() => {
+            alert.classList.add('alert-hidden');
+            // Remove from DOM after animation completes
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300); // Match this with the animation duration
+        }, time);
+        
+        // Manual close button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                alert.classList.add('alert-hidden');
+                // Remove from DOM after animation completes
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300);
+            });
+        }
+    });
+  });

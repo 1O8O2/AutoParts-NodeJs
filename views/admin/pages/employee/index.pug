@@ -34,14 +34,14 @@ block main
                                             else
                                                 span Nữ
                                         td.align-middle
-                                            a.change-status-link(href="javascript:void(0);" data-emp-phone=employee.phone data-emp-status=employee.status)
+                                            a.change-status-link(href="javascript:void(0);" data-emp-email=employee.email data-emp-status=employee.status)
                                                 if employee.status === "Active"
                                                     span.badge.badge-success Hoạt động
                                                 else
                                                     span.badge.badge-danger Ngừng hoạt động
                                         td.align-middle
-                                            a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/employee/edit?empPhone=${employee.phone}`) Sửa
-                                            a.btn.btn-sm.btn-dark.ml-1(href=`${prefixAdmin}/employee/detail?empPhone=${employee.phone}`) Chi Tiết
+                                            a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/employee/edit?empEmail=${employee.email}`) Sửa
+                                            a.btn.btn-sm.btn-dark.ml-1(href=`${prefixAdmin}/employee/detail?empEmail=${employee.email}`) Chi Tiết
                             else
                                 tr
                                     td(colspan="6" class="text-center") Không có nhân viên nào
@@ -67,29 +67,16 @@ block main
 block append scripts
     script.
         $(document).ready(function() {
-            // Initialize DataTable
-            $('#dataTable').DataTable({
-                "language": {
-                    "search": "Tìm kiếm",
-                    "lengthMenu": "Hiển thị _MENU_ dòng",
-                    "info": "Hiển thị từ _START_ đến _END_ trên tổng số _TOTAL_ dòng",
-                    "paginate": {
-                        "previous": "Trước", 
-                        "next": "Tiếp"
-                    }
-                }
-            });
-
             // Handle change status link click
             $('#dataTable').on('click', '.change-status-link', function(event) {
                 event.preventDefault();
-                const empPhone = $(this).data('emp-phone');
+                const empEmail = $(this).data('emp-email');
                 const empStatus = $(this).data('emp-status');
                 
                 $.ajax({
                     url: '#{prefixAdmin}/employee/changeStatus',
                     type: 'POST',
-                    data: { empPhone: empPhone },
+                    data: { empEmail: empEmail },
                     success: function(response) {
                         const badge = $(event.target).closest('.change-status-link').find('.badge');
                         const link = $(event.target).closest('.change-status-link');

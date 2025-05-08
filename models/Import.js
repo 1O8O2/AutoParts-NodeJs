@@ -38,7 +38,8 @@ Import.belongsTo(Employee, {
 
 Import.hasMany(ImportDetail, {
     foreignKey: 'importId',
-    sourceKey: 'importId'
+    sourceKey: 'importId',
+    as: 'importDetails'
 });
 
 module.exports = Import;

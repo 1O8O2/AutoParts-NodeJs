@@ -12,6 +12,8 @@ const messages = require('../../configs/messages.json'); // Adjust the path as n
 module.exports.createOrder = async (req, res) => {
     try {
         console.log('Creating order...');
+        
+
         let acc, cus, cart;
         console.log(acc, cus, cart)
         if(req.cookies.tokenUser!=null)
@@ -21,37 +23,43 @@ module.exports.createOrder = async (req, res) => {
             });
 
             cus = await Customer.findByPk(acc.email);
-            console.log(cus)
+            //console.log(cus)
 
             cart = await Cart.findByPk(cus.cartId);
         }
+        else if(req.cookies.tokenUser==null && await Account.findOne({where: { email: req.body.email }}) !=null)
+        {
+            acc = await Account.findOne({where: { email: req.body.email }})
+            cus = await Customer.findByPk(acc.email);
+            cart = await Cart.findByPk(req.cookies.cartId);
+        }
         else
         {
-            acc = await Account.create({
+            acc = {
                 email: req.body.email,
                 password: "",
                 token: null,
                 permission: 'RG002', 
                 status: 'Guest',
                 deleted: false
-            });
+            };
 
             console.log('Account created:', acc)
 
-            cus = await Customer.create({
+            cus ={
                 email: req.body.email,
-                cartId: req.cookies.cartId,
+                cartId: null,
                 fullName: "",
                 phone : null,
                 address : null,
                 status: 'Guest'
-            });
+            };
             console.log('Customer created:', cus)
 
             cart = await Cart.findByPk(req.cookies.cartId);
         }
 
-        console.log(acc, cus, cart)
+        //console.log(acc, cus, cart)
 
         let query='/AutoParts/order?';
 
@@ -66,14 +74,11 @@ module.exports.createOrder = async (req, res) => {
             }
             query=query.slice(0,-1);
             console.log(query)
+
+        
         //console.log('updatedSelectedProducts:', updatedSelectedProducts);
 
         //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
-
-        
-        if (selectedProducts.length === 0) {
-            return res.render('client/pages/order/order', { message: 'No products selected for order' });
-        }
 
         const totalCost = parseFloat(req.body.totalCost) *1000;
         console.log('Total cost:', totalCost);
@@ -85,7 +90,8 @@ module.exports.createOrder = async (req, res) => {
 
         if (!shippingType) {
             console.log('Shipping type not selected');
-            req.flash('error',  messages.BLANK_SHIPPING_TYPE);
+            console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
+            req.flash('error',  res.locals.messages.BLANK_SHIPPING_TYPE);
             return res.redirect(query);
         }
 
@@ -93,17 +99,29 @@ module.exports.createOrder = async (req, res) => {
         if(discount && discount.usageLimit<=0)
         {
             console.log('Discount usage limit exceeded');
-            req.flash('error', messages.DISCOUNT_QUANTITY_EXCEEDED);
+            req.flash('error', res.locals.messages.DISCOUNT_QUANTITY_EXCEEDED);
             return res.redirect(query);
         }
 
-        
+
+        if (selectedProducts.length === 0) {
+            req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
+            return res.render('client/pages/order/order', { message: 'No products selected for order' });
+        }    
 
         // Generate next order ID (assuming a custom method in Order model)
         // If this method doesn't exist, we'll need to implement it or use another way to generate IDs
         let orderId = 'ORD' + Date.now().toString().substring(6);
         if (typeof Order.generateOrderId === 'function') {
             orderId = await Order.generateOrderId();
+        }
+
+        if(req.cookies.tokenUser==null )
+        {
+            acc = await Account.create(acc);
+            console.log('Account created:', acc)
+            cus = await Customer.create(cus);
+            console.log('Customer created:', cus)
         }
 
         // Create new order
@@ -156,9 +174,9 @@ module.exports.createOrder = async (req, res) => {
         console.log('Cart updated successfully');
 
         return res.render('client/pages/order/success'); // Render success page
-   } catch (error) {
-        req.flash('error',  messages.CREATE_ORDER_ERROR);
-        return res.redirect('back');
+    } catch (error) {
+        req.flash('error', res.locals.messages.ORDER_CREATE_ERROR);
+        return res.redirect(query);
     }
 };
 
@@ -172,6 +190,7 @@ module.exports.showDetail = async (req, res) => {
         const orderId = req.query.orderId;
         const order = await Order.findByPk(orderId);
         if (!order) {
+            req.flash('error', res.locals.messages.ORDER_NOT_FOUND);
             return res.render('client/pages/order/orderDetail', { message: 'Order not found' });
         }
 
@@ -181,6 +200,7 @@ module.exports.showDetail = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in showDetail:', error);
+        req.flash('error', res.locals.messages.ORDER_DETAIL_ERROR);
         return res.redirect('/AutoParts/account/login');
     }
 };
@@ -200,7 +220,7 @@ module.exports.showCart = async (req, res) => {
         if(acc)
         {
             cus = await Customer.findByPk(acc.email);
-            console.log(cus)
+            //console.log(cus)
         }
         
         if (cus) {
@@ -219,14 +239,15 @@ module.exports.showCart = async (req, res) => {
         const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
         //console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
-            return res.render('client/pages/order/order', { message: 'No products selected' });
+            req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
+            return res.redirect('back');
         }
         //console.log('Selected products:', selectedProducts);
         let discounts = [];
         if (acc) {
             const discountData = await Discount.getByCustomer(acc.email);
             discounts = Array.isArray(discountData) ? discountData : []; // Ensure discounts is an array
-            console.log(discounts)
+            //console.log(discounts)
         }
         //console.log(discounts)
         //console.log(messages)
@@ -234,6 +255,7 @@ module.exports.showCart = async (req, res) => {
         res.render('client/pages/order/order', { selectedProducts, discounts, user : cus, messageList : messages});
     } catch (error) {
         console.error('Error in showCart:', error);
+        req.flash('error', res.locals.messages.CART_ERROR);
         return res.render('client/pages/order/order', { message: 'Error processing cart' });
     }
 };
@@ -257,9 +279,11 @@ module.exports.cancel = async (req, res) => {
         order.deleted = true;
         order.deletedAt = new Date(Date.now()).toISOString();
         await order.save();
-
+        req.flash('success', res.locals.messages.ORDER_CANCEL_SUCCESS);
+        return res.redirect('/AutoParts/account/profile');
         
     } catch (error) {
+        req.flash('error', res.locals.messages.ORDER_CANCEL_ERROR);
         console.error('Error in showDetail:', error);
         return res.redirect('/AutoParts/account/login');
     }

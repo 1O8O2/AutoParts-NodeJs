@@ -22,7 +22,7 @@ block main
                             .form-group
                                 label(for="productName") Tên Sản Phẩm 
                                     span.text-danger *
-                                input.form-control(type="text" id="productName" name="productName" required)
+                                input.form-control(type="text" id="productName" name="productName" placeholder="Nhập tên sản phẩm" required)
                             .form-group
                                 label(for="brandId") Nhãn Hiệu 
                                     span.text-danger *
@@ -32,30 +32,39 @@ block main
                                         each brand in brands
                                             option(value=brand.brandId)= brand.brandName
                             .form-group
-                                label(for="groupId") Nhóm Sản Phẩm 
+                                label(for="productGroupId") Nhóm Sản Phẩm 
                                     span.text-danger *
-                                select.form-control(name="groupId" id="groupId" required)
+                                select.form-control(name="productGroupId" id="productGroupId" required)
                                     option(value="" disabled selected) -- Chọn nhóm sản phẩm --
-                                    if groups && groups.length > 0
-                                        each group in groups
-                                            option(value=group.groupId)= group.groupName
+                                    if productGroups && productGroups.length > 0
+                                        each group in productGroups
+                                            option(value=group.productGroupId)= group.groupName
                             .form-group
                                 label(for="description") Mô Tả
-                                textarea.form-control(id="description" name="description" rows="3")
+                                textarea.form-control(id="description" name="description" rows="3" placeholder="Nhập mô tả sản phẩm")
                         // Cột 2: Giá và hình ảnh
                         .col-lg-6
                             .form-group
                                 label(for="costPrice") Giá Nhập 
                                     span.text-danger *
-                                input.form-control(type="number" id="costPrice" name="costPrice" min="0" required)
+                                input.form-control(type="number" id="costPrice" name="costPrice" min="0" placeholder="Nhập giá nhập sản phẩm" required)
                             .form-group
                                 label(for="salePrice") Giá Bán 
                                     span.text-danger *
-                                input.form-control(type="number" id="salePrice" name="salePrice" min="0" required)
+                                input.form-control(type="number" id="salePrice" name="salePrice" min="0" placeholder="Nhập giá bán sản phẩm" required)
                             .form-group
-                                label(for="stock") Số Lượng 
+                                label(for="weight") Khối lượng 
                                     span.text-danger *
-                                input.form-control(type="number" id="stock" name="stock" min="0" required)
+                                input.form-control(type="number" name="weight" placeholder="Nhập khối lượng sản phẩm" required)
+                            .form-group
+                                label(for="unit") Đơn vị     
+                                    span.text-danger *
+                                select.form-control(name="unit" id="unit" required)
+                                    option(value="Cái" selected) Cái
+                                    option(value="Bộ") Bộ
+                                    option(value="Bình") Bình
+                            .form-group
+                                input.form-control(type="number" id="stock" name="stock" value="0" hidden required)
                             .form-group
                                 label(for="status") Trạng Thái 
                                     span.text-danger *
@@ -65,7 +74,7 @@ block main
                             .form-group
                                 label(for="images") Hình Ảnh 
                                     span.text-danger *
-                                input.form-control(type="file" id="images" name="images" multiple accept="image/*" required)
+                                input.form-control(type="file" id="images" name="imageFiles" multiple accept="image/*" required)
                                 #imagePreview.row.mt-2
                     .d-flex.justify-content-end.mt-3
                         button.btn.btn-primary(type="submit") Lưu Sản Phẩm

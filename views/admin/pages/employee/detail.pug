@@ -45,13 +45,18 @@ block main
                             label Trình Độ Học Vấn:
                             span.form-control-plaintext #{employee.educationLevel}
                         .form-group
+                            label Phân Quyền:
+                            each roleGroup in roleGroups
+                                if roleGroup.roleGroupId == employee.Account.permission
+                                    span.form-control-plaintext #{roleGroup.roleGroupName}
+                        .form-group
                             label Trạng Thái:
                             if employee.status === "Active"
                                 span.form-control-plaintext Hoạt động
                             else
                                 span.form-control-plaintext Ngừng hoạt động
                 .d-flex.justify-content-end.mt-3
-                    a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/employee/edit?empPhone=${employee.phone}`) Chỉnh Sửa Thông Tin
+                    a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/employee/edit?empEmail=${employee.email}`) Chỉnh Sửa Thông Tin
 
         // Modal Logout
         #logoutModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="logoutModal" aria-hidden="true")
