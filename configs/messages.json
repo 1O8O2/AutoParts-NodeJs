@@ -28,6 +28,7 @@
   "CREATE_ORDER_ERROR": "Đặt hàng thất bại!",
 
   "INVALID_PRODUCT_NUMBER": "Số lượng sản phẩm không hợp lệ!",
+  "INVALID_PRODUCT_COST_PRICE": "Giá nhập sản phẩm không hợp lệ!",
   "INVALID_ADDRESS_WARNING": "Địa chỉ không hợp lệ!",
   "INVALID_PHONE_WARNING": "Số điện thoại không hợp lệ!",
   "INVALID_EMAIL_WARNING": "Email không hợp lệ!",

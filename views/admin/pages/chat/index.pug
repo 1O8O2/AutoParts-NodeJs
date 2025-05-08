@@ -5,8 +5,8 @@ block main
       h1.h3.mb-0.text-gray-800 Trò chuyện với khách hàng
 
     .card.shadow.mb-4
-      .card-header.py-3
-        h6.m-0.font-weight-bold.text-primary Danh sách khách hàng có tin nhắn
+      .card-header.py-3(style="background-color: #ff6f61;")
+        h6.m-0.font-weight-bold.text-white Danh sách khách hàng có tin nhắn
       .card-body
         .table-responsive
           table#dataTable.table.table-bordered(width="100%", cellspacing="0")
@@ -34,7 +34,7 @@ block main
                       else
                         span.badge.badge-secondary 0
                     td
-                      a.btn.btn-primary.btn-sm(href=`/AutoParts/admin/chat/${customer.email}`)
+                      a.btn.btn-primary.btn-sm(href=`/AutoParts/admin/chat/${customer.email}` style="background-color: #ff6f61; border-color: #ff6f61;")
                         i.fas.fa-comments  Chat
               else
                 tr

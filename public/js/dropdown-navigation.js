@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Make group items clickable
-  const groupItems = document.querySelectorAll('.header_menu-list li:first-child .item');
+  // Only handle navigation menu items, not filter form items
+  const headerMenu = document.querySelector('.header_menu');
+  if (!headerMenu) return; // Exit if not on a page with the header menu
+
+  // Make group items clickable in the navigation menu only
+  const groupItems = headerMenu.querySelectorAll('li:nth-child(2) .items .item');
   groupItems.forEach(item => {
     item.style.cursor = 'pointer';
     item.addEventListener('click', function(e) {
@@ -12,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Make brand items clickable
-  const brandItems = document.querySelectorAll('#brand .item');
+  // Make brand items clickable in the navigation menu only
+  const brandItems = headerMenu.querySelectorAll('#brand .items .item');
   brandItems.forEach(item => {
     item.style.cursor = 'pointer';
     item.addEventListener('click', function(e) {
@@ -26,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Make mini-items clickable (for submenu items)
-  const miniItems = document.querySelectorAll('.mini-item');
+  const miniItems = headerMenu.querySelectorAll('.mini-item');
   miniItems.forEach(item => {
     item.style.cursor = 'pointer';
     item.addEventListener('click', function(e) {

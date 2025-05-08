@@ -1,0 +1,5 @@
+mixin showImage(path)
+    if path.startsWith('https')
+        img(src=path alt="Current Image (External)")
+    else
+        img(src=`/img/${path}` alt="Current Image (Local)")

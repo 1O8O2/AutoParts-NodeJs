@@ -1,0 +1,53 @@
+extends ../layouts/default.pug
+include ../mixins/alert.pug
+include ../mixins/currency.pug
+
+block main
+    #alertContainer
+    .d-sm-flex.align-items-center.justify-content-between.mb-4
+        h1.h3.mb-0.text-gray-800 Báo cáo sản phẩm
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold Chọn khoảng thời gian
+        .card-body
+            form.form-inline(action=`${prefixAdmin}/product-report` method="get")
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="fromDate") Từ ngày:
+                    input.form-control(type="date" id="fromDate" name="fromDate" value=fromDate)
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="toDate") Đến ngày:
+                    input.form-control(type="date" id="toDate" name="toDate" value=toDate)
+                button.btn.btn-primary.mb-2(type="submit") Lọc dữ liệu
+                a.btn.btn-success.mb-2.ml-2(href=`${prefixAdmin}/product-report/export?fromDate=${fromDate}&toDate=${toDate}`)
+                    i.fas.fa-file-export.mr-1
+                    | Xuất báo cáo
+
+    .card.mb-4
+        .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary Danh sách sản phẩm
+        .card-body
+            .table-responsive
+                table.table.table-bordered
+                    thead.thead-light
+                        tr
+                            th Mã sản phẩm
+                            th Tên sản phẩm
+                            th Giá bán
+                            th Số lượng tồn kho
+                            th Số lượng đã bán
+                            th Tổng doanh thu
+                    tbody
+                        each product in products
+                            tr
+                                td #{product.productId}
+                                td #{product.name}
+                                td
+                                    +formatCurrency(product.salePrice)
+                                td #{product.stock}
+                                td #{product.soldQuantity}
+                                td
+                                    +formatCurrency(product.totalRevenue)
+
+    script.
+        // Add any necessary JavaScript here 

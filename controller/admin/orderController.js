@@ -134,6 +134,7 @@ module.exports.index = async (req, res) => {
                     },
                     include: [{ model: Customer }]
                 });
+                console.log(listPending);
 
                 return res.render('admin/pages/order/orderConfirm/index', {
                     pageTitle: "Danh sách đơn hàng chờ xác nhận",

@@ -11,7 +11,7 @@ link(href='/css/base.css', rel='stylesheet')
   .row
     .col-md-8.offset-md-2
       .card.chat-card
-        .card-header.bg-primary.text-white.d-flex.align-items-center
+        .card-header.text-white.d-flex.align-items-center(style="background-color: #ff6f61; border-color: #ff6f61;")
           i.fas.fa-headset.mr-2
           h5.mb-0 Hỗ trợ trực tuyến
         
@@ -25,7 +25,7 @@ link(href='/css/base.css', rel='stylesheet')
                     .message-text= message.content
                     .message-time= new Date(message.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
             else
-              .text-center.text-muted.chat-empty-state
+              .text-center.text-muted.chat-empty-state(style="background-color: #ff6f61; border-color: #ff6f61;")
                 i.fas.fa-comments.fa-3x.mb-3
                 p Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện với chúng tôi!
           
@@ -33,7 +33,7 @@ link(href='/css/base.css', rel='stylesheet')
           .chat-input-container
             .d-flex
               input#message-input.form-control(type="text", placeholder="Nhập tin nhắn của bạn...", required)
-              button#send-button.btn.btn-primary.ml-2(type="button")
+              button#send-button.btn.btn-primary.ml-2(type="button" style="background-color: #ff6f61; border-color: #ff6f61;")
                 i.fas.fa-paper-plane.mr-1
                 span Gửi
           

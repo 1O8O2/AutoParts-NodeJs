@@ -17,6 +17,9 @@ const brandRoute = require('./brand.route.js');
 const customerRoute = require('./customer.route.js');
 const employeeRoute = require('./employee.route.js');
 const chatRoute = require('./chat.route.js');
+const productReportRoute = require('./product-report.route.js');
+const orderReportRoute = require('./order-report.route.js');
+const financialReportRoute = require('./financial-report.route.js');
 
 module.exports = (app) => {
     const PATH_ADMIN = systemConfig.prefixAdmin;
@@ -36,4 +39,7 @@ module.exports = (app) => {
     app.use(PATH_ADMIN + '/customer', userMiddleware.infoUser, customerRoute);
     app.use(PATH_ADMIN + '/employee', userMiddleware.infoUser, employeeRoute);
     app.use(PATH_ADMIN + '/chat', userMiddleware.infoUser, chatRoute);
+    app.use(PATH_ADMIN + '/product-report', userMiddleware.infoUser, productReportRoute);
+    app.use(PATH_ADMIN + '/order-report', userMiddleware.infoUser, orderReportRoute);
+    app.use(PATH_ADMIN + '/financial-report', userMiddleware.infoUser, financialReportRoute);
 }
