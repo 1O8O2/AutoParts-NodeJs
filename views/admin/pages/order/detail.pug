@@ -66,7 +66,7 @@ block main
                                     div Số Lượng: #{detail.amount}
             if order.status == 'Pending'
                 .d-flex.justify-content-end.mt-3
-                    button.btn.btn-primary.confirm-btn(type="button" data-order-id=order.orderId data-toggle="modal" data-target="#ConfirmModal") Xác Nhận Đơn Hàng
+                    button.btn.btn-primary.confirm-btn(type="button" data-order-id=order.orderId data-toggle="modal" data-target="#ConfirmModal" style="background-color: #ff6f61; border-color: #ff6f61;") Xác Nhận Đơn Hàng
                     button.btn.btn-danger.ml-2.cancelled-btn(type="button" data-order-id=order.orderId data-toggle="modal" data-target="#CancelledModal") Hủy Đơn Hàng
                     a.btn.btn-secondary.ml-2(href=`${prefixAdmin}/order/Pending`) Quay Lại
 
@@ -80,8 +80,8 @@ block main
                 .modal-body
                     p Xác nhận đơn hàng?
                 .modal-footer
-                    button.btn.btn-outline-primary(type="button" data-dismiss="modal") Không
-                    button.btn.btn-primary.confirm-order-btn(type="button" data-order-id=order.orderId data-order-status=order.status) Xác Nhận
+                    button.btn.btn-outline-primary(type="button" data-dismiss="modal" style="color: #ff6f61; border-color: #ff6f61;") Không
+                    button.btn.btn-primary.confirm-order-btn(type="button" data-order-id=order.orderId data-order-status=order.status style="background-color: #ff6f61; border-color: #ff6f61;") Xác Nhận
 
     #CancelledModal.modal.fade(tabindex="-1" role="dialog" aria-labelledby="CancelledModal" aria-hidden="true")
         .modal-dialog(role="document")
