@@ -40,7 +40,7 @@ html(lang="en")
                       input.input-updateQTY.quantity(type="number" data-product-id=product.product.productId value=product.amount min="1" max=product.product.stock)
                       button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
                     .col
-                      a(href=`/AutoParts/product/productDetail?productId=${product.product.productId}`) Xem chi tiết ->
+                      a(href=`/AutoParts/product/detail?productId=${product.product.productId}`) Xem chi tiết ->
           .back-to-shop
             a(href="/AutoParts")
               span ←

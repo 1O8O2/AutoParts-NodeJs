@@ -31,7 +31,6 @@ module.exports.createOrder = async (req, res) => {
             req.flash('error', res.locals.messages.CART_NOT_FOUND_WARNING);
             return res.render('back');
         }
-
         let query='/AutoParts/order?';
 
         // Get all products from cart (virtual field populated by afterFind hook)
@@ -233,5 +232,42 @@ module.exports.cancel = async (req, res) => {
         req.flash('error', res.locals.messages.ORDER_CANCEL_ERROR);
         console.error('Error in showDetail:', error);
         return res.redirect('/AutoParts/account/login');
+    }
+};
+
+// GET /order/check - Check order by orderId
+module.exports.checkOrder = async (req, res) => {
+    try {
+        const orderId = req.query.orderId;
+        if (!orderId) {
+            return res.status(400).json({ message: 'Order ID is required' });
+        }
+
+        const order = await Order.findByPk(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const user = await Customer.findByPk(order.userEmail);
+        if (!user) {
+            return res.status(404).json({ message: 'Customer information not found' });
+        }
+
+        const account = await Account.findByPk(order.userEmail);
+        const userName = account ? account.name : 'Unknown';
+
+        const products = await OrderDetail.findAll({
+            where: { orderId: orderId }
+        });
+
+        return res.json({
+            order,
+            user,
+            userName,
+            products
+        });
+    } catch (error) {
+        console.error('Error in checkOrder:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };

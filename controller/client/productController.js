@@ -4,7 +4,7 @@ const ProductGroup = require('../../models/ProductGroup');
 const Customer = require('../../models/Customer');
 const {Cart, ProductsInCart} = require('../../models/Cart');
 
-// [GET] /product/productDetail
+// [GET] /product/detail
 module.exports.showProduct = async (req, res) => {
     try {
         const { productId } = req.query;

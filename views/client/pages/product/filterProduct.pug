@@ -17,7 +17,7 @@ html
           h2
             strong Bộ lọc
         .filter-form
-          .search-form
+          div
             if !keyword || keyword.length === 0
               h3 Nhập từ khóa để tìm kiếm
             else
@@ -35,7 +35,7 @@ html
           .form-group
             label(for="category") Loại hàng
             select#category-filter.form-control( name="category")
-              if (!brand)
+              if (!group)
                 option(value="" selected) Tất cả
               each gr in categories
                 if gr.productGroupId == group

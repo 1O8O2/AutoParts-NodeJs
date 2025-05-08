@@ -1,0 +1,163 @@
+doctype html
+html
+  head
+    title Kiểm tra đơn hàng
+    link(rel="stylesheet" href="/css/base.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous")
+    style.
+      .container {
+        max-width: 800px;
+        margin: 150px auto 50px;
+        padding: 20px;
+      }
+      .search-box {
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+      .search-box h2 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .btn-search {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+      }
+      .btn-search:hover {
+        background-color: #0056b3;
+      }
+      .order-result {
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+      .order-result h3 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+      .order-info p {
+        margin-bottom: 10px;
+      }
+      .order-info strong {
+        display: inline-block;
+        width: 150px;
+        color: #007bff;
+      }
+      .product-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+      }
+      .product-item {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+      .error-message {
+        color: #dc3545;
+        margin-top: 10px;
+        display: none;
+      }
+
+  body
+    include ../../partials/header.pug
+
+    .container
+      .search-box
+        h2 Kiểm tra đơn hàng
+        form#orderSearchForm(action="/AutoParts/order/check" method="GET")
+          .form-group
+            label(for="orderId") Nhập mã đơn hàng:
+            input#orderId.form-control(type="text" name="orderId" placeholder="Nhập mã đơn hàng của bạn" required)
+          button.btn.btn-search(type="submit") Kiểm tra
+          .error-message#errorMessage
+
+      .order-result#orderResult
+        h3 Thông tin đơn hàng
+        .order-info
+          p
+            strong Mã đơn hàng: 
+            span#resultOrderId
+          p
+            strong Tên khách hàng: 
+            span#resultCustomerName
+          p
+            strong Số điện thoại: 
+            span#resultPhone
+          p
+            strong Địa chỉ: 
+            span#resultAddress
+          p
+            strong Tổng tiền: 
+            span#resultTotal
+          p
+            strong Ngày đặt hàng: 
+            span#resultOrderDate
+          p
+            strong Trạng thái: 
+            span#resultStatus
+        h4 Sản phẩm
+        ul.product-list#productList
+
+    script.
+      document.getElementById('orderSearchForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const orderId = document.getElementById('orderId').value;
+        const errorMessage = document.getElementById('errorMessage');
+        const orderResult = document.getElementById('orderResult');
+        
+        try {
+          const response = await fetch(`/AutoParts/order/check?orderId=${orderId}`);
+          const data = await response.json();
+          
+          if (response.ok) {
+            errorMessage.style.display = 'none';
+            orderResult.style.display = 'block';
+            
+            // Update order information
+            document.getElementById('resultOrderId').textContent = data.order.orderId;
+            document.getElementById('resultCustomerName').textContent = data.userName;
+            document.getElementById('resultPhone').textContent = data.user.phone;
+            document.getElementById('resultAddress').textContent = data.order.shipAddress;
+            document.getElementById('resultTotal').textContent = data.order.totalCost;
+            document.getElementById('resultOrderDate').textContent = data.order.orderDate;
+            document.getElementById('resultStatus').textContent = data.order.status;
+            
+            // Update product list
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+              const li = document.createElement('li');
+              li.className = 'product-item';
+              li.innerHTML = `
+                <p><strong>Tên sản phẩm:</strong> ${product.productName}</p>
+                <p><strong>Mã sản phẩm:</strong> ${product.productId}</p>
+                <p><strong>Số lượng:</strong> ${product.amount}</p>
+                <p><strong>Đơn giá:</strong> ${product.unitPrice}</p>
+                <a href="/AutoParts/product/detail?productId=${product.productId}" class="btn btn-primary">Xem sản phẩm</a>
+              `;
+              productList.appendChild(li);
+            });
+          } else {
+            throw new Error(data.message || 'Không tìm thấy đơn hàng');
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = 'block';
+          orderResult.style.display = 'none';
+        }
+      }); 

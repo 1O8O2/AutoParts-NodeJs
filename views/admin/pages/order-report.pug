@@ -1,0 +1,112 @@
+extends ../layouts/default.pug
+include ../mixins/alert.pug
+include ../mixins/currency.pug
+
+block main
+    #alertContainer
+    .d-sm-flex.align-items-center.justify-content-between.mb-4
+        h1.h3.mb-0.text-gray-800 Báo cáo đơn hàng
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold Chọn khoảng thời gian
+        .card-body
+            form.form-inline(action=`${prefixAdmin}/order-report` method="get")
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="fromDate") Từ ngày:
+                    input.form-control(type="date" id="fromDate" name="fromDate" value=fromDate)
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="toDate") Đến ngày:
+                    input.form-control(type="date" id="toDate" name="toDate" value=toDate)
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="status") Trạng thái:
+                    select.form-control(id="status" name="status")
+                        option(value="") Tất cả
+                        option(value="Pending" selected=status === 'Pending') Chờ xác nhận
+                        option(value="Processing" selected=status === 'Processing') Đang xử lý
+                        option(value="Shipping" selected=status === 'Shipping') Đang vận chuyển
+                        option(value="Completed" selected=status === 'Completed') Đã hoàn thành
+                        option(value="Cancelled" selected=status === 'Cancelled') Đã hủy
+                button.btn.btn-primary.mb-2(type="submit") Lọc dữ liệu
+                a.btn.btn-success.mb-2.ml-2(href=`${prefixAdmin}/order-report/export?fromDate=${fromDate}&toDate=${toDate}&status=${status}`)
+                    i.fas.fa-file-export.mr-1
+                    | Xuất báo cáo
+
+    .row.mb-4
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tổng đơn hàng
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{totalOrders}
+                        .col-auto
+                            i.fas.fa-shopping-cart.fa-2x.text-primary
+
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tổng doanh thu
+                            .h5.mb-0.font-weight-bold.text-gray-800
+                                +formatCurrency(totalRevenue)
+                        .col-auto
+                            i.fas.fa-dollar-sign.fa-2x.text-success
+
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Đơn hàng thành công
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{completedOrders}
+                        .col-auto
+                            i.fas.fa-check-circle.fa-2x.text-info
+
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Đơn hàng hủy
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{cancelledOrders}
+                        .col-auto
+                            i.fas.fa-times-circle.fa-2x.text-danger
+
+    .card.mb-4
+        .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary Danh sách đơn hàng
+        .card-body
+            .table-responsive
+                table.table.table-bordered
+                    thead.thead-light
+                        tr
+                            th Mã đơn hàng
+                            th Ngày đặt
+                            th Khách hàng
+                            th Tổng tiền
+                            th Trạng thái
+                            th Thao tác
+                    tbody
+                        each order in orders
+                            tr
+                                td #{order.orderId}
+                                td #{order.orderDate}
+                                td #{order.userEmail}
+                                td
+                                    +formatCurrency(order.totalAmount)
+                                td
+                                    case order.status
+                                        when "Pending"
+                                            span.badge.badge-warning Chờ xác nhận
+                                        when "Completed"
+                                            span.badge.badge-success Đã hoàn thành
+                                        when "Cancelled"
+                                            span.badge.badge-danger Đã hủy
+                                        when "Processing"
+                                            span.badge.badge-info Đang xử lý
+                                        when "Shipping"
+                                            span.badge.badge-primary Đang vận chuyển
+                                td
+                                    a.btn.btn-sm.btn-primary(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi tiết 

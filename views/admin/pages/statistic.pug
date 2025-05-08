@@ -6,6 +6,16 @@ block main
     #alertContainer
     .d-sm-flex.align-items-center.justify-content-between.mb-4
         h1.h3.mb-0.text-gray-800 Thống kê
+        .btn-group
+            a.btn.btn-primary.mr-2(href=`${prefixAdmin}/product-report`)
+                i.fas.fa-box.mr-1
+                | Báo cáo sản phẩm
+            a.btn.btn-info.mr-2(href=`${prefixAdmin}/order-report`)
+                i.fas.fa-shopping-cart.mr-1
+                | Báo cáo đơn hàng
+            a.btn.btn-success(href=`${prefixAdmin}/financial-report`)
+                i.fas.fa-chart-line.mr-1
+                | Báo cáo tài chính
 
     .card.mb-4
         .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
