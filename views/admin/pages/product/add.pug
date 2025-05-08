@@ -45,13 +45,9 @@ block main
                         // Cột 2: Giá và hình ảnh
                         .col-lg-6
                             .form-group
-                                label(for="costPrice") Giá Nhập 
-                                    span.text-danger *
-                                input.form-control(type="number" id="costPrice" name="costPrice" min="0" placeholder="Nhập giá nhập sản phẩm" required)
+                                input.form-control(type="number" id="costPrice" name="costPrice" value="0" hidden required)
                             .form-group
-                                label(for="salePrice") Giá Bán 
-                                    span.text-danger *
-                                input.form-control(type="number" id="salePrice" name="salePrice" min="0" placeholder="Nhập giá bán sản phẩm" required)
+                                input.form-control(type="number" id="salePrice" name="salePrice" value="0" hidden required)
                             .form-group
                                 label(for="weight") Khối lượng 
                                     span.text-danger *

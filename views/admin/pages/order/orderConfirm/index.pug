@@ -16,7 +16,6 @@ block main
                     thead.thead-light
                         tr
                             th Mã Đơn Hàng
-                            th Số Điện Thoại KH
                             th Địa Chỉ Giao Hàng
                             th Ngày Đặt Hàng
                             th Tổng Tiền
@@ -25,7 +24,6 @@ block main
                         each order in listPending
                             tr.product-item
                                 td.align-middle #{order.orderId}
-                                td.align-middle #{order.userPhone}
                                 td.align-middle #{order.shipAddress}
                                 td.align-middle 
                                     +formatDate(order.orderDate)

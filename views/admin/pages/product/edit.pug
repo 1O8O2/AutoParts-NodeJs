@@ -37,14 +37,14 @@ block main
                                     if productGroupList && productGroupList.length > 0
                                         each group in productGroupList
                                             option(value=group.productGroupId selected=group.productGroupId === product.productGroupId)= group.groupName
-                            .form-group
+                            .form-group(class=`${product.costPrice == 0 ? "d-none" : "d-block" }`)
                                 label(for="costPrice") Giá nhập 
                                     span.required-text *
                                 .input-group.mb-3
-                                    input.form-control(type="number" id="costPrice" name="costPrice" value=product.costPrice placeholder="Nhập giá tiền gốc của sản phẩm" required)
+                                    input.form-control(type="number" id="costPrice" name="costPrice" value=product.costPrice disabled required)
                                     .input-group-append
                                         span.input-group-text VNĐ
-                            .form-group
+                            .form-group(class=`${product.costPrice == 0 ? "d-none" : "d-block" }`)
                                 label(for="salePrice") Giá bán 
                                     span.required-text *
                                 .input-group.mb-3
