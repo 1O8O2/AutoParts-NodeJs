@@ -333,43 +333,6 @@ module.exports.cancel = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
-// GET /order/check - Check order by orderId
-module.exports.checkOrder = async (req, res) => {
-    try {
-        const orderId = req.query.orderId;
-        if (!orderId) {
-            return res.status(400).json({ message: 'Order ID is required' });
-        }
-
-        const order = await Order.findByPk(orderId);
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
-        }
-
-        const user = await Customer.findByPk(order.userEmail);
-        if (!user) {
-            return res.status(404).json({ message: 'Customer information not found' });
-        }
-
-        const account = await Account.findByPk(order.userEmail);
-        const userName = account ? account.name : 'Unknown';
-
-        const products = await OrderDetail.findAll({
-            where: { orderId: orderId }
-        });
-
-        return res.json({
-            order,
-            user,
-            userName,
-            products
-        });
-    } catch (error) {
-        console.error('Error in checkOrder:', error);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-=======
 
 
 // GET /edit - Show edit form
@@ -606,5 +569,4 @@ module.exports.removeProduct = async (req, res) => {
     // });
 
     return res.redirect('back');
->>>>>>> a61501fc0aed3307a30f76970a91eb9bd910ea71
 };
