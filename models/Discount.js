@@ -107,5 +107,39 @@ Discount.setUsedDiscount = async(email, discountId) =>
 }
 
 
+Discount.deleteDiscountUsed = async (discountId, email) => {
+  try {
+    const sql = `
+      DELETE FROM [dbo].[UsedDiscount]
+      WHERE discountId = :discountId AND email = :email
+    `;
+    await Discount.sequelize.query(sql, {
+      replacements: { discountId, email },
+      type: sequelize.QueryTypes.DELETE,
+    });
+  } catch (error) {
+    console.error('Error in deleteDiscountUsed:', error);
+    return false;
+  }
+};
+
+Discount.updateDiscountUsed = async (oldDiscountId, email, newDiscountId) => {
+  try {
+    const sql = `
+      UPDATE [dbo].[UsedDiscount]
+      SET discountId = :newDiscountId
+      WHERE discountId = :oldDiscountId AND email = :email
+    `;
+    await Discount.sequelize.query(sql, {
+      replacements: { newDiscountId, oldDiscountId, email },
+      type: sequelize.QueryTypes.UPDATE,
+    });
+  } catch (error) {
+    console.error('Error in updateDiscountUsed:', error);
+    return false;
+  }
+};
+
+
 module.exports = Discount;
 

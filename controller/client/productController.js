@@ -3,6 +3,7 @@ const Brand = require('../../models/Brand');
 const ProductGroup = require('../../models/ProductGroup');
 const Customer = require('../../models/Customer');
 const {Cart, ProductsInCart} = require('../../models/Cart');
+const Account = require('../../models/Account');
 
 // [GET] /product/detail
 module.exports.showProduct = async (req, res) => {
@@ -37,21 +38,28 @@ module.exports.addProduct = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
 
-        if (!res.locals.user) {
-            req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
-            return res.redirect('/AutoParts/account/login');
+        let acc, cus, cart;
+        if(req.cookies.tokenUser!=null)
+        {
+            acc = await Account.findOne({
+                where: { token: req.cookies.tokenUser }
+            });
         }
-
-        const cus = await Customer.findByPk(res.locals.user.email);
-        if (!cus) {
-            req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
-            return res.redirect('/AutoParts/account/login');
+         
+        if(acc)
+        {
+            cus = await Customer.findByPk(acc.email);
+            console.log(cus)
         }
-
-        const cart = await Cart.findByPk(cus.cartId);
-        if (!cart) {
-            req.flash('error', res.locals.messages.CART_NOT_FOUND);
-            return res.render('back', { message: 'Giỏ hàng không tồn tại' });
+        
+        if (cus) {
+            // return res.render('client/pages/order/order', { message: 'Cart not found' });
+            cart = await Cart.findByPk(cus.cartId);
+        }
+        else
+        {
+            cart = await Cart.findByPk(req.cookies.cartId);
+            console.log(cart.cartId)
         }
 
         const product = await Product.findByPk(productId);
@@ -119,27 +127,48 @@ module.exports.addProduct = async (req, res) => {
 
 module.exports.deleteProduct = async (req, res) => {
     try {
+        console.log('Delete product from cart');
+
+        let acc, cus, cart;
+        if(req.cookies.tokenUser!=null)
+        {
+            acc = await Account.findOne({
+                where: { token: req.cookies.tokenUser }
+            });
+        }
+         
+        if(acc)
+        {
+            cus = await Customer.findByPk(acc.email);
+            console.log(cus)
+        }
+        
+        if (cus) {
+            // return res.render('client/pages/order/order', { message: 'Cart not found' });
+            cart = await Cart.findByPk(cus.cartId);
+        }
+        else
+        {
+            cart = await Cart.findByPk(req.cookies.cartId);
+            console.log(cart.cartId)
+        }
+
         const { productId } = req.query; 
         const referer = req.headers.referer || '/AutoParts'; 
-
-        if (!res.locals.user) {
-            req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
-            return res.redirect('/AutoParts/account/login'); // Or handle differently
-        }
-
-        const cus = await Customer.findByPk(res.locals.user.email);
-        //console.log(cus)
-        if (!cus) {
-            req.flash('error', res.locals.messages.NOT_LOGIN_ERROR);
-            return res.redirect('/AutoParts/account/login');
-        }
-
-        const cart = await Cart.findByPk(cus.cartId);
+        console.log('Referer:', referer);
+        //console.log(productId)
+        //console.log(acc)
+        
+        //console.log(cart.products)
         if (cart && cart.products) {
-            // Filter out the product to delete
+            console.log('cart.products before filter:', cart.products);
             cart.products = cart.products.filter(item => item.product.productId !== productId);
-            await cart.save(); // Hooks update ProductsInCart table
+            console.log('cart.products after filter:', cart.products);
+            await cart.save();
+        } else {
+            console.log('cart or cart.products is undefined:', { cart, products: cart?.products });
         }
+        //console.log(cart.products)
         req.flash('success', res.locals.messages.REMOVE_FROM_CART_SUCCESS);
         res.redirect(referer);
     } catch (error) {
