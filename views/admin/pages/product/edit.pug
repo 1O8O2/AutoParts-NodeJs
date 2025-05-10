@@ -33,18 +33,18 @@ block main
                                 label(for="groupName") Danh mục sản phẩm 
                                     span.required-text *
                                 select.form-control.mb-3(id="productGroupId" name="productGroupId" required)
-                                    option(value="" disabled) -- Chọn danh mục của sản phẩm --
+                                    option(value="" disabled) -- Chọn danh mục sản phẩm --
                                     if productGroupList && productGroupList.length > 0
                                         each group in productGroupList
                                             option(value=group.productGroupId selected=group.productGroupId === product.productGroupId)= group.groupName
-                            .form-group
-                                label(for="costPrice") Giá gốc 
+                            .form-group(class=`${product.costPrice == 0 ? "d-none" : "d-block" }`)
+                                label(for="costPrice") Giá nhập 
                                     span.required-text *
                                 .input-group.mb-3
-                                    input.form-control(type="number" id="costPrice" name="costPrice" value=product.costPrice placeholder="Nhập giá tiền gốc của sản phẩm" required)
+                                    input.form-control(type="number" id="costPrice" name="costPrice" value=product.costPrice disabled required)
                                     .input-group-append
                                         span.input-group-text VNĐ
-                            .form-group
+                            .form-group(class=`${product.costPrice == 0 ? "d-none" : "d-block" }`)
                                 label(for="salePrice") Giá bán 
                                     span.required-text *
                                 .input-group.mb-3
@@ -53,7 +53,9 @@ block main
                                         span.input-group-text VNĐ
                         .col-lg-6
                             .form-group
-                                input.form-control(type="number" id="stock" name="stock" value="0" hidden required)
+                                label(for="salePrice") Số lượng tồn kho
+                                    span.required-text *
+                                input.form-control(type="number" id="stock" name="stock" value=product.stock disabled required)
                             .form-group
                                 label(for="unit") Đơn vị 
                                     span.required-text *

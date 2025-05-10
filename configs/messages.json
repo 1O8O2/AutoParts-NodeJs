@@ -3,6 +3,8 @@
   "EDIT_PROFILE_SUCCESS": "Thay đổi thông tin thành công!",
   "EDIT_PROFILE_ERROR": "Thay đổi thông tin thất bại!",
   "EDIT_PROFILE_INVALID": "Thông tin không hợp lệ!",
+  "EDIT_ORDER_SUCCESS": "Thay đổi thông tin đơn hàng thành công!",
+
 
   "INVALID_PASSWORD_ERROR": "Mật khẩu không hợp lệ!",
   "NOT_MATCH_PASSWORD_ERROR": "Mật khẩu xác nhận không khớp!",
@@ -30,6 +32,7 @@
   "CREATE_ORDER_ERROR": "Đặt hàng thất bại!",
 
   "INVALID_PRODUCT_NUMBER": "Số lượng sản phẩm không hợp lệ!",
+  "INVALID_PRODUCT_COST_PRICE": "Giá nhập sản phẩm không hợp lệ!",
   "INVALID_ADDRESS_WARNING": "Địa chỉ không hợp lệ!",
   "INVALID_PHONE_WARNING": "Số điện thoại không hợp lệ!",
   "INVALID_EMAIL_WARNING": "Email không hợp lệ!",

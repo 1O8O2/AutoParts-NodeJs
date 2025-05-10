@@ -368,7 +368,6 @@ module.exports.importAddPost = async (req, res) => {
             importDetails.push(detail);
         }
 
-        // Process import details and update product stock
         for (const detail of importDetails) {
             await ImportDetail.create({
                 importId: importRecord.importId,
@@ -378,8 +377,11 @@ module.exports.importAddPost = async (req, res) => {
             });
 
             const product = await Product.findByPk(detail.id.productId);
+            const updatedCostPrice = (product.costPrice * product.stock + detail.amount * detail.price) / (product.stock + detail.amount);
+
             await product.update({
-                stock: product.stock + detail.amount
+                stock: product.stock + detail.amount,
+                costPrice: updatedCostPrice
             });
         }
 

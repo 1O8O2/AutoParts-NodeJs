@@ -31,6 +31,10 @@ const Order = sequelize.define('Order', {
         type: DataTypes.STRING(255),
         allowNull: true
     },
+    shippingType: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
     totalCost: {
         type: DataTypes.DECIMAL(18, 2),
         allowNull: true

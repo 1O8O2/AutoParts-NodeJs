@@ -137,8 +137,18 @@ block main
             const amount = parseInt(document.getElementById("amount").value);
             const price = parseFloat(document.getElementById("price").value);
 
-            if (!productId || amount <= 0 || price < 0) {
+            if (!productId) {
                 showAlertClientSide(messages.BLANK_INFORMATION, "error");
+                return;
+            }
+
+            if (amount <= 0) {
+                showAlertClientSide(messages.INVALID_PRODUCT_NUMBER, "error");
+                return;
+            }
+
+            if (price <= 0) {
+                showAlertClientSide(messages.INVALID_PRODUCT_COST_PRICE, "error");
                 return;
             }
 
