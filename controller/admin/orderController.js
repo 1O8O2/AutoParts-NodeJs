@@ -14,6 +14,8 @@ const generateToken = require("../../helpers/generateToken");
 
 const systemConfig = require("../../configs/system");
 
+const {mailSend} = require('../../helpers/mail');
+
 // [GET] /AutoParts/admin/order/add
 module.exports.add = async (req, res) => {
     try {
@@ -372,7 +374,12 @@ module.exports.detail = async (req, res) => {
 module.exports.changeStatus = async (req, res) => {
     try {
         const status = req.body.status;
-        const orderId = req.body.orderId;			
+        const orderId = req.body.orderId;
+        const order = await Order.findByPk(orderId);
+        const customerEmail = order.userEmail;	
+        console.log(customerEmail);
+        console.log(order);
+
 
         if (status === 'Pending') {
             await Order.update(
@@ -385,6 +392,23 @@ module.exports.changeStatus = async (req, res) => {
                 }
             );
 
+            const from = 'no-reply@autopart.com'
+            const to = customerEmail
+            const subject = 'Đơn hàng đã được xác nhận';
+            const html = `
+                Chào bạn,<br><br>
+                Đơn hàng của bạn tại AutoPart đã được xác nhận thành công! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
+                <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+                <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+                <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+                <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+                Đơn hàng của bạn hiện đang được chuẩn bị và sẽ sớm được giao đến bạn. Bạn có thể theo dõi trạng thái đơn hàng trong phần "Tài khoản" trên website của chúng tôi.<br><br>
+                Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+                Trân trọng,<br>
+                Đội ngũ AutoPart
+            `;
+            console.log(to);
+            await mailSend(from, to, subject, html);
             req.flash('success', "Xác nhận đơn hàng thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/order/Processing`);
         }
@@ -398,6 +422,23 @@ module.exports.changeStatus = async (req, res) => {
                     where: { orderId: orderId }
                 }
             );
+            
+            const from = 'no-reply@autopart.com'
+            const to = customerEmail
+            const subject = 'Đơn hàng đang được giao';
+            const html = `
+                Chào bạn,<br><br>
+                Đơn hàng của bạn tại AutoPart đang được giao đến bạn! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
+                <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+                <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+                <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+                <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+                Đơn hàng của bạn đã được chuyển đến đơn vị vận chuyển và sẽ sớm đến tay bạn. Bạn có thể theo dõi trạng thái giao hàng trong phần "Tài khoản" trên website của chúng tôi hoặc liên hệ đơn vị vận chuyển để biết thêm chi tiết.<br><br>
+                Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+                Trân trọng,<br>
+                Đội ngũ AutoPart
+            `;
+            await mailSend(from, to, subject, html);
 
             req.flash('success', "Chuyển trạng thái giao hàng thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/order/Delivery`);
@@ -412,6 +453,40 @@ module.exports.changeStatus = async (req, res) => {
                     where: { orderId: orderId }
                 }
             );
+
+            const from = 'no-reply@autopart.com'
+            const to = customerEmail
+            const subject = 'Đơn hàng đang được giao';
+            let  html 
+            if (status === 'Cancelled') {
+                html = `
+                    Chào bạn,<br><br>
+                    Đơn hàng của bạn tại AutoPart đã bị hủy! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
+                    <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+                    <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+                    <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+                    <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+                    Đơn hàng của bạn đã bị hủy vì lý do không xác định. Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+                    Trân trọng,<br>
+                    Đội ngũ AutoPart
+                `;
+            }
+            else {
+                html = `
+                    Chào bạn,<br><br>
+                    Đơn hàng của bạn tại AutoPart đã hoàn tất! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
+                    <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+                    <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+                    <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+                    <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+                    Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã mua sắm tại AutoPart!<br><br>
+                    Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+                    Trân trọng,<br>
+                    Đội ngũ AutoPart
+                `;
+            }
+
+            await mailSend(from, to, subject, html);
 
             req.flash('success', "Thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/order/History`);

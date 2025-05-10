@@ -126,7 +126,7 @@ html
           | #{order.status}
         if order.status === 'Pending'
           div.order-actions
-            a.edit-btn(href=`/autopart/order/edit.htm?orderId=${order.orderId}`) Sửa đơn hàng
+            a.edit-btn(href=`/AutoParts/order/edit?orderId=${order.orderId}`) Sửa đơn hàng
             a.cancel-btn(href=`/AutoParts/order/cancel?orderId=${order.orderId}`, onclick=`return confirm('Bạn có chắc muốn hủy đơn hàng ${order.orderId}?')`) Hủy đơn hàng
         
 
@@ -147,4 +147,4 @@ html
               | #{p.unitPrice}
             p
               strong
-                a.btn.nav-btn(href=`/AutoParts/product/productDetail?productId=${p.productId}`) Xem sản phẩm
+                a.btn.nav-btn(href=`/AutoParts/product/detail?productId=${p.productId}`) Xem sản phẩm

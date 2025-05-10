@@ -2,15 +2,7 @@
 const Account = require('../../models/Account');
 const Customer = require('../../models/Customer');
 
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const {mailSend} = require('../../helpers/mail');
 
 // [GET] forgot-password
 module.exports.showForgotPassword = async (req, res) => {
@@ -35,20 +27,18 @@ module.exports.forgotPassword = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const mailOptions = {
-      from: 'no-reply@autopart.com',
-      to: email,
-      subject: 'Khôi phục mật khẩu',
-      html: `
+    const from = 'no-reply@autopart.com'
+    const to = email;
+    const subject = 'Khôi phục mật khẩu';
+    const html = `
         Chào bạn,<br><br>
         Mã OTP để khôi phục mật khẩu của bạn là: <strong>${otp}</strong><br>
         Vui lòng sử dụng mã này để đặt lại mật khẩu. Mã OTP có hiệu lực trong 5 phút.<br><br>
         Trân trọng,<br>
         Đội ngũ AutoPart
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    await mailSend(from, to, subject, html);
+    //await transporter.sendMail(mailOptions);
     req.session.otp = otp;
     req.session.recoveringMail = email;
     console.log(req.session.otp)
