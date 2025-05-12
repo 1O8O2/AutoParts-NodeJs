@@ -4,9 +4,9 @@
   "EDIT_PROFILE_ERROR": "Thay đổi thông tin thất bại!",
   "EDIT_PROFILE_INVALID": "Thông tin không hợp lệ!",
   "EDIT_ORDER_SUCCESS": "Thay đổi thông tin đơn hàng thành công!",
-
-
+  
   "INVALID_PASSWORD_ERROR": "Mật khẩu không hợp lệ!",
+  "SHORT_PASSWORD_ERROR": "Mật khẩu phải có ít nhất 4 ký tự!",
   "NOT_MATCH_PASSWORD_ERROR": "Mật khẩu xác nhận không khớp!",
   "PASSWORD_CHANGED_SUCCESS": "Đổi mật khẩu thành công!",
   "PASSWORD_CHANGED_ERROR": "Đổi mật khẩu thất bại!",
@@ -14,6 +14,13 @@
   "NOT_MATCH_PASSWORD_WARNING": "Mật khẩu xác nhận không khớp!",
   "NOT_DIFFERENT_PASSWORD_WARNING": "Mật khẩu mới không được giống mật khẩu cũ!",
   "INCORRECT_PASSWORD_WARNING": "Mật khẩu không đúng!",
+  "LOGIN_SUCCESS": "Đăng nhập thành công!",
+  "LOGIN_ERROR": "Đăng nhập thất bại!",
+  "EMAIL_EXIST_WARNING": "Email đã tồn tại!",
+  "NOT_LOGGED_IN": "Vui lòng đăng nhập để thực hiện chức năng này!",
+  "CUSTOMER_NOT_FOUND": "Không tìm thấy thông tin khách hàng!",
+  "ORDER_NOT_FOUND": "Không tìm thấy đơn hàng!",
+  "ORDER_ID_REQUIRED": "Vui lòng cung cấp mã đơn hàng!",
 
   "BLANK_ADDRESS": "Địa chỉ không được để trống!",
   "BLANK_PHONE": "Số điện thoại không được để trống!",

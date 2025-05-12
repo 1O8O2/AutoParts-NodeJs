@@ -7,50 +7,126 @@ html
     link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous")
     link(rel="stylesheet" href="/css/base.css")
     link(rel="stylesheet" href="/css/filterproduct.css")
+    style.
+      :root {
+        --main-color: #ff6f61;
+        --main-color-2: #fb5748;
+        --text-color: #333;
+        --light-bg: #f8f9fa;
+        --border-color: #e9e9e9;
+      }
+      .sidebar {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .sidebar h2 {
+        color: var(--main-color);
+        margin-bottom: 20px;
+      }
+      .filter-form h3 {
+        color: var(--text-color);
+        margin-bottom: 15px;
+      }
+      .filter-form h3 i {
+        color: var(--main-color);
+        margin-right: 8px;
+      }
+      .form-group label {
+        color: var(--text-color);
+      }
+      .form-group label i {
+        color: var(--main-color);
+        margin-right: 8px;
+      }
+      .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid var(--border-color);
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .card-title {
+        color: var(--text-color);
+      }
+      .card-text {
+        color: var(--text-color);
+      }
+      .card-body p:last-child {
+        color: var(--main-color);
+      }
+      .empty-state {
+        color: var(--text-color);
+      }
+      .empty-state i {
+        color: var(--main-color);
+      }
 
   body
     include ../../partials/header.pug
+    include ../../mixins/currency.pug
 
     .container_filter
       .sidebar
-        div
-          h2
-            strong Bộ lọc
+        h2
+          strong Bộ lọc
         .filter-form
-          .search-form
+          div
             if !keyword || keyword.length === 0
-              h3 Nhập từ khóa để tìm kiếm
+              h3
+                i.fa-solid.fa-magnifying-glass
+                |  Nhập từ khóa để tìm kiếm
             else
-              h3 Tìm kiếm theo từ khóa: "#{keyword}"
+              h3
+                i.fa-solid.fa-magnifying-glass
+                |  Tìm kiếm theo từ khóa: "#{keyword}"
           .form-group
-            label(for="brand") Hãng
-            select#brand-filter.form-control( name="brand")
-                if (!brand)
-                  option(value="" selected) Tất cả
-                each b in brands
-                  if(b.brandId === brand)
-                    option(value=b.brandId selected) #{b.brandName}
-                  else
-                    option(value=b.brandId) #{b.brandName}
-          .form-group
-            label(for="category") Loại hàng
-            select#category-filter.form-control( name="category")
+            label(for="brand")
+              i.fa-solid.fa-tag
+              |  Hãng
+            select#brand-filter.form-control(name="brand")
               if (!brand)
                 option(value="" selected) Tất cả
+              else
+                option(value="") Tất cả
+              each b in brands
+                if(b.brandId === brand)
+                  option(value=b.brandId selected) #{b.brandName}
+                else
+                  option(value=b.brandId) #{b.brandName}
+          .form-group
+            label(for="category")
+              i.fa-solid.fa-list
+              |  Loại hàng
+            select#category-filter.form-control(name="category")
+              if (!group)
+                option(value="" selected) Tất cả
+              else 
+                option(value="") Tất cả
               each gr in categories
                 if gr.productGroupId == group
                   option(value=gr.productGroupId selected) #{gr.groupName}
                 else
                   option(value=gr.productGroupId) #{gr.groupName}
       .content
-        .list-card
-          each product in products
-            .card(style="width: 18rem;" data-brand=product.brandId data-category=product.productGroupId)
-              a(href=`/AutoParts/product/detail?productId=${product.productId}`)
-                img.card-img-top(src=product.imageUrls)
-              .card-body
-                h5.card-title #{product.productName}
-                p.card-text #{product.description}
-                p Giá bán: #{product.salePrice}đ
+        .list-card(class=products.length === 0 ? 'empty' : '')
+          if products.length === 0
+            .empty-state
+              i.fa-solid.fa-box-open
+              p Không tìm thấy sản phẩm nào
+          else
+            each product in products
+              .card(data-brand=product.brandId data-category=product.productGroupId)
+                a(href=`/AutoParts/product/detail?productId=${product.productId}`)
+                  img.card-img-top(src=product.imageUrls alt=product.productName)
+                .card-body
+                  h5.card-title #{product.productName}
+                  p.card-text #{product.description}
+                  p
+                    i.fa-solid.fa-tag
+                    |  
+                    +formatCurrency(product.salePrice)
 
     script(src="/js/filterproduct.js")

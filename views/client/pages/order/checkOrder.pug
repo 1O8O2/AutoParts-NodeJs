@@ -1,0 +1,327 @@
+doctype html
+html
+  head
+    title Kiểm tra đơn hàng
+    link(rel="stylesheet" href="/css/base.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer")
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous")
+    style.
+      :root {
+        --main-color: #ff6f61;
+        --main-color-2: #fb5748;
+        --text-color: #333;
+        --light-bg: #f8f9fa;
+        --border-color: #e9e9e9;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f4;
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 850px;
+        margin: 150px auto 50px;
+        padding: 20px;
+      }
+      .search-box {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        margin-bottom: 30px;
+        transition: var(--transition);
+      }
+      .search-box:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      }
+      .search-box h2 {
+        margin-bottom: 20px;
+        color: var(--text-color);
+        font-weight: 600;
+        text-align: center;
+        position: relative;
+        padding-bottom: 12px;
+      }
+      .search-box h2:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background-color: var(--main-color);
+        border-radius: 2px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-control {
+        border: 1px solid var(--border-color);
+        padding: 12px;
+        border-radius: 8px;
+        transition: var(--transition);
+      }
+      .form-control:focus {
+        border-color: var(--main-color);
+        box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.2);
+      }
+      label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+        color: #555;
+      }
+      .btn-search {
+        background-color: var(--main-color);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: var(--transition);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 6px rgba(255, 111, 97, 0.3);
+      }
+      .btn-search:hover {
+        background-color: var(--main-color-2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 111, 97, 0.4);
+      }
+      .order-result {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        display: none;
+        transition: var(--transition);
+        animation: fadeIn 0.5s ease;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .order-result h3 {
+        margin-bottom: 25px;
+        color: var(--text-color);
+        font-weight: 600;
+        text-align: center;
+        position: relative;
+        padding-bottom: 12px;
+      }
+      .order-result h3:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background-color: var(--main-color);
+        border-radius: 2px;
+      }
+      .order-info {
+        background-color: var(--light-bg);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 4px solid var(--main-color);
+      }
+      .order-info p {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+      }
+      .order-info strong {
+        display: inline-block;
+        width: 150px;
+        color: var(--main-color);
+        font-weight: 600;
+      }
+      .order-info span {
+        font-weight: 500;
+      }
+      .product-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+      }
+      .product-item {
+        background-color: var(--light-bg);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+      .product-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-3px);
+        border-color: var(--main-color);
+      }
+      .product-item:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--main-color);
+      }
+      .product-item p {
+        margin-bottom: 8px;
+      }
+      .product-item strong {
+        display: inline-block;
+        width: 120px;
+        color: #555;
+        font-weight: 600;
+      }
+      .product-item .btn-primary {
+        background-color: var(--main-color);
+        border-color: var(--main-color);
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: var(--transition);
+        margin-top: 10px;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .product-item .btn-primary:hover {
+        background-color: var(--main-color-2);
+        border-color: var(--main-color-2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      .error-message {
+        color: #dc3545;
+        margin-top: 15px;
+        display: none;
+        background-color: #f8d7da;
+        border-radius: 6px;
+        padding: 10px 15px;
+        font-weight: 500;
+        border-left: 4px solid #dc3545;
+        animation: shake 0.5s ease-in-out;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+      }
+      h4 {
+        margin: 30px 0 15px;
+        font-weight: 600;
+        color: var(--text-color);
+        position: relative;
+        display: inline-block;
+        padding-bottom: 8px;
+      }
+      h4:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--main-color);
+        border-radius: 2px;
+      }
+
+  body
+    include ../../partials/header.pug
+
+    .container
+      .search-box
+        h2 Kiểm tra đơn hàng
+        form#orderSearchForm(action="/AutoParts/order/check" method="GET")
+          .form-group
+            label(for="orderId") Nhập mã đơn hàng:
+            input#orderId.form-control(type="text" name="orderId" placeholder="Nhập mã đơn hàng của bạn" required)
+          button.btn.btn-search(type="submit") Kiểm tra
+          .error-message#errorMessage
+
+      .order-result#orderResult
+        h3 Thông tin đơn hàng
+        .order-info
+          p
+            strong Mã đơn hàng: 
+            span#resultOrderId
+          p
+            strong Tên khách hàng: 
+            span#resultCustomerName
+          p
+            strong Số điện thoại: 
+            span#resultPhone
+          p
+            strong Địa chỉ: 
+            span#resultAddress
+          p
+            strong Tổng tiền: 
+            span#resultTotal
+          p
+            strong Ngày đặt hàng: 
+            span#resultOrderDate
+          p
+            strong Trạng thái: 
+            span#resultStatus
+        h4 Sản phẩm
+        ul.product-list#productList
+
+    script.
+      document.getElementById('orderSearchForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const orderId = document.getElementById('orderId').value;
+        const errorMessage = document.getElementById('errorMessage');
+        const orderResult = document.getElementById('orderResult');
+        
+        try {
+          const response = await fetch(`/AutoParts/order/check?orderId=${orderId}`);
+          const data = await response.json();
+          
+          if (response.ok) {
+            errorMessage.style.display = 'none';
+            orderResult.style.display = 'block';
+            
+            // Update order information
+            document.getElementById('resultOrderId').textContent = data.order.orderId;
+            document.getElementById('resultCustomerName').textContent = data.customer.fullName;
+            document.getElementById('resultPhone').textContent = data.customer.phone;
+            document.getElementById('resultAddress').textContent = data.order.shipAddress;
+            document.getElementById('resultTotal').textContent = data.order.totalCost;
+            document.getElementById('resultOrderDate').textContent = data.order.orderDate;
+            document.getElementById('resultStatus').textContent = data.order.status;
+            
+            // Update product list
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+              const li = document.createElement('li');
+              li.className = 'product-item';
+              li.innerHTML = `
+                <p><strong>Tên sản phẩm:</strong> ${product.productName}</p>
+                <p><strong>Mã sản phẩm:</strong> ${product.productId}</p>
+                <p><strong>Số lượng:</strong> ${product.amount}</p>
+                <p><strong>Đơn giá:</strong> ${product.unitPrice}</p>
+                <a href="/AutoParts/product/detail?productId=${product.productId}" class="btn btn-primary">Xem sản phẩm</a>
+              `;
+              productList.appendChild(li);
+            });
+          } else {
+            throw new Error(data.message || 'Không tìm thấy đơn hàng');
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = 'block';
+          orderResult.style.display = 'none';
+        }
+      }); 

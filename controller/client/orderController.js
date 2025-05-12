@@ -60,7 +60,6 @@ module.exports.createOrder = async (req, res) => {
         }
 
         //console.log(acc, cus, cart)
-
         let query='/AutoParts/order?';
 
         // Get all products from cart (virtual field populated by afterFind hook)
@@ -222,8 +221,22 @@ module.exports.createOrder = async (req, res) => {
 
 // GET /order - Show order details
 module.exports.showDetail = async (req, res) => {
+        const tokenUser = req.cookies.tokenUser;
     try {
-        if (!res.locals.user) {
+        if (!tokenUser) {
+            req.flash('error', res.locals.messages.NOT_LOGGED_IN);
+            return res.redirect('/AutoParts/account/login');
+        }
+        const acc = await Account.findOne({
+            where: { token: tokenUser }
+        });
+        if (!acc) {
+            req.flash('error', res.locals.messages.NOT_LOGGED_IN);
+            return res.redirect('/AutoParts/account/login');
+        }
+        const cus = await Customer.findByPk(acc.email);
+        if (!cus) {
+            req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND);
             return res.redirect('/AutoParts/account/login');
         }
 
@@ -236,6 +249,7 @@ module.exports.showDetail = async (req, res) => {
 
         res.render('client/pages/order/orderDetail', {
             order,
+            customer: cus,
             products: order.details
         });
     } catch (error) {
@@ -576,4 +590,59 @@ module.exports.removeProduct = async (req, res) => {
     // });
 
     return res.redirect('back');
+};
+
+// GET /order/check - Check order by orderId
+module.exports.checkOrder = async (req, res) => {
+    // const tokenUser = req.cookies.tokenUser;
+    try {
+
+        // if (!tokenUser) {
+        //     req.flash('error', res.locals.messages.NOT_LOGGED_IN);
+        //     return res.redirect('/AutoParts/account/login');
+        // }
+        // const acc = await Account.findOne({
+        //     where: { token: tokenUser }
+        // });
+        // if (!acc) {
+        //     req.flash('error', res.locals.messages.NOT_LOGGED_IN);
+        //     return res.redirect('/AutoParts/account/login');
+        // }
+        // const cus = await Customer.findByPk(acc.email);
+        // if (!cus) {
+        //     req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND);
+        //     return res.redirect('/AutoParts/account/login');
+        // }
+
+
+
+        const orderId = req.query.orderId;
+        
+        if (!orderId) {
+            req.flash('error', res.locals.messages.ORDER_ID_REQUIRED);
+            return res.status(400).json({ message: 'Order ID is required' });
+        }
+
+        const order = await Order.findByPk(orderId);
+        
+        if (!order) {
+            req.flash('error', res.locals.messages.ORDER_NOT_FOUND);
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        cus = await Customer.findByPk(order.userEmail);
+
+        const products = await OrderDetail.findAll({
+            where: { orderId: orderId }
+        });
+
+        return res.json({
+            order,
+            customer: cus,
+            products
+        });
+    } catch (error) {
+        console.error('Error in checkOrder:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 };

@@ -1,13 +1,19 @@
+include ../../mixins/alert.pug
 doctype html
 html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title Autopart Management
-    link(href="/css/adminCss/login.css" rel="stylesheet")
+    link(href="/css/admincss/base.css" rel="stylesheet")
+    link(href="/css/admincss/login.css" rel="stylesheet")
+
 
   body
-    div #{msg}
+    #alertContainer
+    +alert-error(3000)
+    +alert-success(3000)
+
     .login-container
       .login-header
         h1 Đăng nhập hệ thống quản lý
@@ -15,3 +21,213 @@ html(lang="en")
         input(type="email" name="email" placeholder="Email" required)
         input(type="password" name="password" placeholder="Mật khẩu" required)
         button(type="submit") Đăng nhập
+
+  script.
+    // Alert handling
+    const alerts = document.querySelectorAll('[show-alert]')
+    console.log(alerts);
+    alerts.forEach(alert => {
+        const time = parseInt(alert.getAttribute('data-time'));
+        const closeBtn = alert.querySelector('[close-alert]');
+        
+        // Auto-hide after specified time
+        setTimeout(() => {
+            alert.classList.add('alert-hidden');
+            // Remove from DOM after animation completes
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300); // Match this with the animation duration
+        }, time);
+        
+        // Manual close button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                alert.classList.add('alert-hidden');
+                // Remove from DOM after animation completes
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300);
+            });
+        }
+    });    
+  script.
+      const formLogin = document.querySelector('.login-form');
+      window.messages = !{JSON.stringify(messagelist || {})};
+      console.log(formLogin);
+      // Add validation to the login form
+      if (formLogin) {
+        formLogin.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (validateLoginForm(this)) {
+            this.submit();
+          }
+        });
+
+        // Add blur event listeners to login form inputs
+        const loginInputs = formLogin.querySelectorAll('input');
+        loginInputs.forEach(input => {
+          input.addEventListener('blur', function() {
+            validateLoginInput(this);
+          });
+        });
+      }
+      function showAlertClientSide(message, type = 'success', duration = 3000) {
+        const existingAlerts = document.querySelectorAll('.message.info');
+        existingAlerts.forEach(alert => alert.remove());
+        // Determine alert class based on type
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        // Create alert HTML
+        const alertHtml = `
+            <div class="message info">
+                <div class="alert ${alertClass}" data-time="${duration}" show-alert role="alert">
+                    ${message} <span close-alert>X</span>
+                </div>
+            </div>
+        `;
+
+        // Append to a container (e.g., at the top of the form)
+        const container = document.getElementById('alertContainer') || document.querySelector('.container-fluid');
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+
+        // Handle auto-dismissal (if you have existing logic for this)
+        const alertElement = container.querySelector('.alert[show-alert]');
+        if (duration > 0) {
+            setTimeout(() => {
+                alertElement.parentElement.remove();
+            }, duration);
+        }
+
+        // Add click handler for manual close
+        const closeButton = alertElement.querySelector('[close-alert]');
+        closeButton.addEventListener('click', () => {
+            alertElement.parentElement.remove();
+        });
+      }      // Input validation functions
+        const validateInput = (input) => {
+          console.log(input);
+          let isValid = true;
+          let errorMessage = '';
+          
+          //- input.parentElement.classList.remove('error');
+          
+          // Validation rules based on input type
+          if (input.value.trim() === '') {
+            isValid = false;
+            if (input.name === 'fullName') {
+              errorMessage = window.messages?.BLANK_NAME || 'Tên không được để trống';
+            } else if (input.name === 'email') {
+              errorMessage = window.messages?.BLANK_EMAIL || 'Email không được để trống';
+            } else if (input.name === 'phone') {
+              errorMessage = window.messages?.BLANK_PHONE || 'Số điện thoại không được để trống';
+            } else if (input.name === 'address') {
+              errorMessage = window.messages?.BLANK_ADDRESS || 'Địa chỉ không được để trống';
+            } else {
+              errorMessage = window.messages?.BLANK_PASSWORD || 'Mật khẩu không được để trống';
+            }
+          } else if (input.type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_EMAIL_WARNING || 'Email không đúng định dạng';
+            }
+          }  else if (input.name === 'pass') {
+            // Improved password validation
+            if (input.value.length < 4) {
+              isValid = false;
+              errorMessage = window.messages?.SHORT_PASSWORD_ERROR || 'Mật khẩu phải có ít nhất 4 ký tự';
+            }
+            // Check if contains at least one letter and one number
+            const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
+            if (!passwordRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_PASSWORD_ERROR || 'Mật khẩu không hợp lệ';
+            }
+          }
+            // Check if new password is the same as current password
+            const currentPassword = document.querySelector('input[name="pass"]').value;
+            if (input.value === currentPassword) {
+              isValid = false;
+              errorMessage = window.messages?.NOT_DIFFERENT_PASSWORD_WARNING || 'Mật khẩu mới không được trùng với mật khẩu hiện tại';
+            }
+          
+          if (!isValid) {
+            //- input.parentElement.classList.add('error');
+              showAlertClientSide(errorMessage, 'danger');
+              
+              setTimeout(() => {
+                //- input.parentElement.classList.remove('error');
+              }, 3000);
+          }
+          return isValid;
+        };     
+            // Validate form
+        const validateForm = (form) => {
+          // This is only used for the profile page forms, not the login page
+          const inputs = form.querySelectorAll('input:not([readonly]):not([type="hidden"])');
+          let isValid = true;
+          
+          inputs.forEach(input => {
+            if (!validateInput(input)) {
+              isValid = false;
+            }
+          });
+          
+          return isValid;
+        };
+          // Validate login input
+        const validateLoginInput = (input) => {
+          console.log(input);
+          let isValid = true;
+          let errorMessage = '';
+          
+          //- input.parentElement.classList.remove('error');
+          
+          // Validation rules for login form
+          if (input.value.trim() === '') {
+            isValid = false;
+            if (input.name === 'email') {
+              errorMessage = window.messages?.BLANK_EMAIL || 'Email không được để trống';
+            } else if (input.name === 'password') {
+              errorMessage = window.messages?.BLANK_PASSWORD || 'Mật khẩu không được để trống';
+            }
+          } else if (input.name === 'email' || input.type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_EMAIL_WARNING || 'Email không đúng định dạng';
+            }
+          } else if ((input.name === 'password' || input.type === 'password') && input.value.length < 4) {
+            isValid = false;
+            errorMessage = window.messages?.SHORT_PASSWORD_ERROR || 'Mật khẩu phải có ít nhất 4 ký tự';
+          }
+          
+          if (!isValid) {
+            //- input.parentElement.classList.add('error');
+            showAlertClientSide(errorMessage, 'danger');
+            
+            setTimeout(() => {
+              //- input.parentElement.classList.remove('error');
+            }, 3000);
+          }
+          
+          return isValid;
+        };
+        
+        // Validate login form
+        const validateLoginForm = (form) => {
+          const inputs = form.querySelectorAll('input');
+          let isValid = true;
+          
+          inputs.forEach(input => {
+            if (!validateLoginInput(input)) {
+              isValid = false;
+            }
+          });
+          
+          return isValid;
+        };

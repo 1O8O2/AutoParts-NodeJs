@@ -1,12 +1,18 @@
+include ../../mixins/currency.pug
+include ../../mixins/showImage.pug
+
 doctype html
 html
   head
     meta(charset='UTF-8')
-    title Autopart
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title AutoParts - Cửa hàng phụ tùng ô tô chất lượng cao
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css', integrity='sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==', crossorigin='anonymous', referrerpolicy='no-referrer')
     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', rel='stylesheet', integrity='sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC', crossorigin='anonymous')
+    link(rel='stylesheet', href='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css')
     link(href='/css/dashboard.css', rel='stylesheet')
     link(href='/css/base.css', rel='stylesheet')
+    link(href='/css/homepage.css', rel='stylesheet')
     link(rel='icon', type='image/x-icon', href='https://down-bs-vn.img.susercontent.com/vn-11134216-7ras8-m2ko7nkbfksm02_tn.webp')
 
   body
@@ -16,31 +22,152 @@ html
       .banner
         img(src='https://html.themability.com/autoelite/assets/images/banners/mainbanner1.png', alt='main-img')
 
-      .cat-container
-        .categories#categories
-          .categories_title
-            h1.part-name Danh mục
-          .categories_list
-            - const categories = ['Động cơ', 'Động cơ', 'Động cơ', 'Động cơ', 'Động cơ', 'Động cơ']
-            each category, index in categories
-              .categories_list-item
-                a.item-img(href='#')
-                  img(src=`https://html.themability.com/autoelite/assets/images/categories/${index + 1}.png`, alt='')
-                span.item-title #{category}
 
-        .list-card
-          .products_title
-            h1.part-name#products Sản phẩm nổi bật
-          .products_list
+      // Các tính năng nổi bật
+      .features-section
+        .container
+          .row
+            .col-md-3.col-6
+              .feature-box
+                i.fas.fa-shipping-fast
+                h4 Giao hàng nhanh chóng
+                p Nhận hàng trong 24h
+            .col-md-3.col-6
+              .feature-box
+                i.fas.fa-shield-alt
+                h4 Bảo hành chính hãng
+                p Đảm bảo chất lượng
+            .col-md-3.col-6
+              .feature-box
+                i.fas.fa-headset
+                h4 Hỗ trợ 24/7
+                p Luôn sẵn sàng phục vụ
+            .col-md-3.col-6
+              .feature-box
+                i.fas.fa-exchange-alt
+                h4 Đổi trả dễ dàng
+                p Trong vòng 7 ngày
+
+      // Danh mục sản phẩm
+      .categories-section#categories
+        .container
+          .section-title
+            h2 Danh mục sản phẩm
+            p Tìm kiếm phụ tùng theo nhu cầu của bạn
+          
+          .categories-grid
+            each category, index in categories
+              .category-card
+                .category-img
+                  img(src=`https://html.themability.com/autoelite/assets/images/categories/${index + 1}.png`, alt=category.groupName)
+                .category-content
+                  h3 #{category.groupName}
+                  a.btn-view(href=`/AutoParts/product/search?group=${category.groupName}`) Xem thêm
+                    i.fas.fa-arrow-right
+      
+      // Sản phẩm nổi bật
+      .products-section#products
+        .container
+          .section-title
+            h2 Sản phẩm nổi bật
+            p Những sản phẩm được khách hàng tin dùng nhất
+          
+          .products-grid
             each product in products
-              .card(style='width: 16rem;')
-                a(href=`/AutoParts/product/detail?productId=${product.productId}`)
-                  img.card-img-top(src=product.imageUrls, alt='...')
-                  .card-body
-                    h5.card-title #{product.productName}
-                    p.card-text #{product.description}
-                    p Giá bán: #{product.salePrice}đ
-          div
-            a(href='/AutoParts/product/search?keyword=') Xem tất cả
+              .product-card
+                .product-badge Nổi bật
+                .product-img
+                  a(href=`/AutoParts/product/detail?productId=${product.productId}`)
+                    +showImage(product.imageUrls)
+                .product-actions
+                  a.action-btn.quick-view(href=`/AutoParts/product/detail?productId=${product.productId}` title="Xem nhanh")
+                    i.fas.fa-eye
+                  form(action="/AutoParts/product/add" method="post")
+                    input(hidden name="quantity" value="1")
+                    input(hidden value=product.productId name="productId")
+                    button.action-btn.add-to-cart(type="submit" class="addToCart" title="Thêm vào giỏ" data-product-id=product.productId)
+                      i.fas.fa-shopping-cart
+                .product-content
+                  h3.product-title
+                    a(href=`/AutoParts/product/detail?productId=${product.productId}`) #{product.productName}
+                  .product-meta
+                    span.product-category #{product.ProductGroup.groupName || 'Phụ tùng'}
+                    .product-rating
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star-half-alt
+                  .product-price
+                    span.current-price #{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.salePrice)}
+                    if product.originalPrice && product.originalPrice > product.salePrice
+                      span.old-price #{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.originalPrice)}
+          
+          .products-more
+            a.btn-view-all(href='/AutoParts/product/search?keyword=') Xem tất cả sản phẩm
+              i.fas.fa-arrow-right
+      
+      // Sản phẩm bán chạy
+      .bestsellers-section
+        .container
+          .section-title
+            h2 Sản phẩm bán chạy
+            p Những sản phẩm được khách hàng mua nhiều nhất
+          
+          .row
+            .col-md-6
+              .bestseller-highlight
+                .bestseller-img
+                  +showImage(productOrderMost[0].imageUrls)
+                .bestseller-content
+                  span.bestseller-badge TOP 1
+                  h3 #{productOrderMost[0].productName}
+                  p #{productOrderMost[0].description}
+                  .bestseller-price
+                    span.price 
+                      +formatCurrency(productOrderMost[0].salePrice)
+                  a.btn-buy-now(href=`/AutoParts/product/detail?productId=${productOrderMost[0].productId}`) Mua ngay
+            
+            .col-md-6
+              .bestseller-list
+                each item, index in productOrderMost.slice(1)
+                  .bestseller-item
+                    .bestseller-item-img
+                      img(src=item.imageUrls, alt=item.productName)
+                    .bestseller-item-info
+                      h4 #{item.productName}
+                      .bestseller-item-price 
+                        +formatCurrency(item.salePrice)
+                      .bestseller-item-rating
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+
+      
+            
+            // Navigation
+            .swiper-button-next
+            .swiper-button-prev
+
+      // Call to action
+      .cta-section
+        .container
+          .cta-content
+            h2 Bạn cần tư vấn về phụ tùng?
+            p Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
+            .cta-buttons
+              a.btn-contact(href="/AutoParts/chat")
+                i.fas.fa-phone-alt
+                | Liên hệ ngay
+              a.btn-contact(href="/AutoParts/order/checkOrder")
+                i.fas.fa-magnifying-glass
+                | Tra cứu đơn hàng
 
       include ../../partials/footer.pug
+
+
+    // Scripts
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js', integrity='sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM', crossorigin='anonymous')
+    script(src='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js')

@@ -1,0 +1,201 @@
+extends ../layouts/default.pug
+include ../mixins/alert.pug
+include ../mixins/currency.pug
+
+block main
+    #alertContainer
+    .d-sm-flex.align-items-center.justify-content-between.mb-4
+        h1.h3.mb-0.text-gray-800 Báo cáo tài chính
+
+    .card.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+            h6.m-0.font-weight-bold Chọn khoảng thời gian
+        .card-body
+            form.form-inline(action=`${prefixAdmin}/financial-report` method="get")
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="fromDate") Từ ngày:
+                    input.form-control(type="date" id="fromDate" name="fromDate" value=fromDate)
+                .form-group.mx-sm-3.mb-2
+                    label.mr-2(for="toDate") Đến ngày:
+                    input.form-control(type="date" id="toDate" name="toDate" value=toDate)
+                button.btn.btn-primary.mb-2(type="submit") Lọc dữ liệu
+                a.btn.btn-success.mb-2.ml-2(href=`${prefixAdmin}/financial-report/export?fromDate=${fromDate}&toDate=${toDate}`)
+                    i.fas.fa-file-export.mr-1
+                    | Xuất báo cáo
+
+    .row.mb-4
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tổng doanh thu
+                            .h5.mb-0.font-weight-bold.text-gray-800
+                                +formatCurrency(totalRevenue)
+                        .col-auto
+                            i.fas.fa-dollar-sign.fa-2x.text-success
+
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tổng chi phí
+                            .h5.mb-0.font-weight-bold.text-gray-800
+                                +formatCurrency(totalCost)
+                        .col-auto
+                            i.fas.fa-money-bill-wave.fa-2x.text-danger
+
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Lợi nhuận
+                            .h5.mb-0.font-weight-bold.text-gray-800
+                                +formatCurrency(profit)
+                        .col-auto
+                            i.fas.fa-chart-line.fa-2x.text-primary
+
+        .col-xl-3.col-md-6.mb-4
+            .card.h-100
+                .card-body
+                    .row.align-items-center
+                        .col.mr-2
+                            .text-xs.font-weight-bold.text-uppercase.mb-1 Tỷ suất lợi nhuận
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{profitMargin}%
+                        .col-auto
+                            i.fas.fa-percentage.fa-2x.text-info
+
+    .row
+        .col-xl-8.col-lg-7
+            .card.mb-4
+                .card-header.py-3
+                    h6.m-0.font-weight-bold.text-primary Biểu đồ doanh thu và chi phí
+                .card-body
+                    .chart-area
+                        canvas#revenueChart
+
+        .col-xl-4.col-lg-5
+            .card.mb-4
+                .card-header.py-3
+                    h6.m-0.font-weight-bold.text-primary Chi tiết chi phí
+                .card-body
+                    .table-responsive
+                        table.table.table-bordered
+                            thead.thead-light
+                                tr
+                                    th Loại chi phí
+                                    th Số tiền
+                            tbody
+                                each cost in costDetails
+                                    tr
+                                        td #{cost.type}
+                                        td
+                                            +formatCurrency(cost.amount)
+
+    script(src="/vendor/chart.js/Chart.min.js")
+    script.
+        // Revenue Chart
+        var ctx = document.getElementById("revenueChart");
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: !{JSON.stringify(labels)},
+                datasets: [{
+                    label: "Doanh thu",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: !{JSON.stringify(revenueData)},
+                },
+                {
+                    label: "Chi phí",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(231, 74, 59, 0.05)",
+                    borderColor: "rgba(231, 74, 59, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(231, 74, 59, 1)",
+                    pointBorderColor: "rgba(231, 74, 59, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(231, 74, 59, 1)",
+                    pointHoverBorderColor: "rgba(231, 74, 59, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: !{JSON.stringify(costData)},
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'date'
+                        },
+                        gridLines: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            callback: function(value, index, values) {
+                                return value.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
+                            }
+                        },
+                        gridLines: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }],
+                },
+                legend: {
+                    display: true
+                },
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(tooltipItem, chart) {
+                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                            return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
+                        }
+                    }
+                }
+            }
+        }); 

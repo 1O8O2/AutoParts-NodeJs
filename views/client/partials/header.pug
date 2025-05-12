@@ -1,4 +1,5 @@
 include ../mixins/alert.pug
+
 div.header
   +alert-success(3000)
   +alert-error(3000)
@@ -42,7 +43,10 @@ div.header
                 each product in cart.products
                   li.header__cart-item
                     input(type='checkbox', name=product.product.productId, value=product.amount, id=`cart-item-${product.product.productId}`)
-                    img.header__cart-img(src=product.product.imageUrl || 'https://img.freepik.com/free-photo/fashion-portrait-young-elegant-woman_1328-2743.jpg?w=1480&t=st=1701357403~exp=1701358003~hmac=435f00eded774f42e172f48f4be677658485206407baa84eaef2058b11f1431f', alt=product.product.productName)
+                    if product.product.imageUrl.startsWith('https')
+                      img(src=product.product.imageUrl alt="Current Image (External)" class="header__cart-img")
+                    else
+                      img(src=`https://html.themability.com/autoelite/assets/images/categories/1.png` alt="Current Image (Local)" class="header__cart-img")
                     .header__cart-item-info
                       .header__cart-item-head
                         h5.header__cart-item-name #{product.product.productName}
@@ -60,19 +64,18 @@ div.header
             button.btn.btn--primary.header__cart-view-cart(type='submit') 
               i.fa-solid.fa-credit-card
               |  Thanh toán
-      if user
-        .header_chat
-          a.nav-link(href='/AutoParts/chat', aria-current='page')
-            button.header-right_chat(type='button')
-              .header-chat_button
-                i.fa-solid.fa-comments.logo-chat
-                span.title-chat Hỗ trợ
+      //- if user
+      //-   .header_chat
+      //-     a.nav-link(href='/AutoParts/chat', aria-current='page')
+      //-       button.header-right_chat(type='button')
+      //-         .header-chat_button
+      //-           i.fa-solid.fa-comments.logo-chat
+      //-           span.title-chat Hỗ trợ
   .header_menu
     ul.header_menu-list
       li
         a.menu-item(href='#products')
           | Sản phẩm
-          i.fa.fa-angle-down(aria-hidden='true')
       li
         a.menu-item(href='#categories')
           | Danh mục
@@ -89,7 +92,6 @@ div.header
       li
         a(href='#contact')
           | Liên hệ
-          i.fa.fa-angle-down(aria-hidden='true')
       li
         a.menu-item#brand(href='#')
           | Nhãn hàng

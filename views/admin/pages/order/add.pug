@@ -6,8 +6,8 @@ block main
     +alert-error(3000)
 
     .card.mb-4
-        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
-            h6.m-0.font-weight-bold.text-primary Tạo Đơn Hàng
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between(style="background-color: #ff6f61;")
+            h6.m-0.font-weight-bold.text-white Tạo Đơn Hàng
         .card-body
             form(action=`${prefixAdmin}/order/add` method="post")
                 .row

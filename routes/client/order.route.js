@@ -10,7 +10,9 @@ router.get('/edit', controller.editForm);
 router.post('/edit', controller.edit);
 router.post('/edit/remove-product', controller.removeProduct);
 router.get('/', controller.showCart);
-
-
+router.get('/check', controller.checkOrder);
+router.get('/checkOrder', (req, res) => {
+    res.render('client/pages/order/checkOrder');
+});
 
 module.exports = router;

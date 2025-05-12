@@ -31,5 +31,5 @@ block main
                                     +formatCurrency(order.totalCost)
                                 td.align-middle
                                     if (permission.includes("QUAN_LY_DON_HANG_SUA"))
-                                        a.btn.btn-sm.btn-primary.mr-1(href=`${prefixAdmin}/order/edit/${order.orderId}`) Sửa
+                                        a.btn.btn-sm.btn-primary.mr-1(href=`${prefixAdmin}/order/edit/${order.orderId}` style="background-color: #ff6f61; border-color: #ff6f61;") Sửa
                                     a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi Tiết
