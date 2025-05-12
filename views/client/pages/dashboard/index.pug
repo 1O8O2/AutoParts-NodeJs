@@ -56,14 +56,13 @@ html
             p Tìm kiếm phụ tùng theo nhu cầu của bạn
           
           .categories-grid
-            - const categories = ['Động cơ', 'Hệ thống phanh', 'Hệ thống treo', 'Điện & điện tử', 'Dầu & chất lỏng', 'Phụ kiện']
             each category, index in categories
               .category-card
                 .category-img
-                  img(src=`https://html.themability.com/autoelite/assets/images/categories/${index + 1}.png`, alt=category)
+                  img(src=`https://html.themability.com/autoelite/assets/images/categories/${index + 1}.png`, alt=category.groupName)
                 .category-content
-                  h3 #{category}
-                  a.btn-view(href=`/AutoParts/product/search?category=${category}`) Xem thêm
+                  h3 #{category.groupName}
+                  a.btn-view(href=`/AutoParts/product/search?group=${category.groupName}`) Xem thêm
                     i.fas.fa-arrow-right
       
       // Sản phẩm nổi bật
