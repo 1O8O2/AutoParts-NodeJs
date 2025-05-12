@@ -48,6 +48,31 @@ module.exports.index = async (req, res) => {
       limit: 4
     });
 
+          
+    const categoriesHaveMostPro = await ProductGroup.findAll({
+      attributes: [
+        'productGroupId',
+        'groupName',
+        [
+          Sequelize.literal(`
+            (SELECT COUNT(*)
+             FROM Product
+             WHERE Product.productGroupId = ProductGroup.productGroupId 
+             AND Product.deleted = 0 
+             AND Product.status = N'Active')
+          `),
+          'totalProductGroup'
+        ]
+      ],
+      where: {
+        deleted: false,
+        status: 'Active'
+      },
+      group: ['ProductGroup.productGroupId', 'ProductGroup.groupName'],
+      order: [[Sequelize.literal('totalProductGroup'), 'DESC']],
+      limit: 6
+    });
+
     // Process image URLs (split and take first image)
     const newProLst = proLstFav.map(product => {
       const img = product.imageUrls || '';
@@ -63,11 +88,11 @@ module.exports.index = async (req, res) => {
 
     res.render('client/pages/dashboard/index', {
       products: newProLst,
-      productOrderMost: newProMostOrder
+      productOrderMost: newProMostOrder,
+      categories: categoriesHaveMostPro
     });
   } catch (error) {
     req.flash('error', res.locals.messages.LOADING_ERROR);
     res.render('dashboard', { message: 'Đã xảy ra lỗi khi tải trang' });
   }
 };
-

@@ -15,15 +15,21 @@ module.exports.login = async (req, res) => {
 module.exports.loginPost = async (req, res) => {
   try {
     const account = await Account.findByPk(req.body.email);
-    
-    if (account != null && account.password == req.body.password && account.status != 'Deleted' && account.roleGroupId != 'RG002') {
-      res.cookie("token", account.token);
-      return res.redirect(`${systemConfig.prefixAdmin}/dashboard/profile`);
+    if(!account) {
+      req.flash("error", res.locals.messages.ACCOUNT_NOT_FOUND);
+      return res.redirect('back');
     }
-
-    return res.redirect('back', {
-      msg: "error"
-    });
+    if(account.password !== req.body.password) {
+      req.flash("error", res.locals.messages.PASSWORD_INCORRECT);
+       return res.redirect('back');
+    }
+    if(account.permission =='RG002') {
+      req.flash("error", res.locals.messages.LOGIN_ERROR);
+      return res.redirect('back');
+    }
+    res.cookie("token", account.token);
+    req.flash("success", res.locals.messages.LOGIN_SUCCESS)
+    return res.redirect(`${systemConfig.prefixAdmin}/dashboard/profile`);
 
   } catch (err) {
     res.status(500).send('Server error');

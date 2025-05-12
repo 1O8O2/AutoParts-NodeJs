@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add scroll to top when filters change
     brandFilter.addEventListener('change', scrollToTop);
     categoryFilter.addEventListener('change', scrollToTop);
+
+    filterProducts();
 });
 /**
  * 

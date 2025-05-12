@@ -32,6 +32,12 @@ module.exports.register = async (req, res) => {
         return res.redirect('back');
     }
 
+    let customer = await Customer.findOne({ where: { email: email } });
+    if (customer) {
+        req.flash('error', res.locals.messages.EMAIL_EXIST_WARNING);
+        return res.redirect('back');
+    }
+
     try {
         // Create a new Cart
         const cartId = 'CART' + Date.now().toString().substring(8);
@@ -85,9 +91,9 @@ module.exports.register = async (req, res) => {
 // [GET] /account/login
 module.exports.showLogIn = async (req, res) => {
     if (req.cookies?.tokenUser) {
+        req.flash('success', res.locals.messages.LOGIN_SUCCESS);
         return res.redirect(systemConfig.prefixUrl+'/account/profile');
     }
-    req.flash('error', res.locals.messages.LOGIN_ERROR);
     return res.render('client/pages/user/login',
         {
             messagelist: res.locals.messages,
@@ -117,8 +123,12 @@ module.exports.logIn = async (req, res) => {
     } 
 
     const customer = await Customer.findByPk(account.email);
-    const cart = await Cart.findByPk(customer.cartId);
+    if (!customer) {
+        req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
+        return res.redirect('back');
+    }
 
+    const cart = await Cart.findByPk(customer.cartId);
     res.cookie("cartId", cart.cartId);
     res.cookie("tokenUser", account.token);
     req.flash('success', res.locals.messages.LOGIN_SUCCESS);
