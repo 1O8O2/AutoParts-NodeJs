@@ -1,3 +1,6 @@
+include ../../mixins/currency.pug
+include ../../mixins/moment.pug
+
 doctype html
 html
   head
@@ -213,20 +216,34 @@ html
           strong Địa chỉ: 
           | #{order.shipAddress}
         p
-          strong Tổng: 
-          | #{order.totalCost}
+          strong Tổng tiền: 
+          +formatCurrency(order.totalCost)
         p
           strong Mã giảm giá: 
           | #{order.discountId || 'Không có'}
         p
           strong Ngày đặt hàng: 
-          | #{order.orderDate}
+          +formatDate(order.orderDate)
         p
           strong Loại vận chuyển: 
-          | #{order.shippingType}
+          if (order.shippingType == "Normal")
+            | Thường
+          else if (order.shippingType == "Express")
+            | Nhanh
+          else if (order.shippingType == "Economy")
+            | Tiết kiệm
         p
           strong Trạng thái: 
-          | #{order.status}
+          if (order.status == "Pending")
+            | Chờ xác nhận
+          else if (order.status == "Processing")
+            | Chờ xử lý
+          else if (order.status == "Shipping")
+            | Đang giao 
+          else if (order.status == "Completed")
+            | Đã giao
+          else if (order.status == "Cancelled")
+            | Đã hủy
         if order.status === 'Pending'
           div.order-actions
             a.edit-btn(href=`/AutoParts/order/edit?orderId=${order.orderId}`) Sửa đơn hàng
@@ -247,7 +264,7 @@ html
               | #{p.amount}
             p
               strong Đơn giá: 
-              | #{p.unitPrice}
+              +formatCurrency(p.unitPrice)
             p
               strong
                 a.btn.nav-btn(href=`/AutoParts/product/detail?productId=${p.productId}`) Xem sản phẩm

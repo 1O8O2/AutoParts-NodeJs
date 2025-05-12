@@ -1,4 +1,6 @@
 include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+include ../../mixins/currency.pug
 doctype html
 
 html
@@ -43,10 +45,10 @@ html
         .buttons
           button.button.edit-btn#edit-btn(type='submit') Chỉnh sửa
       .menu
-        a.order.choosed
+        a(href="#").order.choosed
           i.fa-solid.fa-box-open
           |  Thông tin đơn hàng
-        a.setting
+        a(href="#").setting
           i.fa-solid.fa-lock
           |  Đổi mật khẩu
         a(href='/AutoParts')
@@ -66,13 +68,22 @@ html
               | #{order.orderId}
             p
               strong Ngày: 
-              | #{order.orderDate}
+              +formatDate(order.orderDate)
             p
               strong Tổng tiền: 
-              | #{order.totalCost}
+              +formatCurrency(order.totalCost)
             p
               strong Trạng thái: 
-              | #{order.status}
+              if (order.status == "Pending")
+                | Chờ xác nhận
+              else if (order.status == "Processing")
+                | Chờ xử lý
+              else if (order.status == "Shipping")
+                | Đang giao 
+              else if (order.status == "Completed")
+                | Đã giao
+              else if (order.status == "Cancelled")
+                | Đã hủy
             a.button.nav-btn(href=`/AutoParts/order/detail?orderId=${order.orderId}`) Xem chi tiết đơn hàng
       form.change-password.hide(action='/AutoParts/account/changePass', method='post')
         h3 Đổi mật khẩu

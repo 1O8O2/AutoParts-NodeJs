@@ -262,7 +262,7 @@ module.exports.logOut = async(req, res) => {
     res.clearCookie("tokenUser");
     res.clearCookie("cartId");
     req.flash('success', res.locals.messages.LOGOUT_SUCCESS);
-    return res.redirect(systemConfig.prefixUrl+'/account/login');
+    return res.redirect(systemConfig.prefixUrl);
 }
 
 
