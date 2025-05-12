@@ -13,30 +13,17 @@ html
     )
     link(rel="stylesheet" href="/css/base.css")
     link(href="/css/register.css" rel="stylesheet")
-    
-    script.
-      function checkPasswords() {
-        var password = document.getElementsByName('password')[0].value;
-        var repassword = document.getElementsByName('repassword')[0].value;
-        var message = document.getElementById('password-message');
-        
-        if (password === '' || repassword === '' || password === repassword) {
-          message.style.display = 'none';
-        } else {
-          message.style.display = 'block';
-          message.innerText = 'Passwords do not match!';
-        }
-      }
   
-  body
+  body    
     +alert-success(3000)
     +alert-error(3000)
+    #alertContainer
     .wrapper
-      form#register-login(action="/AutoParts/account/register" method="post" data-oc-toggle="ajax")
+      form#register-form(action="/AutoParts/account/register" method="post" data-oc-toggle="ajax")
         h2 Đăng ký
         
         .container_register
-          .container_left
+          .container_left            
             .input-field
               input(type="text" name="fullName" required)
               label Nhập Họ và Tên
@@ -46,27 +33,293 @@ html
               label Nhập địa chỉ
             
             .input-field
-              input(type="text" name="phone" required)
+              input(type="tel" name="phone" required)
               label Nhập số điện thoại
-          
           .container_right
             .input-field
-              input(type="text" name="email" required)
+              input(type="email" name="email" required)
               label Nhập email
             
             .input-field
-              input(type="password" name="password" required oninput="checkPasswords()")
+              input(type="password" name="password" required )
               label Nhập mật khẩu
             
             .input-field
-              input(type="password" name="repassword" required oninput="checkPasswords()")
-              label Nhập lại mật khẩu
-        
-        #password-message(style="color: red; display: none;")
-        div #{message}
-        
+              input(type="password" name="repassword" required )
+              label Nhập lại mật khẩu        
         button(type="submit") Đăng ký
         
         .register
           p Đã có tài khoản? 
-            a(href="/AutoParts/account/login") Đăng nhập
+            a(href="/AutoParts/account/login") Đăng nhập    
+  script.
+      // Alert handling
+      const alerts = document.querySelectorAll('[show-alert]')
+      console.log(alerts);
+      alerts.forEach(alert => {
+          const time = parseInt(alert.getAttribute('data-time'));
+          const closeBtn = alert.querySelector('[close-alert]');
+          
+          // Auto-hide after specified time
+          setTimeout(() => {
+              alert.classList.add('alert-hidden');
+              // Remove from DOM after animation completes
+              setTimeout(() => {
+                  if (alert.parentNode) {
+                      alert.parentNode.removeChild(alert);
+                  }
+              }, 300); // Match this with the animation duration
+          }, time);
+          
+          // Manual close button
+          if (closeBtn) {
+              closeBtn.addEventListener('click', () => {
+                  alert.classList.add('alert-hidden');
+                  // Remove from DOM after animation completes
+                  setTimeout(() => {
+                      if (alert.parentNode) {
+                          alert.parentNode.removeChild(alert);
+                      }
+                  }, 300);
+              });
+          }
+      });
+  script.
+      const formRegister = document.querySelector('#register-form');
+      window.messages = !{JSON.stringify(messagelist || {})};
+    
+      // Add validation to the register form
+      if (formRegister) {
+        formRegister.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (validateRegisterForm(this)) {
+            this.submit();
+          }
+        });
+
+        // Add blur event listeners to register form inputs
+        const registerInputs = formRegister.querySelectorAll('input');
+
+        registerInputs.forEach(input => {
+          input.addEventListener('blur', function() {
+            validateRegisterInput(this);
+          });
+        });
+      }
+ 
+      function showAlertClientSide(message, type = 'success', duration = 3000) {
+        const existingAlerts = document.querySelectorAll('.message.info');
+        existingAlerts.forEach(alert => alert.remove());
+        // Determine alert class based on type
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        // Create alert HTML
+        const alertHtml = `
+            <div class="message info">
+                <div class="alert ${alertClass}" data-time="${duration}" show-alert role="alert">
+                    ${message} <span close-alert>X</span>
+                </div>
+            </div>
+        `;
+
+        // Append to a container (e.g., at the top of the form)
+        const container = document.getElementById('alertContainer') || document.querySelector('.container-fluid');
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+
+        // Handle auto-dismissal (if you have existing logic for this)
+        const alertElement = container.querySelector('.alert[show-alert]');
+        if (duration > 0) {
+            setTimeout(() => {
+                alertElement.parentElement.remove();
+            }, duration);
+        }
+
+        // Add click handler for manual close
+        const closeButton = alertElement.querySelector('[close-alert]');
+        closeButton.addEventListener('click', () => {
+            alertElement.parentElement.remove();
+        });
+      }      // Input validation functions
+        const validateInput = (input) => {
+          let isValid = true;
+          let errorMessage = '';
+          
+          input.parentElement.classList.remove('error');
+          
+          // Validation rules based on input type
+          if (input.value.trim() === '') {
+            isValid = false;
+            if (input.name === 'fullName') {
+              errorMessage = window.messages?.BLANK_NAME || 'Tên không được để trống';
+            } else if (input.name === 'email') {
+              errorMessage = window.messages?.BLANK_EMAIL || 'Email không được để trống';
+            } else if (input.name === 'phone') {
+              errorMessage = window.messages?.BLANK_PHONE || 'Số điện thoại không được để trống';
+            } else if (input.name === 'address') {
+              errorMessage = window.messages?.BLANK_ADDRESS || 'Địa chỉ không được để trống';
+            } else {
+              errorMessage = window.messages?.BLANK_PASSWORD || 'Mật khẩu không được để trống';
+            }
+          } else if (input.type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_EMAIL_WARNING || 'Email không đúng định dạng';
+            }
+          } else if (input.type === 'tel') {
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_PHONE_WARNING || 'Số điện thoại không đúng định dạng';
+            }
+          } else if (input.name === 'fullName' && input.value.trim().length < 6) {
+            isValid = false;
+            errorMessage = window.messages?.INVALID_NAME_WARNING || 'Tên phải có ít nhất 6 ký tự';          } else if (input.name === 'address' && input.value.trim().length < 6) {
+            isValid = false;
+            errorMessage = window.messages?.INVALID_ADDRESS_WARNING || 'Địa chỉ phải có ít nhất 6 ký tự';
+          } else if (input.name === 'password') {
+            // Password validation
+            if (input.value.length < 4) {
+              isValid = false;
+              errorMessage = window.messages?.SHORT_PASSWORD_ERROR || 'Mật khẩu phải có ít nhất 4 ký tự';
+            } else {
+              // Check if contains at least one letter and one number
+              const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
+              if (!passwordRegex.test(input.value)) {
+                isValid = false;
+                errorMessage = window.messages?.INVALID_PASSWORD_ERROR || 'Mật khẩu phải có ít nhất 1 chữ cái và 1 số';
+              }
+            }
+          } else if (input.name === 'repassword') {
+            const password = document.querySelector('input[name="password"]').value;
+            if (input.value !== password) {
+              isValid = false;
+              errorMessage = window.messages?.NOT_MATCH_PASSWORD_WARNING || 'Xác nhận mật khẩu không khớp';
+            }
+          }
+          
+          if (!isValid) {
+            input.parentElement.classList.add('error');
+              showAlertClientSide(errorMessage, 'danger');
+              
+              setTimeout(() => {
+                input.parentElement.classList.remove('error');
+              }, 3000);
+          }
+          
+          return isValid;
+        };          // Validate form
+        const validateForm = (form) => {
+          // This is only used for the profile page forms, not the login page
+          const inputs = form.querySelectorAll('input:not([readonly]):not([type="hidden"])');
+          let isValid = true;
+          
+          inputs.forEach(input => {
+            if (!validateInput(input)) {
+              isValid = false;
+            }
+          });
+          
+          return isValid;
+        };
+
+          // Validate register input
+        const validateRegisterInput = (input) => {
+          console.log(input)
+          let isValid = true;
+          let errorMessage = '';
+          
+          // Get the error element
+          //- let errorElement = input.parentElement.querySelector('.error-message');
+          
+          input.parentElement.classList.remove('error');
+          
+          // Validation rules based on input type
+          if (input.value.trim() === '') {
+            isValid = false;
+            if (input.name === 'fullName') {
+              errorMessage = window.messages?.BLANK_NAME || 'Tên không được để trống';
+            } else if (input.name === 'email') {
+              errorMessage = window.messages?.BLANK_EMAIL || 'Email không được để trống';
+            } else if (input.name === 'phone') {
+              errorMessage = window.messages?.BLANK_PHONE || 'Số điện thoại không được để trống';
+            } else if (input.name === 'address') {
+              errorMessage = window.messages?.BLANK_ADDRESS || 'Địa chỉ không được để trống';
+            } else if (input.name === 'password' || input.name === 'repassword') {
+              errorMessage = window.messages?.BLANK_PASSWORD || 'Mật khẩu không được để trống';
+            }
+          } else if (input.name === 'email' || input.type === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_EMAIL_WARNING || 'Email không đúng định dạng';
+            }
+          } else if (input.name === 'phone') {
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(input.value)) {
+              isValid = false;
+              errorMessage = window.messages?.INVALID_PHONE_WARNING || 'Số điện thoại không đúng định dạng';
+            }
+          } else if (input.name === 'fullName' && input.value.trim().length < 6) {
+            isValid = false;
+            errorMessage = window.messages?.INVALID_NAME_WARNING || 'Tên phải có ít nhất 6 ký tự';
+          } else if (input.name === 'address' && input.value.trim().length < 6) {
+            isValid = false;
+            errorMessage = window.messages?.INVALID_ADDRESS_WARNING || 'Địa chỉ phải có ít nhất 6 ký tự';
+          } else if (input.name === 'password') {
+            // Password validation
+            if (input.value.length < 4) {
+              isValid = false;
+              errorMessage = window.messages?.SHORT_PASSWORD_ERROR || 'Mật khẩu phải có ít nhất 4 ký tự';
+            } else {
+              // Check if contains at least one letter and one number
+              const passwordRegex = /^[a-zA-Z0-9]{4,}$/;
+              if (!passwordRegex.test(input.value)) {
+                isValid = false;
+                errorMessage = window.messages?.INVALID_PASSWORD_ERROR || 'Mật khẩu không đúng định dạng';
+              }
+            }
+          } else if (input.name === 'repassword') {
+            const password = document.querySelector('input[name="password"]').value;
+            if (input.value !== password) {
+              isValid = false;
+              errorMessage = window.messages?.NOT_MATCH_PASSWORD_WARNING || 'Xác nhận mật khẩu không khớp';
+            }
+          }
+            if (!isValid) {
+            input.parentElement.classList.add('error');
+              //- errorElement.textContent = errorMessage;
+              //- errorElement.style.visibility = 'visible';
+              showAlertClientSide(errorMessage, 'danger');
+              
+              setTimeout(() => {
+                //- errorElement.style.visibility = 'hidden';
+                input.parentElement.classList.remove('error');
+              }, 3000);
+          } 
+          return isValid;
+        };
+          // Validate register form
+        const validateRegisterForm = (form) => {
+          const inputs = form.querySelectorAll('input');
+          let isValid = true;
+          
+          inputs.forEach(input => {
+            if (!validateRegisterInput(input)) {
+              isValid = false;
+            }
+          });
+          
+          // Check if passwords match
+          const password = form.querySelector('input[name="password"]');
+          const repassword = form.querySelector('input[name="repassword"]');
+          
+          if (password && repassword && password.value !== repassword.value) {
+            const message = window.messages?.NOT_MATCH_PASSWORD_WARNING || 'Xác nhận mật khẩu không khớp';
+            showAlertClientSide(message, 'danger');
+            isValid = false;
+          }
+          
+          return isValid;
+        };
+
