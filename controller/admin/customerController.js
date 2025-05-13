@@ -1,6 +1,9 @@
 const Customer = require('../../models/Customer');
+const Order = require('../../models/Order');
 const systemConfig = require('../../configs/system');
+const { Op, HSTORE } = require('sequelize');
 
+// [GET] /admin/customer
 module.exports.index = async (req, res) => {
     try {
         const customers = await Customer.findAll();
@@ -17,11 +20,12 @@ module.exports.index = async (req, res) => {
     }
 };
 
+// [GET] /admin/customer/detail/:cusEmail
 module.exports.detail = async (req, res) => {
     try {
-        const cusPhone = req.query.cusPhone;
+        const cusEmail = req.query.cusEmail;
         const customer = await Customer.findOne({ 
-            where: { phone: cusPhone }
+            where: { email: cusEmail }
         });
 
         if (!customer) {
@@ -43,3 +47,30 @@ module.exports.detail = async (req, res) => {
         });
     }
 }; 
+
+// [GET] /admin/customer/historyOrder/:cusEmail
+module.exports.historyOrder = async (req, res) => {
+    try {
+        const cusEmail = req.query.cusEmail;
+        console.log(cusEmail)
+
+        const historyOrder = await Order.findAll({
+            where: {
+                status: { [Op.in]: ['Completed', 'Cancelled'] },
+                userEmail: cusEmail,
+                deleted: false
+            },
+        });
+
+        res.render("admin/pages/customer/historyOrder", {
+            success: true,
+            historyOrder: historyOrder
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Có lỗi xảy ra khi tải thông tin khách hàng' 
+        });
+    }
+}
