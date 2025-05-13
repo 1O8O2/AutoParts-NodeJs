@@ -39,7 +39,7 @@ block main
                     .row.align-items-center
                         .col.mr-2
                             .text-xs.font-weight-bold.text-uppercase.mb-1 Tổng đơn hàng
-                            .h5.mb-0.font-weight-bold.text-gray-800 #{totalOrders}
+                            .h5.mb-0.font-weight-bold.text-gray-800 #{orders.length}
                         .col-auto
                             i.fas.fa-shopping-cart.fa-2x.text-primary
 
@@ -95,7 +95,7 @@ block main
                                 td #{order.orderDate}
                                 td #{order.userEmail}
                                 td
-                                    +formatCurrency(order.totalAmount)
+                                    +formatCurrency(order.totalCost)
                                 td
                                     case order.status
                                         when "Pending"

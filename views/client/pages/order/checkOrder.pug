@@ -1,3 +1,4 @@
+include ../../mixins/currency.pug
 doctype html
 html
   head
@@ -278,6 +279,13 @@ html
         ul.product-list#productList
 
     script.
+      // Add the currency formatting function
+      function formatCurrency(price) {
+        console.log(price)
+        if (price === undefined || price === null) return '0';
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "₫";
+      }
+
       document.getElementById('orderSearchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const orderId = document.getElementById('orderId').value;
@@ -287,7 +295,7 @@ html
         try {
           const response = await fetch(`/AutoParts/order/check?orderId=${orderId}`);
           const data = await response.json();
-          
+          console.log(data)
           if (response.ok) {
             errorMessage.style.display = 'none';
             orderResult.style.display = 'block';
@@ -297,8 +305,11 @@ html
             document.getElementById('resultCustomerName').textContent = data.customer.fullName;
             document.getElementById('resultPhone').textContent = data.customer.phone;
             document.getElementById('resultAddress').textContent = data.order.shipAddress;
-            document.getElementById('resultTotal').textContent = data.order.totalCost;
-            document.getElementById('resultOrderDate').textContent = data.order.orderDate;
+            
+            // Format total cost using the same function as the mixin
+            document.getElementById('resultTotal').textContent = formatCurrency(data.order.totalCost);
+            
+            document.getElementById('resultOrderDate').textContent = new Date(data.order.orderDate).toLocaleDateString('vi-VN');
             document.getElementById('resultStatus').textContent = data.order.status;
             
             // Update product list
@@ -307,11 +318,12 @@ html
             data.products.forEach(product => {
               const li = document.createElement('li');
               li.className = 'product-item';
+              
               li.innerHTML = `
                 <p><strong>Tên sản phẩm:</strong> ${product.productName}</p>
                 <p><strong>Mã sản phẩm:</strong> ${product.productId}</p>
                 <p><strong>Số lượng:</strong> ${product.amount}</p>
-                <p><strong>Đơn giá:</strong> ${product.unitPrice}</p>
+                <p><strong>Đơn giá:</strong> ${formatCurrency(product.unitPrice)}</p>
                 <a href="/AutoParts/product/detail?productId=${product.productId}" class="btn btn-primary">Xem sản phẩm</a>
               `;
               productList.appendChild(li);

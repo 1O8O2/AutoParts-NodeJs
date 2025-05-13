@@ -1,5 +1,5 @@
 include ../../mixins/alert.pug
-
+include ../../mixins/currency.pug
 doctype html
 html(lang="en")
   head
@@ -47,7 +47,7 @@ html(lang="en")
                       .row.text-muted #{product.product.productId}
                       .row #{product.product.productName}
                       input.price(type="hidden" value=product.product.salePrice)
-                      | #{product.product.salePrice} ₫
+                      +formatCurrency(product.product.salePrice)
                     .col.updateQTY
                       button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)")
                         i.fas.fa-minus
