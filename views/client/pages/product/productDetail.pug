@@ -1,4 +1,5 @@
 include ../../mixins/alert.pug
+include ../../mixins/currency.pug
 doctype html
 html
   head
@@ -21,7 +22,7 @@ html
         .col-md-6
           each url, index in imgUrls
             if index === 0
-              img#main-image(src=url width="500" height="500" alt="Car Image" class="img-fluid")
+              img#main-image(src=url style="width: 85%; height: 75%;" alt="Car Image" class="img-fluid")
           .list-image
             each url, index in imgUrls
               if index === 0
@@ -39,7 +40,8 @@ html
           p
             strong Mã sản phẩm: #{product.productId}
           p
-            strong Giá bán: #{product.salePrice}
+            strong Giá bán: 
+            +formatCurrency(product.salePrice)
           p
             strong Mô tả: #{product.description}.
           ul
@@ -47,7 +49,7 @@ html
               li Hãng: #{brand.brandName}
             if group
               li Loại hàng: #{group.groupName}
-            li Trọng lượng: #{product.weight}
+            li Trọng lượng: #{product.weight} g
             li Số lượng: #{product.stock} #{product.unit}
 
           if product.stock > 0

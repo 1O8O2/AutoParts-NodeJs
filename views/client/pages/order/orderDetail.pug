@@ -1,3 +1,4 @@
+include ../../mixins/currency.pug
 doctype html
 html
   head
@@ -214,7 +215,7 @@ html
           | #{order.shipAddress}
         p
           strong Tổng: 
-          | #{order.totalCost}
+          +formatCurrency(order.totalCost)
         p
           strong Mã giảm giá: 
           | #{order.discountId || 'Không có'}
@@ -247,7 +248,7 @@ html
               | #{p.amount}
             p
               strong Đơn giá: 
-              | #{p.unitPrice}
+              +formatCurrency(p.unitPrice)
             p
               strong
                 a.btn.nav-btn(href=`/AutoParts/product/detail?productId=${p.productId}`) Xem sản phẩm

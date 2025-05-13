@@ -162,6 +162,7 @@ module.exports.showProfile = async (req, res) => {
 
 // [POST] /account/edit
 module.exports.accountEdit = async(req, res) => {
+    
     const acc = await Account.findOne({
         where: { token: req.cookies.tokenUser }
     });
@@ -201,7 +202,7 @@ module.exports.accountEdit = async(req, res) => {
     }
 
     try {
-
+        
         await Customer.update(
             req.body,
             { 
