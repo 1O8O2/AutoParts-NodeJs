@@ -64,9 +64,12 @@ module.exports.createOrder = async (req, res) => {
 
         // Get all products from cart (virtual field populated by afterFind hook)
         const productsInCart = cart.products || [];
+        console.log('Products in cart:', productsInCart);
         //console.log(req.body)
         const selectedProducts = productsInCart.filter(item => req.body[item.product.productId]);
+        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         const updatedSelectedProducts = selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] }));
+        console.log('Updated selected products:', updatedSelectedProducts);
         for(const item of updatedSelectedProducts)
             {
                 query+=item.productId+'='+item.amount+'&';
@@ -159,7 +162,8 @@ module.exports.createOrder = async (req, res) => {
         }
 
         // Create order details and update cart
-        const updatedProductsInCart = productsInCart.filter(item => ![item.product]);
+        const updatedProductsInCart = productsInCart.filter(item => !req.body[item.product.productId]);
+        console.log('Updated products in cart:', updatedProductsInCart);
 
         for (const item of updatedSelectedProducts) {
             console.log(item)
@@ -183,6 +187,7 @@ module.exports.createOrder = async (req, res) => {
 
         // Update cart by setting new products (hooks will handle ProductsInCart)
         cart.products = updatedProductsInCart;
+        console.log('Updated cart products:', cart.products);
         await cart.save();
         console.log('Cart updated successfully');
 
@@ -286,6 +291,7 @@ module.exports.showCart = async (req, res) => {
 
         // Remove products that are not selected
         const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
+        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         //console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
             req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);
@@ -588,38 +594,43 @@ module.exports.removeProduct = async (req, res) => {
 
 // GET /order/check - Check order by orderId
 module.exports.checkOrder = async (req, res) => {
-    const tokenUser = req.cookies.tokenUser;
+    // const tokenUser = req.cookies.tokenUser;
     try {
 
-        if (!tokenUser) {
-            req.flash('error', res.locals.messages.NOT_LOGGED_IN);
-            return res.redirect('/AutoParts/account/login');
-        }
-        const acc = await Account.findOne({
-            where: { token: tokenUser }
-        });
-        if (!acc) {
-            req.flash('error', res.locals.messages.NOT_LOGGED_IN);
-            return res.redirect('/AutoParts/account/login');
-        }
-        const cus = await Customer.findByPk(acc.email);
-        if (!cus) {
-            req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND);
-            return res.redirect('/AutoParts/account/login');
-        }
+        // if (!tokenUser) {
+        //     req.flash('error', res.locals.messages.NOT_LOGGED_IN);
+        //     return res.redirect('/AutoParts/account/login');
+        // }
+        // const acc = await Account.findOne({
+        //     where: { token: tokenUser }
+        // });
+        // if (!acc) {
+        //     req.flash('error', res.locals.messages.NOT_LOGGED_IN);
+        //     return res.redirect('/AutoParts/account/login');
+        // }
+        // const cus = await Customer.findByPk(acc.email);
+        // if (!cus) {
+        //     req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND);
+        //     return res.redirect('/AutoParts/account/login');
+        // }
+
 
 
         const orderId = req.query.orderId;
+        
         if (!orderId) {
             req.flash('error', res.locals.messages.ORDER_ID_REQUIRED);
             return res.status(400).json({ message: 'Order ID is required' });
         }
 
         const order = await Order.findByPk(orderId);
+        
         if (!order) {
             req.flash('error', res.locals.messages.ORDER_NOT_FOUND);
             return res.status(404).json({ message: 'Order not found' });
         }
+
+        cus = await Customer.findByPk(order.userEmail);
 
         const products = await OrderDetail.findAll({
             where: { orderId: orderId }

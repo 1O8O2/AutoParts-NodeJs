@@ -27,8 +27,8 @@ module.exports.index = async (req, res) => {
         // Calculate product statistics
         const productStats = products.map(product => {
             const soldQuantity = orders.reduce((total, order) => {
-                const orderItem = order.items.find(item => item.productId === product.productId);
-                return total + (orderItem ? orderItem.quantity : 0);
+                const orderItem = order.details.find(item => item.productId === product.productId);
+                return total + (orderItem ? orderItem.amount : 0);
             }, 0);
 
             const totalRevenue = soldQuantity * product.salePrice;
@@ -77,10 +77,10 @@ module.exports.exportReport = async (req, res) => {
         });
 
         // Calculate product statistics
-        const productStats = products.map(product => {
+        const productStats = products.map(product => { 
             const soldQuantity = orders.reduce((total, order) => {
-                const orderItem = order.items.find(item => item.productId === product.productId);
-                return total + (orderItem ? orderItem.quantity : 0);
+                const orderItem = order.details.find(item => {item.productId === product.productId});
+                return total  + (orderItem ? orderItem.amount : 0);
             }, 0);
 
             const totalRevenue = soldQuantity * product.salePrice;
