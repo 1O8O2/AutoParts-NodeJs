@@ -145,7 +145,13 @@ module.exports.showProfile = async (req, res) => {
         }
         
         const customer = await Customer.findByPk(acc.email);
-        const orderLst = await Order.findAll({ where: { userEmail: acc.email, deleted : false} }); 
+        const orderLst = await Order.findAll({ 
+            where: { 
+                userEmail: acc.email, 
+                deleted : false
+            },
+            order: [["orderDate", "DESC"]] 
+        }); 
 
         return res.render('client/pages/user/profile', {
             customer,

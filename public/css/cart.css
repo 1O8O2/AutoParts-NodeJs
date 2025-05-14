@@ -78,7 +78,7 @@ body {
 }
 
 .cart-list .row.border-bottom:hover {
-    background: #f8f9fa;
+    /* background: #f8f9fa; */
     transform: translateX(5px);
 }
 
@@ -279,4 +279,34 @@ body {
     .input-updateQTY {
         width: 50px;
     }
+}
+
+.cart-list .row.border-bottom {
+    display: flex;
+    align-items: center;
+    width: 100%; /* Đảm bảo chiều rộng toàn phần */
+    /* background-color: #f8f9fa; Màu nền đồng nhất, bạn có thể thay đổi */
+    padding: 10px 0; /* Khoảng cách đều */
+}
+  
+.row.main.align-items-center {
+    display: flex;
+    justify-content: space-between; /* Căn đều các phần tử bên trong */
+    width: 100%; /* Đảm bảo chiều rộng cố định */
+}
+  
+.row.main.align-items-center .col {
+    flex: 1; /* Chia đều không gian cho các cột */
+    text-align: left; /* Căn trái nội dung */
+}
+  
+.row.main.align-items-center .col:nth-child(2) {
+    flex: 2; /* Dành nhiều không gian hơn cho cột tên sản phẩm nếu cần */
+}
+  
+.updateQTY {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px; /* Đặt chiều rộng cố định cho phần số lượng */
 }
