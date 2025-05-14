@@ -599,14 +599,14 @@ module.exports.checkOrder = async (req, res) => {
         
         if (!orderId) {
             req.flash('error', res.locals.messages.ORDER_ID_REQUIRED);
-            return res.status(400).json({ message: 'Order ID is required' });
+            return res.status(400).json({ message: res.locals.messages.ORDER_ID_REQUIRED});
         }
 
         const order = await Order.findByPk(orderId);
         
         if (!order) {
             req.flash('error', res.locals.messages.ORDER_NOT_FOUND);
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(404).json({ message: res.locals.messages.ORDER_NOT_FOUND });
         }
 
         cus = await Customer.findByPk(order.userEmail);
@@ -622,6 +622,6 @@ module.exports.checkOrder = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in checkOrder:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ message: res.locals.messages.ORDER_CHECK_ERROR });
     }
 };
