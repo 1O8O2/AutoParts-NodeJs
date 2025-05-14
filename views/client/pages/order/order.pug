@@ -7,7 +7,6 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title Giỏ hàng
     link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
-    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
     link(rel="preconnect" href="https://fonts.googleapis.com")
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
@@ -18,11 +17,10 @@ html(lang="en")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
 
   body
-    // Error message
+    // Alerts for success and error messages
     +alert-error(3000)
     +alert-success(3000)
 
-    
     .card
       .row
         .col-md-8.cart
@@ -32,7 +30,6 @@ html(lang="en")
               .col.cart_title
                 h4
                   b Giỏ hàng
-              div 
               .col.align-self-center.text-right.text-muted
                 i.fas.fa-shopping-cart.me-2
                 span #{selectedProducts ? selectedProducts.length : 0} món
@@ -55,7 +52,7 @@ html(lang="en")
                       button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)")
                         i.fas.fa-plus
                     .col
-                      a.btn.btn-sm.btn-light(href=`/AutoParts/product/productDetail?productId=${product.product.productId}`)
+                      a.btn.btn-sm.btn-light(href=`/AutoParts/product/detail?productId=${product.product.productId}`)
                         i.fas.fa-eye.me-2
                         | Xem chi tiết
           .cart-actions.d-flex.justify-content-between.align-items-center.mt-4
@@ -69,25 +66,20 @@ html(lang="en")
           hr
           .row.mb-3
             .col(style="padding-left: 0;") Số lượng: #{selectedProducts.length}
-            each product in selectedProducts   
+            each product in selectedProducts
               input(type="hidden" class="form-quantity" name=product.product.productId value=product.amount data-product-id=product.product.productId)
-          
           .form-group
             label(for="customerName") Tên
             input#customerName(type="text" name="customerName" placeholder="Tên" required value=user && user.fullName ? user.fullName : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_NAME}')` oninput=`this.setCustomValidity('')`)
-
           .form-group
             label(for="phoneNumber") Số điện thoại
             input#phoneNumber(type="tel" name="phoneNumber" placeholder="Số điện thoại" required value=user && user.phone ? user.phone : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_PHONE}')` oninput=`this.setCustomValidity('')`)
-          
           .form-group
             label(for="email") Email
             input#email(type="email" name="email" placeholder="Email" required value=user && user.email ? user.email : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_EMAIL}')` oninput=`this.setCustomValidity('')`)
-          
           .form-group
             label(for="shipAddress") Địa chỉ giao hàng
             input#shipAddress(type="text" name="shipAddress" placeholder="Địa chỉ" required value=user && user.address ? user.address : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_ADDRESS}')` oninput=`this.setCustomValidity('')`)
-          
           .form-group
             label(for="shippingType") Loại vận chuyển
             select#shippingType(name="shippingType")
@@ -95,12 +87,10 @@ html(lang="en")
               option(value="20000") Vận chuyển thường - 20.000 ₫
               option(value="50000") Vận chuyển nhanh - 50.000 ₫
               option(value="15000") Vận chuyển tiết kiệm - 15.000 ₫
-          
-          .form-group.mb-4
+          .form-group
             label(for="discountId") Mã khuyến mãi
             select#discountId(name="discountId")
-
-          .row(style="border-top: 1px solid rgba(0, 0, 0, .1); padding: 2vh 0;")
+          .row.total-section(style="border-top: 1px solid rgba(0, 0, 0, .1); padding: 2vh 0;")
             .col TỔNG TIỀN
             input.col.text-right#total(name="totalCost" value="" readonly)
             |  ₫
@@ -108,15 +98,10 @@ html(lang="en")
             .col
               button.btn.order-btn.w-100 ĐẶT HÀNG
 
-
-
     script(type="text/javascript").
       document.addEventListener('DOMContentLoaded', function() {
-        // Get success and error message elements
         const successMessage = document.querySelector('.alert-success');
         const errorMessage = document.querySelector('.alert-danger');
-        
-        // If success message exists, hide it after 3 seconds
         if (successMessage) {
           setTimeout(function() {
             successMessage.style.transition = 'opacity 0.5s';
@@ -126,8 +111,6 @@ html(lang="en")
             }, 500);
           }, 3000);
         }
-        
-        // If error message exists, hide it after 3 seconds
         if (errorMessage) {
           setTimeout(function() {
             errorMessage.style.transition = 'opacity 0.5s';
@@ -145,17 +128,11 @@ html(lang="en")
       let quantityInputs = document.querySelectorAll(".quantity");
       let discountSelect = document.getElementById("discountId");
       let shippingSelect = document.getElementById("shippingType");
-      console.log(!{JSON.stringify(messageList)})
+      console.log(!{JSON.stringify(messageList)});
 
-
-      // Danh sách mã khuyến mãi từ server
       const discounts = [
         !{discounts.map((discount, index) => `{ id: "${discount.discountId}", code: "${discount.discountDesc.replace(/"/g, '\\"')}", amount: ${discount.discountAmount}, minOrderValue: ${discount.minimumAmount} }${index < discounts.length - 1 ? ',' : ''}`).join('')}
       ];
-
-      console.log(`${discounts}`);
-      
-      console.log("Discounts: ", discounts);
 
       function updateDiscountOptions(totalCost) {
         const select = document.getElementById('discountId');
@@ -197,7 +174,6 @@ html(lang="en")
         updateDiscountOptions(baseTotal);
       }
 
-      // Lắng nghe sự kiện thay đổi mã giảm giá
       discountSelect.addEventListener('change', function() {
         let baseTotal = 0;
         for (let i = 0; i < priceInputs.length; i++) {
@@ -211,7 +187,6 @@ html(lang="en")
         totalInput.value = finalTotal.toLocaleString('vi-VN');
       });
 
-      // Lắng nghe sự kiện thay đổi loại vận chuyển
       shippingSelect.addEventListener('change', function() {
         let baseTotal = 0;
         for (let i = 0; i < priceInputs.length; i++) {
@@ -225,18 +200,19 @@ html(lang="en")
         totalInput.value = finalTotal.toLocaleString('vi-VN');
       });
 
-      // Gọi hàm lần đầu khi trang tải
       updateCost();
 
       function updateQuantity(input, delta) {
         let value = parseInt(input.value) + delta;
         if (value < 1) {
-          showDialog(input);
+          if (confirm("Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?")) {
+            input.closest('.row.border-bottom').remove();
+            updateCost();
+          }
         } else if (value > parseInt(input.max)) {
-          return;
+          alert("Số lượng không thể vượt quá số lượng trong kho.");
         } else {
           input.value = value;
-          // Update the corresponding hidden input
           const productId = input.dataset.productId;
           const hiddenInput = document.querySelector(`.form-quantity[data-product-id="${productId}"]`);
           if (hiddenInput) {
@@ -245,51 +221,3 @@ html(lang="en")
           updateCost();
         }
       }
-
-      function showDialog(input) {
-        const dialogOverlay = document.getElementById('dialog-overlay');
-        dialogOverlay.style.visibility = 'visible';
-        const confirmButton = document.getElementById('confirm-button');
-        confirmButton.onclick = function() {
-          input.closest('.cart-item').remove();
-          dialogOverlay.style.visibility = 'hidden';
-        };
-        const cancelButton = document.getElementById('cancel-button');
-        cancelButton.onclick = function() {
-          dialogOverlay.style.visibility = 'hidden';
-        };
-      }
-    script.
-      document.addEventListener('DOMContentLoaded', function() {
-        // Alert handling
-        const alerts = document.querySelectorAll('[show-alert]')
-        console.log(alerts);
-        alerts.forEach(alert => {
-            const time = parseInt(alert.getAttribute('data-time'));
-            const closeBtn = alert.querySelector('[close-alert]');
-
-            // Auto-hide after specified time
-            setTimeout(() => {
-                alert.classList.add('alert-hidden');
-                // Remove from DOM after animation completes
-                setTimeout(() => {
-                    if (alert.parentNode) {
-                        alert.parentNode.removeChild(alert);
-                    }
-                }, 300); // Match this with the animation duration
-            }, time);
-
-            // Manual close button
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    alert.classList.add('alert-hidden');
-                    // Remove from DOM after animation completes
-                    setTimeout(() => {
-                        if (alert.parentNode) {
-                            alert.parentNode.removeChild(alert);
-                        }
-                    }, 300);
-                });
-            }
-        });
-      });

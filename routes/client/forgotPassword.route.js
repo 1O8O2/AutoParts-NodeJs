@@ -9,5 +9,7 @@ router.get('/enter-otp', controller.showEnterOtp);
 router.post('/otpVerify', controller.otpVerify);
 router.get('/enter-password', controller.showEnterPassword);
 router.post('/updatePassword', controller.updatePassword);
+router.get('/resend-otp', controller.resendOtp);
+
 
 module.exports = router;
