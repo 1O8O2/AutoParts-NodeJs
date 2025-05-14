@@ -91,7 +91,6 @@ module.exports.register = async (req, res) => {
 // [GET] /account/login
 module.exports.showLogIn = async (req, res) => {
     if (req.cookies?.tokenUser) {
-        req.flash('success', res.locals.messages.LOGIN_SUCCESS);
         return res.redirect(systemConfig.prefixUrl+'/account/profile');
     }
     return res.render('client/pages/user/login',
@@ -162,6 +161,7 @@ module.exports.showProfile = async (req, res) => {
 
 // [POST] /account/edit
 module.exports.accountEdit = async(req, res) => {
+    
     const acc = await Account.findOne({
         where: { token: req.cookies.tokenUser }
     });
@@ -201,7 +201,7 @@ module.exports.accountEdit = async(req, res) => {
     }
 
     try {
-
+        
         await Customer.update(
             req.body,
             { 
@@ -272,7 +272,7 @@ module.exports.logOut = async(req, res) => {
     res.clearCookie("tokenUser");
     res.clearCookie("cartId");
     req.flash('success', res.locals.messages.LOGOUT_SUCCESS);
-    return res.redirect(systemConfig.prefixUrl+'/account/login');
+    return res.redirect(systemConfig.prefixUrl);
 }
 
 

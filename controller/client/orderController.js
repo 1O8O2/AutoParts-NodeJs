@@ -79,7 +79,6 @@ module.exports.createOrder = async (req, res) => {
 
         
         //console.log('updatedSelectedProducts:', updatedSelectedProducts);
-
         //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
 
         const totalCost = parseFloat(req.body.totalCost) *1000;
@@ -594,27 +593,7 @@ module.exports.removeProduct = async (req, res) => {
 
 // GET /order/check - Check order by orderId
 module.exports.checkOrder = async (req, res) => {
-    // const tokenUser = req.cookies.tokenUser;
     try {
-
-        // if (!tokenUser) {
-        //     req.flash('error', res.locals.messages.NOT_LOGGED_IN);
-        //     return res.redirect('/AutoParts/account/login');
-        // }
-        // const acc = await Account.findOne({
-        //     where: { token: tokenUser }
-        // });
-        // if (!acc) {
-        //     req.flash('error', res.locals.messages.NOT_LOGGED_IN);
-        //     return res.redirect('/AutoParts/account/login');
-        // }
-        // const cus = await Customer.findByPk(acc.email);
-        // if (!cus) {
-        //     req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND);
-        //     return res.redirect('/AutoParts/account/login');
-        // }
-
-
 
         const orderId = req.query.orderId;
         
@@ -635,7 +614,7 @@ module.exports.checkOrder = async (req, res) => {
         const products = await OrderDetail.findAll({
             where: { orderId: orderId }
         });
-
+        console.log(products)
         return res.json({
             order,
             customer: cus,

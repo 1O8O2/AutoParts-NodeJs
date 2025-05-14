@@ -4,7 +4,7 @@
   "EDIT_PROFILE_ERROR": "Thay đổi thông tin thất bại!",
   "EDIT_PROFILE_INVALID": "Thông tin không hợp lệ!",
   "EDIT_ORDER_SUCCESS": "Thay đổi thông tin đơn hàng thành công!",
-  
+  "ORDER_CREATE_ERROR": "Đã xảy ra lỗi khi tạo đơn hàng!",
   "INVALID_PASSWORD_ERROR": "Mật khẩu không hợp lệ!",
   "SHORT_PASSWORD_ERROR": "Mật khẩu phải có ít nhất 4 ký tự!",
   "NOT_MATCH_PASSWORD_ERROR": "Mật khẩu xác nhận không khớp!",
