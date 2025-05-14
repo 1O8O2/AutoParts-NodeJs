@@ -220,7 +220,7 @@ module.exports.createOrder = async (req, res) => {
 
 // GET /order - Show order details
 module.exports.showDetail = async (req, res) => {
-        const tokenUser = req.cookies.tokenUser;
+    const tokenUser = req.cookies.tokenUser;
     try {
         if (!tokenUser) {
             req.flash('error', res.locals.messages.NOT_LOGGED_IN);
@@ -361,8 +361,8 @@ module.exports.editForm = async (req, res) => {
         console.log('Showing order edit form...');
 
         const acc = await Account.findOne({
-                    where: { token: req.cookies.tokenUser }
-                });
+            where: { token: req.cookies.tokenUser }
+        });
 
         if (!acc) {
           return res.redirect('/login');
@@ -371,20 +371,22 @@ module.exports.editForm = async (req, res) => {
         const orderId = req.query.orderId;
         const order = await Order.findOne({where :{orderId : orderId}});
         const cus = await Customer.findByPk(order.userEmail);
-        console.log(order.shippingType)
+
         if (!order) {
           return res.status(404).render('error', { message: 'Order not found' });
         }
       
         const products = [];
         for (const detail of order.details) {
-          //console.log(detail);
-          const product = await Product.findOne({where :{productId : detail.productId}});
-          product.stock += detail.amount; // Restore stock to product
-          products.push({product: product, amount: detail.amount});
+            const product = await Product.findOne({where :{productId : detail.productId}});
+            if (product.imageUrls) {
+                const imgArray = product.imageUrls.split(',');
+                product.imageUrl = imgArray[0];
+            }
+            product.stock += detail.amount; // Restore stock to product
+            products.push({product: product, amount: detail.amount});
         }
 
-        console.log(products); 
       
         let discounts = await Discount.getByCustomer(acc.email);
         const discount = await Discount.findOne({where :{discountId : order.discountId}});

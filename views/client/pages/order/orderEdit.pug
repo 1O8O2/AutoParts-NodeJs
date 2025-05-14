@@ -1,4 +1,5 @@
 include ../../mixins/alert.pug
+include ../../mixins/currency.pug
 
 doctype html
 html(lang="en")
@@ -7,11 +8,11 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title Sửa đơn hàng
     link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
-    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
-    link(rel="stylesheet" href="/css/cart.css")
-    link(rel="stylesheet" href="/css/base.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
+    link(rel="stylesheet" href="/css/cart.css")
+    link(rel="stylesheet" href="/css/base.css")
 
   body
     // Error and success messages using mixins
@@ -33,28 +34,30 @@ html(lang="en")
               .row.border-bottom.cart-item
                 .row.main.align-items-center
                   .col-2
-                    img.img-fluid(src="https://html.themability.com/autoelite/assets/images/categories/1.png")
+                    img.img-fluid(src=(item.product.imageUrl.startsWith("https") ? item.product.imageUrl : `/img/${item.product.imageUrl}`) alt=item.product.productName)
                   .col
                     .row.text-muted #{item.product.productId}
                     .row #{item.product.productName}
                     input.price(type="hidden" value=item.product.salePrice)
-                    | #{item.product.salePrice} ₫
+                    +formatCurrency(item.product.salePrice)
                   .col.updateQTY
                     button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)") -
                     input.input-updateQTY.quantity(type="number" data-product-id=item.product.productId value=item.amount min="1" max=item.product.stock)
                     button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
                   .col
-                    a(href=`/AutoParts/product/detail?productId=${item.product.productId}`) Xem chi tiết ->
+                    a.btn.btn-sm.btn-light(href=`/AutoParts/product/detail?productId=${item.product.productId}`)
+                      i.fas.fa-eye.me-2
+                      | Xem chi tiết
                     form(action="/AutoParts/order/edit/remove-product" method="post" style="display: inline;")
                       input(type="hidden" name="orderId" value=order.orderId)
                       input(type="hidden" name="productId" value=item.product.productId)
                       button.btn.btn-danger.btn-sm(type="submit" onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`)
                         i.fa.fa-trash
                         |  Xóa
-          .back-to-shop
-            a(href="/AutoParts/account/profile")
-              span ← 
-              span.text-muted Quay lại tài khoản
+          .cart-actions.d-flex.justify-content-between.align-items-center.mt-4
+            a.btn.back-btn(href="/AutoParts/account/profile")
+              i.fas.fa-arrow-left.me-2
+              | Quay lại tài khoản
         form.col-md-4.summary(action="/AutoParts/order/edit" method="post")
           div
             h5
@@ -95,7 +98,7 @@ html(lang="en")
             .col TỔNG TIỀN
             input.col.text-right#total(name="totalCost" value=order.totalCost readonly)
             |  ₫
-          button.btn LƯU THAY ĐỔI
+          button.btn.btn-primary LƯU THAY ĐỔI
 
     script(type="text/javascript").
       document.addEventListener('DOMContentLoaded', function() {
