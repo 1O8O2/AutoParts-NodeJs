@@ -59,6 +59,13 @@ block main
                         .form-group
                             label(for="shipAddress") Địa chỉ giao hàng <span class="required-text">*</span>
                             input.form-control(name="shipAddress" required placeholder="Nhập địa chỉ giao hàng")
+                        .form-group
+                            label(for="shippingType") Loại vận chuyển
+                            select.form-control.mb-3#shippingType(name="shippingType")
+                                option(value="" disabled selected) -- Chọn loại vận chuyển --
+                                option(value="20000") Vận chuyển thường - 20.000 ₫
+                                option(value="50000") Vận chuyển nhanh - 50.000 ₫
+                                option(value="15000") Vận chuyển tiết kiệm - 15.000 ₫
                 .row
                     .col-lg-12
                         .form-group.totalCost

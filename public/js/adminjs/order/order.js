@@ -1,4 +1,5 @@
 let selectedProducts = [];
+let baseTotal = 0; // Add this variable to store total before shipping
 
 function formatCurrency(amount) {
     const number = Number(amount);
@@ -59,23 +60,37 @@ function updateQuantity(productId, newQuantity) {
     updateDiscountOptions();
 }
 
+
 function calculateTotal(discountAmount = 0) {
-    let total = selectedProducts.reduce((sum, product) => sum + (product.salePrice * product.quantity), 0);
-    if (discountAmount != 0) total *= (100 - discountAmount) / 100;
+    // Calculate base total from products
+    baseTotal = selectedProducts.reduce((sum, product) => sum + (product.salePrice * product.quantity), 0);
+    
+    // Get shipping cost
+    const shippingCost = Number($('#shippingType').val()) || 0;
+    
+    // Calculate final total
+    let total = baseTotal;
+    if (discountAmount != 0) {
+        total *= (100 - discountAmount) / 100;
+    }
+    
+    // Add shipping cost after discount
+    total += shippingCost;
+    
     $('#totalCostlbl').text(formatCurrency(total));
     $('#totalCost').val(total);
+    
+    // Update discount options based on base total
 }
 
+    updateDiscountOptions();
+
+
 function updateDiscountOptions() {
-    const totalCost = Number($('#totalCost').val());
     const currentDate = new Date();
     const orderDiscountId = $('#discountSelect').attr('data-order-discount-id') || ''; 
 
-    // Lưu trạng thái ban đầu của option được chọn từ order
-    const $initialSelectedOption = $('#discountSelect option[value="' + orderDiscountId + '"]');
-    const hasInitialSelection = $initialSelectedOption.length > 0 && orderDiscountId !== '';
-    let initialVal;
-
+    // Use baseTotal instead of total for discount validation
     $('#discountSelect option').each(function() {
         const $this = $(this);
         const discountId = $this.val();
@@ -91,15 +106,13 @@ function updateDiscountOptions() {
         const usageLimit = Number($this.data('usage-limit'));
         const applyStart = new Date($this.data('apply-start'));
         const applyEnd = new Date($this.data('apply-end'));
-        const isValid = totalCost >= minimumAmount && 
+        const isValid = baseTotal >= minimumAmount && 
                        status === 'Active' && 
                        currentDate >= applyStart && 
                        currentDate <= applyEnd && 
                        usageLimit > 0;
 
-        if (hasInitialSelection && discountId === orderDiscountId) {
-            initialVal = $this.data('discount-amount');
-            calculateTotal(initialVal);
+        if (discountId === orderDiscountId) {
             $this.prop('disabled', false);
             $this.show();
         } else {
@@ -108,17 +121,10 @@ function updateDiscountOptions() {
         }
     });
 
-    // Kiểm tra giá trị hiện tại của #discountSelect
-    const selectedDiscount = $('#discountSelect').val();
-    if (!selectedDiscount || $('#discountSelect option[value="' + selectedDiscount + '"]').is(':hidden')) {
-        // Chỉ đặt lại về '' nếu không có orderDiscountId hoặc option ban đầu không hợp lệ
-        if (!hasInitialSelection) {
-            $('#discountSelect').val('');
-        }
-    } else if (hasInitialSelection && selectedDiscount !== orderDiscountId) {
-        // Đảm bảo giữ nguyên orderDiscountId nếu nó vẫn hiển thị
-        $('#discountSelect').val(orderDiscountId);
-    }
+    // Reapply current discount if exists
+    const selectedOption = $('#discountSelect').find('option:selected');
+    const discountAmount = parseFloat(selectedOption.attr('data-discount-amount')) || 0;
+    calculateTotal(discountAmount);
 }
 
 $(document).ready(function() {
@@ -136,10 +142,17 @@ $(document).ready(function() {
         updateDiscountOptions();
     });
 
+    $('#shippingType').on('change', function() {
+        const selectedOption = $('#discountSelect').find('option:selected');
+        const discountAmount = parseFloat(selectedOption.attr('data-discount-amount')) || 0;
+        calculateTotal(discountAmount);
+    });
+
+    // Modify discount select change handler
     $('#discountSelect').on('change', function() {
         const selectedOption = $(this).find('option:selected');
         const discountAmount = parseFloat(selectedOption.attr('data-discount-amount')) || 0;
-        calculateTotal(discountAmount); 
+        calculateTotal(discountAmount);
     });
 
     $('#productSearch').on('input', function() {
