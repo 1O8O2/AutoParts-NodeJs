@@ -15,6 +15,7 @@ const generateToken = require("../../helpers/generateToken");
 const systemConfig = require("../../configs/system");
 
 const {mailSend} = require('../../helpers/mail');
+const { fi } = require('date-fns/locale');
 
 // [GET] /AutoParts/admin/order/add
 module.exports.add = async (req, res) => {
@@ -47,9 +48,44 @@ module.exports.add = async (req, res) => {
 module.exports.addPost = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
+        const discountId = req.body.discountId || null;
+        let shippingType = req.body.shippingType;
+        console.log('Shipping type:', shippingType);
+        switch (shippingType)
+        {
+            case '20000':
+            shippingType = 'Normal';
+            break;
+            case '50000':
+            shippingType = 'Express';
+            break;
+            case '15000':
+            shippingType = 'Economy';
+            break;
+        }
+
+        if (!shippingType) {
+            console.log('Shipping type not selected');
+            console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
+            req.flash('error',  res.locals.messages.BLANK_SHIPPING_TYPE);
+            return res.redirect('back');
+        }
+
+        const discount = await Discount.findByPk(discountId);
+                if(discount && discount.usageLimit<=0)
+                {
+                    console.log('Discount usage limit exceeded');
+                    req.flash('error', res.locals.messages.DISCOUNT_QUANTITY_EXCEEDED);
+                    return res.redirect(query);
+                }
+        
+
         const findCusAcc = await Account.findByPk(req.body.userEmail, { transaction });
+        const findCus = await Customer.findByPk(req.body.userEmail, { transaction });
+        let accData;
+        let cusData;
         if (!findCusAcc) {
-            const accData = {
+            accData = {
                 email: req.body.userEmail,
                 password: md5('1111'), 
                 token: generateToken.generateRandomString(),
@@ -59,7 +95,7 @@ module.exports.addPost = async (req, res) => {
             };
             await Account.create(accData, { transaction });
 
-            const cusData = {
+            cusData = {
                 email: req.body.userEmail,
                 fullName: req.body.userName,
                 phone: req.body.userPhone || '',
@@ -68,6 +104,7 @@ module.exports.addPost = async (req, res) => {
             };
             await Customer.create(cusData, { transaction });
         }
+        console.log(findCusAcc, accData, cusData);
 
         // Convert orderDetails to array
         const orderDetails = [];
@@ -86,21 +123,30 @@ module.exports.addPost = async (req, res) => {
             };
             orderDetails.push(detail);
         });
-        
+
+
+        console.log('Before creating order');
         // Create Order data
         const orderData = {
             orderId: req.body.orderId,
             discountId: (req.body.discountId === '' ? null : req.body.discountId),
             userEmail: req.body.userEmail,
             shipAddress: req.body.shipAddress,
+            shippingType: shippingType,
             totalCost: parseFloat(req.body.totalCost),
             confirmedBy: res.locals.user.email,
             status: 'Processing',
             deleted: false
         };
+        console.log('After creating order');
+
 
         // Create Order record
+        console.log('Before creating order');
+
         const order = await Order.create(orderData, { transaction });
+        console.log('Before creating order');
+
 
         // Add orderId to orderDetails and create OrderDetail records
         const orderDetailData = orderDetails.map(detail => ({
@@ -109,8 +155,35 @@ module.exports.addPost = async (req, res) => {
         }));
         await OrderDetail.bulkCreate(orderDetailData, { transaction });
 
+
+        const from = 'no-reply@autopart.com'
+        const to = accData == null ? findCusAcc.email : accData.email;
+        const subject = 'Đặt đơn hàng thành công';  
+        const html = `
+            Chào bạn,<br><br>
+            Cảm ơn bạn đã đặt hàng tại AutoPart! Đơn hàng của bạn đã được đặt thành công với các thông tin sau:<br><br>
+            <strong>Tên khách hàng:</strong> ${cusData == null ? findCus.fullName : cusData.fullName}<br>
+            <strong>Số điện thoại:</strong> ${cusData == null ? findCus.phone : cusData.phone}<br>
+            <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+            <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+            <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+            <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+            Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất và thông báo khi hàng được giao. Bạn có thể theo dõi trạng thái đơn hàng trong phần "Tài khoản" trên website của chúng tôi.<br><br>
+            Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+            Trân trọng,<br>
+            Đội ngũ AutoPart
+        `;
+
+        console.log('Before sending email');
+        console.log(to);
+        await mailSend(from, to, subject, html);
+
+        console.log('After sending email');
         // Commit transaction
         await transaction.commit();
+
+        
+
 
         req.flash('success', 'Tạo đơn hàng thành công!');
         res.redirect(`${systemConfig.prefixAdmin}/order/Processing`);
@@ -232,13 +305,47 @@ module.exports.edit = async (req, res) => {
 
 // [PATCH] /AutoParts/admin/order/edit/:orderId
 module.exports.editPatch = async (req, res) => {
+    
     const transaction = await sequelize.transaction();
     try {
+
         const orderId = req.params.orderId; 
 
         const order = await Order.findByPk(orderId, { transaction });
         if (!order) {
             req.flash('error', "Đơn hàng không tồn tại!");
+            return res.redirect('back');
+        }
+
+        const discountId = req.body.discountId || null;
+        const discount = await Discount.findByPk(discountId);
+        const orderDiscount = await Discount.findByPk(order.discountId);
+        let shippingType = req.body.shippingType;
+        console.log('Shipping type:', shippingType);
+        switch (shippingType)
+        {
+            case '20000':
+            shippingType = 'Normal';
+            break;
+            case '50000':
+            shippingType = 'Express';
+            break;
+            case '15000':
+            shippingType = 'Economy';
+            break;
+        }
+
+        if (!shippingType) {
+            console.log('Shipping type not selected');
+            console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
+            req.flash('error',  res.locals.messages.BLANK_SHIPPING_TYPE);
+            return res.redirect('back');
+        }
+
+        if(discount && discount.usageLimit<=0)
+        {
+            console.log('Discount usage limit exceeded');
+            req.flash('error', res.locals.messages.DISCOUNT_QUANTITY_EXCEEDED);
             return res.redirect('back');
         }
 
@@ -275,6 +382,13 @@ module.exports.editPatch = async (req, res) => {
             );
         }
 
+        if(discountId && findCusAcc.status === 'Guest')
+        {
+            console.log('Not a customer');
+            req.flash('error', 'Khách hàng không có khuyến mãi vì chưa có tài khoản!');
+            return res.redirect('back');
+        }
+
         // Convert orderDetails to array
         const orderDetails = [];
         const orderDetailKeys = Object.keys(req.body).filter(key => key.startsWith('orderDetails['));
@@ -298,10 +412,45 @@ module.exports.editPatch = async (req, res) => {
             discountId: (req.body.discountId === '' ? null : req.body.discountId),
             userEmail: req.body.userEmail,
             shipAddress: req.body.shipAddress,
+            shippingType: shippingType,
             totalCost: parseFloat(req.body.totalCost),
             updatedBy: res.locals.user.email,
             deleted: false
         };
+
+        if (discountId && !order.discountId) 
+                {
+                    // Case 2: No previous discount, apply new discount
+                    console.log(discount.usageLimit);
+                    await Discount.setUsedDiscount(findCusAcc.email, discountId);
+                    discount.usageLimit -= 1;
+                    await discount.save();
+                    console.log(discount.usageLimit);
+                } 
+                else if (!discountId && order.discountId) 
+                {
+                    // Case 3: Previous discount, remove discount
+                    console.log(orderDiscount.usageLimit);
+                    await Discount.deleteDiscountUsed(order.discountId, findCusAcc.email);
+                    orderDiscount.usageLimit += 1;
+                    await orderDiscount.save();
+                    console.log(orderDiscount.usageLimit);
+                } 
+                else if (discount && orderDiscount && discount.discountId !== orderDiscount.discountId) 
+                {
+                    // Case 4: Change discount
+                    console.log(discount.usageLimit);
+                    console.log(orderDiscount.usageLimit);
+                    await Discount.deleteDiscountUsed(order.discountId, findCusAcc.email);
+                    await Discount.setUsedDiscount(findCusAcc.email, discountId);
+                    discount.usageLimit -= 1;
+                    orderDiscount.usageLimit += 1;
+                    await discount.save();
+                    await orderDiscount.save(); 
+                    console.log(discount.usageLimit);
+                    console.log(orderDiscount.usageLimit);
+                }
+        
 
         await Order.update(orderData, {
             where: { orderId: orderId },
@@ -320,6 +469,9 @@ module.exports.editPatch = async (req, res) => {
             orderId: orderId
         }));
         await OrderDetail.bulkCreate(orderDetailData, { transaction });
+
+
+
 
         // Commit transaction
         await transaction.commit();

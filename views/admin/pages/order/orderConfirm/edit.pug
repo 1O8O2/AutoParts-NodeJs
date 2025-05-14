@@ -65,10 +65,18 @@ block main
                             input.form-control(name="userName" value=customer.fullName required placeholder="Nhập họ và tên")
                         .form-group
                             label(for="userPhone") Số điện thoại khách hàng <span class="required-text">*</span>
-                            input.form-control(name="userPhone" value=order.userPhone required placeholder="Nhập số điện thoại")
+                            input.form-control(name="userPhone" value=customer.phone required placeholder="Nhập số điện thoại")
                         .form-group
                             label(for="shipAddress") Địa chỉ giao hàng <span class="required-text">*</span>
                             input.form-control(name="shipAddress" value=order.shipAddress required placeholder="Nhập địa chỉ giao hàng")
+                        .form-group
+                            label(for="shippingType") Loại vận chuyển
+                            select.form-control.mb-3#shippingType(name="shippingType")
+                                option(value="" disabled) -- Chọn loại vận chuyển --
+                                option(value="20000" selected=order.shippingType === 'Normal') Vận chuyển thường - 20.000 ₫
+                                option(value="50000" selected=order.shippingType === 'Express') Vận chuyển nhanh - 50.000 ₫
+                                option(value="15000" selected=order.shippingType === 'Economy') Vận chuyển tiết kiệm - 15.000 ₫
+
                 .row
                     .col-lg-12
                         .form-group.totalCost

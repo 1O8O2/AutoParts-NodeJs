@@ -1,4 +1,5 @@
 include ../../mixins/alert.pug
+include ../../mixins/currency.pug
 
 doctype html
 html(lang="en")
@@ -7,14 +8,70 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title Sửa đơn hàng
     link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
-    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet")
     link(rel="stylesheet" href="/css/cart.css")
     link(rel="stylesheet" href="/css/base.css")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
+    style.
+      .cart-list .row.border-bottom {
+        margin: 0 0 1.5rem 0;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
 
+      .cart-list .row.border-bottom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .product-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      .btn-outline-primary {
+        color: #FF6F61;
+        border-color: #FF6F61;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: #FF6F61;
+        border-color: #FF6F61;
+        color: white;
+      }
+
+      .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+      }
+
+      .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+      }
+
+      .input-updateQTY {
+        width: 50px;
+        text-align: center;
+        margin: 0 5px;
+      }
+
+      .updateQTY label {
+        font-weight: 500;
+        color: #666;
+      }
   body
-    // Error and success messages using mixins
     +alert-error(3000)
     +alert-success(3000)
 
@@ -27,75 +84,95 @@ html(lang="en")
               .col.cart_title
                 h4
                   b Sửa đơn hàng ##{order.orderId}
-              .col.align-self-center.text-right.text-muted #{products.length} món
+              .col.align-self-center.text-right.text-muted
+                i.fas.fa-shopping-cart.me-2
+                span #{products.length} món
+
           .cart-list
             each item in products
-              .row.border-bottom.cart-item
+              .row.border-bottom.py-4
                 .row.main.align-items-center
-                  .col-2
-                    img.img-fluid(src="https://html.themability.com/autoelite/assets/images/categories/1.png")
-                  .col
-                    .row.text-muted #{item.product.productId}
-                    .row #{item.product.productName}
+                  .col-3
+                    img.img-fluid.rounded(src=item.product.imageUrls.split(',')[0] style="width: 100%; height: auto; object-fit: cover;")
+                  .col-5
+                    .row.text-muted.mb-2
+                      strong Mã SP: 
+                      span #{item.product.productId}
+                    .row.mb-2
+                      h5.product-name #{item.product.productName}
+                    .row.mb-2
+                      strong.text-danger
+                        +formatCurrency(item.product.salePrice)
                     input.price(type="hidden" value=item.product.salePrice)
-                    | #{item.product.salePrice} ₫
-                  .col.updateQTY
-                    button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)") -
-                    input.input-updateQTY.quantity(type="number" data-product-id=item.product.productId value=item.amount min="1" max=item.product.stock)
-                    button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
-                  .col
-                    a(href=`/AutoParts/product/detail?productId=${item.product.productId}`) Xem chi tiết ->
-                    form(action="/AutoParts/order/edit/remove-product" method="post" style="display: inline;")
-                      input(type="hidden" name="orderId" value=order.orderId)
-                      input(type="hidden" name="productId" value=item.product.productId)
-                      button.btn.btn-danger.btn-sm(type="submit" onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`)
-                        i.fa.fa-trash
-                        |  Xóa
-          .back-to-shop
-            a(href="/AutoParts/account/profile")
-              span ← 
-              span.text-muted Quay lại tài khoản
+                  .col-2.updateQTY
+                    .d-flex.flex-column.align-items-center
+                      label.mb-2 Số lượng
+                      .d-flex.align-items-center
+                        button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)")
+                          i.fas.fa-minus
+                        input.input-updateQTY.quantity.text-center(
+                          type="number" 
+                          data-product-id=item.product.productId 
+                          value=item.amount 
+                          min="1" 
+                          max=item.product.stock
+                        )
+                        button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)")
+                          i.fas.fa-plus
+                  .col-2
+                    .d-flex.flex-column.align-items-end.gap-2
+                      a.btn.btn-sm.btn-outline-primary.w-100.mb-2(href=`/AutoParts/product/detail?productId=${item.product.productId}`)
+                        i.fas.fa-eye.me-2
+                        | Chi tiết
+                      form.w-100(action="/AutoParts/order/edit/remove-product" method="post")
+                        input(type="hidden" name="orderId" value=order.orderId)
+                        input(type="hidden" name="productId" value=item.product.productId)
+                        button.btn.btn-sm.btn-outline-danger.w-100(
+                          type="submit" 
+                          onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`
+                        )
+                          i.fas.fa-trash.me-2
+                          | Xóa
+
+          .cart-actions.d-flex.justify-content-between.align-items-center.mt-4
+            a.btn.back-btn(href="/AutoParts/account/profile")
+              i.fas.fa-arrow-left.me-2
+              | Quay lại tài khoản
+
         form.col-md-4.summary(action="/AutoParts/order/edit" method="post")
           div
             h5
               b CHI TIẾT ĐƠN HÀNG
           hr
           input(type="hidden" name="orderId" value=order.orderId)
-          .row
+          .row.mb-3
             .col(style="padding-left: 0;") Số lượng: #{products.length}
             each item in products
               input(type="hidden" class="form-quantity" id=item.product.productId name=item.product.productId value=item.amount data-product-id=item.product.productId)
-          //- p Tên
-          //- .row
-          //-   input#customerName(type="text" name="customerName" placeholder="Tên" required value=user && user.fullName ? user.fullName : '' disabled oninvalid=`this.setCustomValidity('${messageList.BLANK_NAME}')` oninput="this.setCustomValidity('')")
 
-          //- p Số điện thoại
-          //- .row
-          //-   input#phoneNumber(type="tel" name="phoneNumber" placeholder="Số điện thoại" required value=user && user.phone ? user.phone : '' disabled oninvalid=`this.setCustomValidity('${messageList.BLANK_PHONE}')` oninput="this.setCustomValidity('')")
-          //- p Email
-          //- .row
-          //-   input#email(type="email" name="email" placeholder="Email" required value=user && user.email ? user.email : '' disabled oninvalid=`this.setCustomValidity('${messageList.BLANK_EMAIL}')` oninput="this.setCustomValidity('')")
-          
-          //- p Địa chỉ giao hàng
-          //- .row
-          //-   input#shipAddress(type="text" name="shipAddress" placeholder="Địa chỉ" required value=user && user.address ? user.address : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_ADDRESS}')` oninput="this.setCustomValidity('')")
-          div
-            p Loại vận chuyển 
-            select(name="shippingType" id="shippingType")
-                option(value="" disabled) -- Chọn loại vận chuyển --
-                option(value="20000" selected=order.shippingType === 'Normal') Vận chuyển thường - 20.000 ₫
-                option(value="50000" selected=order.shippingType === 'Express') Vận chuyển nhanh - 50.000 ₫
-                option(value="15000" selected=order.shippingType === 'Economy') Vận chuyển tiết kiệm - 15.000 ₫
-            p Mã khuyến mãi #{order.discountId}  
-            select(name="discountId" id="discountId")
+          .form-group
+            label(for="shippingType") Loại vận chuyển
+            select#shippingType(name="shippingType")
+              option(value="" disabled) -- Chọn loại vận chuyển --
+              option(value="20000" selected=order.shippingType === 'Normal') Vận chuyển thường - 20.000 ₫
+              option(value="50000" selected=order.shippingType === 'Express') Vận chuyển nhanh - 50.000 ₫
+              option(value="15000" selected=order.shippingType === 'Economy') Vận chuyển tiết kiệm - 15.000 ₫
+
+          .form-group
+            label(for="discountId") Mã khuyến mãi
+            select#discountId(name="discountId")
               option(value="") -- Chọn mã khuyến mãi --
               each discount in discounts
-                option(value=discount.discountId selected=order.discountId == discount.discountId) #{discount.discountDesc} - Giảm #{discount.discountAmount}% (Tối thiểu: #{discount.minimumAmount} ₫) 
-          .row(style="border-top: 1px solid rgba(0, 0, 0, .1); padding: 2vh 0;")
+                option(value=discount.discountId selected=order.discountId == discount.discountId) #{discount.discountDesc} - Giảm #{discount.discountAmount}% (Tối thiểu: #{discount.minimumAmount} ₫)
+
+          .row.total-section
             .col TỔNG TIỀN
             input.col.text-right#total(name="totalCost" value=order.totalCost readonly)
             |  ₫
-          button.btn LƯU THAY ĐỔI
+
+          .row.mt-3
+            .col
+              button.btn.order-btn.w-100 LƯU THAY ĐỔI
 
     script(type="text/javascript").
       document.addEventListener('DOMContentLoaded', function() {
