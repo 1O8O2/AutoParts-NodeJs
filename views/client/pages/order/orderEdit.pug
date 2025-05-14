@@ -68,6 +68,8 @@ html(lang="en")
         font-weight: 500;
         color: #666;
       }
+
+      
   body
     +alert-error(3000)
     +alert-success(3000)
@@ -181,6 +183,7 @@ html(lang="en")
       let quantityInputs = document.querySelectorAll(".quantity");
       let discountSelect = document.getElementById("discountId");
       let shippingSelect = document.getElementById("shippingType");
+      window.currentDiscountId = "#{order.discountId}";
 
       const discounts = [
         !{discounts.map((discount, index) => `{ id: "${discount.discountId}", code: "${discount.discountDesc.replace(/"/g, '\\"')}", amount: ${discount.discountAmount}, minOrderValue: ${discount.minimumAmount} }${index < discounts.length - 1 ? ',' : ''}`).join('')}
@@ -188,6 +191,7 @@ html(lang="en")
 
       function updateDiscountOptions(totalCost) {
         const select = document.getElementById('discountId');
+        const currentDiscountId = window.currentDiscountId || '';
         select.innerHTML = '<option value="">-- Chọn mã khuyến mãi --</option>';
         discounts.forEach(discount => {
           const option = document.createElement('option');
@@ -195,6 +199,9 @@ html(lang="en")
           option.text = discount.code + " - Giảm " + discount.amount + "% (Tối thiểu: " + discount.minOrderValue.toLocaleString('vi-VN') + " ₫)";
           if (discount.minOrderValue > totalCost) {
             option.disabled = true;
+          }
+          if (discount.id === currentDiscountId) {
+            option.selected = true;
           }
           select.appendChild(option);
         });

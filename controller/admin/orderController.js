@@ -22,7 +22,8 @@ module.exports.add = async (req, res) => {
     try {
         const products = await Product.findAll({
             where: {
-                deleted: false
+                deleted: false,
+                stock: { [Op.gt]: 0 }
             }
         });
         const discounts = await Discount.findAll({

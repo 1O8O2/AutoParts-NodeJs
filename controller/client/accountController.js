@@ -32,13 +32,14 @@ module.exports.register = async (req, res) => {
         return res.redirect('back');
     }
 
-    let customer = await Customer.findOne({ where: { email: email } });
-    if (customer) {
+    let customer = await Customer.findOne({ where: { email: email} });
+    if (customer && customer.status !=='Guest') {
         req.flash('error', res.locals.messages.EMAIL_EXIST_WARNING);
         return res.redirect('back');
     }
 
     try {
+        let success = false;
         // Create a new Cart
         const cartId = 'CART' + Date.now().toString().substring(8);
         const newCart = await Cart.create({ cartId });
@@ -49,14 +50,26 @@ module.exports.register = async (req, res) => {
 
         // Create a new Account
         const token = generate.generateRandomString(20);
-        const newAccount = await Account.create({
+        const newAccount = {
             email: email,
             password,
             token: token,
             permission: 'RG002', 
             status: 'Active',
             deleted: false
-        });
+        }; 
+        if (customer && customer.status ==='Guest')
+            {
+                await Account.update(
+                    newAccount,
+                    { where: { email: email } }
+                );
+            }
+        else
+        {
+            await Account.create(newAccount);
+        }
+       
         if (!newAccount) {
             req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
             return res.redirect('back');
@@ -64,15 +77,29 @@ module.exports.register = async (req, res) => {
         res.cookie("tokenUser", newAccount.token);
 
         // Create a new Customer
-        const newCustomer = await Customer.create({
+        const newCustomer = {
             email: email,
             cartId: newCart.cartId,
             fullName,
             phone,
             address,
             status: 'Active'
-        });
-        if (newCustomer) {
+        };
+
+        if (customer && customer.status ==='Guest')
+        {
+            success = await Customer.update(
+                newCustomer,
+                { where: { email: email } }
+            );
+            console.log(success)
+        }
+        else{
+            success = await Customer.create(newCustomer);
+            console.log(success)
+        }
+        
+        if (success) {
             req.flash('success', res.locals.messages.ACCOUNT_CREATE_SUCCESS);
             return res.redirect(systemConfig.prefixUrl+'/account/login');
         } else {
