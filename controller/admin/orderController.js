@@ -208,9 +208,9 @@ module.exports.index = async (req, res) => {
                         status: 'Pending',
                         deleted: false
                     },
+                    order: [["orderDate", "DESC"]],
                     include: [{ model: Customer }]
                 });
-                console.log(listPending);
 
                 return res.render('admin/pages/order/orderConfirm/index', {
                     pageTitle: "Danh sách đơn hàng chờ xác nhận",
@@ -222,6 +222,7 @@ module.exports.index = async (req, res) => {
                         status: 'Processing',
                         deleted: false
                     },
+                    order: [["orderDate", "DESC"]],
                     include: [{ model: Customer }]
                 });
                 return res.render('admin/pages/order/orderProcessing', {
@@ -234,6 +235,7 @@ module.exports.index = async (req, res) => {
                         status: 'Shipping',
                         deleted: false
                     },
+                    order: [["orderDate", "DESC"]],
                     include: [{ model: Customer }]
                 });
                 return res.render('admin/pages/order/orderDeli', {
@@ -246,6 +248,7 @@ module.exports.index = async (req, res) => {
                         status: { [Op.in]: ['Completed', 'Cancelled'] },
                         deleted: false
                     },
+                    order: [["orderDate", "DESC"]],
                     include: [{ model: Customer }]
                 });
                 return res.render('admin/pages/order/orderHistory', {
