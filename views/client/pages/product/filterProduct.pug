@@ -120,7 +120,7 @@ html
             each product in products
               .card(data-brand=product.brandId data-category=product.productGroupId)
                 a(href=`/AutoParts/product/detail?productId=${product.productId}`)
-                  img.card-img-top(src=product.imageUrls alt=product.productName)
+                  img.card-img-top(src=(product.imageUrls.startsWith("https") ? product.imageUrls : `/img/${product.imageUrls}`) alt=product.productName)
                 .card-body
                   h5.card-title #{product.productName}
                   p.card-text #{product.description}
