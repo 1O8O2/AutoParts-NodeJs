@@ -9,8 +9,6 @@ module.exports.index = async (req, res) => {
         const fromDate = req.query.fromDate || new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0];
         const toDate = req.query.toDate || new Date().toISOString().split('T')[0];
 
-        console.log('Date Range:', { fromDate, toDate });
-
         // Get completed orders within date range
         const orders = await Order.findAll({
             where: {
@@ -21,37 +19,43 @@ module.exports.index = async (req, res) => {
             }
         });
 
-        // Calculate revenue
-        const totalRevenue = orders.reduce((sum, order) => {
-            const orderRevenue = order.details.reduce((detailSum, detail) => {
-                return detailSum + (detail.unitPrice * detail.amount);
-            }, 0);
-            return sum + orderRevenue;
-        }, 0);
+        const productIds = [
+            ...new Set(
+                orders.flatMap(ord => 
+                    ord.details.map(detail => detail.productId)
+                )
+            )
+        ];
+        const productOrders = await Product.findAll({
+            attributes: ['productId', 'costPrice'],
+            required: true,
+            where: {
+                productId: {
+                    [Op.in]: productIds
+                }
+            }
+        })
 
-        console.log('Total Revenue:', totalRevenue);
+        // Calculate revenue
+        const totalRevenue = orders.reduce((sum, order) => sum + order.totalCost, 0);
+        const totalCostPrice = orders.reduce((sum, order) => {
+            const orderCost = order.details.reduce((detailSum, detail) => {
+                const costPrice = productOrders.find(pro => detail.productId == pro.productId).costPrice;
+                const itemCost = costPrice * detail.amount;
+                return detailSum + itemCost;
+            }, 0);
+            return sum + orderCost;
+        }, 0);
 
         // Calculate costs
         const costDetails = [
             {
                 type: 'Giá vốn hàng bán',
-                amount: orders.reduce((sum, order) => {
-                    const orderCost = order.details.reduce((detailSum, detail) => {
-                        const itemCost = (detail.unitPrice || 0) * detail.amount;
-                        console.log(`Order ${order.orderId}, Item ${detail.productId} cost:`, itemCost);
-                        return detailSum + itemCost;
-                    }, 0);
-                    console.log(`Order ${order.orderId} total cost:`, orderCost);
-                    return sum + orderCost;
-                }, 0)
+                amount: totalCostPrice
             },
             {
-                type: 'Chi phí vận chuyển',
-                amount: orders.reduce((sum, order) => {
-                    const shippingFee = order.totalCost || 0;
-                    console.log(`Order ${order.orderId} shipping fee:`, shippingFee);
-                    return sum + shippingFee;
-                }, 0)
+                type: 'Tổng doanh thu đơn hàng',
+                amount: totalRevenue
             },
             {
                 type: 'Chi phí khác',
@@ -59,20 +63,13 @@ module.exports.index = async (req, res) => {
             }
         ];
 
-        console.log('Cost Details:', costDetails);
 
         const totalCost = costDetails.reduce((sum, cost) => {
-            console.log(`${cost.type}:`, cost.amount);
             return sum + cost.amount;
         }, 0);
 
-        console.log('Total Cost:', totalCost);
-
-        const profit = totalRevenue - totalCost;
+        const profit = totalRevenue - totalCostPrice;
         const profitMargin = totalRevenue > 0 ? ((profit / totalRevenue) * 100).toFixed(2) : 0;
-
-        console.log('Profit:', profit);
-        console.log('Profit Margin:', profitMargin + '%');
 
         // Prepare chart data
         const days = [];
@@ -93,24 +90,18 @@ module.exports.index = async (req, res) => {
             });
 
             const dailyRevenue = dailyOrders.reduce((sum, order) => {
-                const orderRevenue = order.details.reduce((detailSum, detail) => {
-                    return detailSum + (detail.unitPrice * detail.amount);
-                }, 0);
-                console.log(`Daily Revenue - ${dateStr}, Order ${order.orderId}:`, orderRevenue);
-                return sum + orderRevenue;
+                return sum + order.totalCost;
             }, 0);
             revenueData.push(dailyRevenue);
 
             // Calculate daily costs
             const dailyCost = dailyOrders.reduce((sum, order) => {
                 const orderCost = order.details.reduce((detailSum, detail) => {
-                    const itemCost = (detail.unitPrice || 0) * detail.amount;
-                    console.log(`Daily Cost - ${dateStr}, Order ${order.orderId}, Item ${detail.productId}:`, itemCost);
+                    const costPrice = productOrders.find(pro => detail.productId == pro.productId).costPrice;
+                    const itemCost = costPrice * detail.amount;
                     return detailSum + itemCost;
                 }, 0);
-                const shippingFee = order.totalCost || 0;
-                console.log(`Daily Cost - ${dateStr}, Order ${order.orderId} total:`, orderCost + shippingFee);
-                return sum + orderCost + shippingFee;
+                return sum + orderCost;
             }, 0);
             costData.push(dailyCost);
 

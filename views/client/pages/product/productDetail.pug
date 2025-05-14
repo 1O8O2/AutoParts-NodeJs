@@ -47,13 +47,13 @@ html
         .col-md-6
           each url, index in imgUrls
             if index === 0
-              img#main-image(src=url style="width: 85%; height: 75%;" alt="Car Image" class="img-fluid")
+              img#main-image(src=(url.startsWith('https') ? url : `/img/${url}`) style="width: 85%; height: 75%;" alt="Car Image" class="img-fluid")
           .list-image
             each url, index in imgUrls
               if index === 0
-                img(src=url class="image-item active" onclick="updateMainImg(this)" width="50" height="50" alt="Car Image" class="img-fluid")
+                img(src=(url.startsWith('https') ? url : `/img/${url}`) class="image-item active" onclick="updateMainImg(this)" width="50" height="50" alt="Car Image" class="img-fluid")
               else
-                img(src=url class="image-item" onclick="updateMainImg(this)" width="50" height="50" alt="Car Image" class="img-fluid")
+                img(src=(url.startsWith('https') ? url : `/img/${url}`) onclick="updateMainImg(this)" width="50" height="50" alt="Car Image" class="img-fluid")
       else
         .col-md-6
           p Không có hình ảnh cho sản phẩm này
@@ -74,7 +74,7 @@ html
               li Hãng: #{brand.brandName}
             if group
               li Loại hàng: #{group.groupName}
-            li Trọng lượng: #{product.weight} g
+            li Trọng lượng: #{product.weight} kg
             li Số lượng: #{product.stock} #{product.unit}
 
           if product.stock > 0

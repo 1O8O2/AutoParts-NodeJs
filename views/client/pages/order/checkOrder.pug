@@ -310,7 +310,18 @@ html
             document.getElementById('resultTotal').textContent = formatCurrency(data.order.totalCost);
             
             document.getElementById('resultOrderDate').textContent = new Date(data.order.orderDate).toLocaleDateString('vi-VN');
-            document.getElementById('resultStatus').textContent = data.order.status;
+            let status = "";
+            if (data.order.status == "Pending")
+              status = "Chờ xác nhận"  
+            else if (data.order.status == "Processing")
+              status = "Chờ xử lý"   
+            else if (data.order.status == "Shipping")
+              status = "Đang giao"   
+            else if (data.order.status == "Completed")
+              status = "Hoàn thành"  
+            else if (data.order.status == "Cancelled")
+              status = "Đã hủy"  
+            document.getElementById('resultStatus').textContent = status;
             
             // Update product list
             const productList = document.getElementById('productList');
