@@ -349,38 +349,38 @@ module.exports.editPatch = async (req, res) => {
             return res.redirect('back');
         }
 
-        const findCusAcc = await Account.findByPk(req.body.userEmail, { transaction });
-        if (!findCusAcc) {
-            const accData = {
-                email: req.body.userEmail,
-                password: md5('1111'),
-                token: generateToken.generateRandomString(),
-                permission: 'RG002',
-                status: 'Active',
-                deleted: false
-            };
-            await Account.create(accData, { transaction });
+        const findCusAcc = await Account.findByPk(order.userEmail, { transaction });
+        // if (!findCusAcc) {
+        //     const accData = {
+        //         email: req.body.userEmail,
+        //         password: md5('1111'),
+        //         token: generateToken.generateRandomString(),
+        //         permission: 'RG002',
+        //         status: 'Active',
+        //         deleted: false
+        //     };
+        //     await Account.create(accData, { transaction });
 
-            const cusData = {
-                email: req.body.userEmail,
-                fullName: req.body.userName,
-                phone: req.body.userPhone || '',
-                address: req.body.shipAddress,
-                status: 'Active'
-            };
-            await Customer.create(cusData, { transaction });
-        } else {
-            await Customer.update(
-                {
-                    fullName: req.body.userName,
-                    address: req.body.shipAddress
-                },
-                {
-                    where: { email: req.body.userEmail },
-                    transaction
-                }
-            );
-        }
+        //     const cusData = {
+        //         email: req.body.userEmail,
+        //         fullName: req.body.userName,
+        //         phone: req.body.userPhone || '',
+        //         address: req.body.shipAddress,
+        //         status: 'Active'
+        //     };
+        //     await Customer.create(cusData, { transaction });
+        // } else {
+        //     await Customer.update(
+        //         {
+        //             fullName: req.body.userName,
+        //             address: req.body.shipAddress
+        //         },
+        //         {
+        //             where: { email: req.body.userEmail },
+        //             transaction
+        //         }
+        //     );
+        // }
 
         if(discountId && findCusAcc.status === 'Guest')
         {
