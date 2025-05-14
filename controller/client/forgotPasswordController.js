@@ -11,7 +11,8 @@ module.exports.showForgotPassword = async (req, res) => {
 
 // [POST] forgot-password
 module.exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const  {email}  = req.body;
+  console.log(email)
 
   if (!email) {
     req.session.message = 'Email là bắt buộc';
@@ -39,17 +40,67 @@ module.exports.forgotPassword = async (req, res) => {
       `
     await mailSend(from, to, subject, html);
     //await transporter.sendMail(mailOptions);
-    req.session.otp = otp;
-    req.session.recoveringMail = email;
-    console.log(req.session.otp)
+    res.cookie('otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: true }); // Expires in 5 minutes
+    res.cookie('recoveringMail', email, { maxAge: 60 * 60 * 1000, httpOnly: true }); // Expires in 1 hour
+    console.log('Current cookies:', req.cookies);
+
 
     req.session.message = null; // Clear message on success
     return res.redirect('forgot-password/enter-otp');
   } catch (error) {
     console.error('Forgot password error:', error);
-    req.session.message = 'Đã có lỗi xảy ra, vui lòng thử lại!';
-    return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
+    return res.render('client/pages/forgot-password/forgot-password', { message: 'Đã có lỗi xảy ra, vui lòng thử lại!' });
   }
+};
+
+
+
+// [POST] ressend-otp
+module.exports.resendOtp = async (req, res) => {
+  console.log('resend-otp')
+  const  email  = req.cookies.recoveringMail;
+  console.log(email)
+
+  // if (!email) {
+  //   req.session.message = 'Email là bắt buộc';
+  //   return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
+  // }
+
+  // try {
+  //   const customer = await Customer.findOne({ where: { email } });
+
+  //   if (!customer) {
+  //     req.session.message = 'Email không đúng';
+  //     return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
+  //   }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const from = 'no-reply@autopart.com'
+    const to = email;
+    const subject = 'Khôi phục mật khẩu';
+    const html = `
+        Chào bạn,<br><br>
+        Mã OTP để khôi phục mật khẩu của bạn là: <strong>${otp}</strong><br>
+        Vui lòng sử dụng mã này để đặt lại mật khẩu. Mã OTP có hiệu lực trong 5 phút.<br><br>
+        Trân trọng,<br>
+        Đội ngũ AutoPart
+      `
+    await mailSend(from, to, subject, html);
+    //await transporter.sendMail(mailOptions);
+    console.log(otp)
+    res.cookie('otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: true }); // Expires in 5 minutes
+    res.cookie('message', '', { maxAge: 0 }); // Clear message cookie
+    console.log('Current cookies:', req.cookies);
+    return res.redirect('/AutoParts/forgot-password/enter-otp');
+
+
+    // req.session.message = null; // Clear message on success
+    // return res.redirect('forgot-password/enter-otp');
+  // } catch (error) {
+  //   console.error('Forgot password error:', error);
+  //   req.session.message = 'Đã có lỗi xảy ra, vui lòng thử lại!';
+  //   return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
+  // }
 };
 
 // [GET] enter-otp
@@ -74,7 +125,7 @@ module.exports.otpVerify = async (req, res) => {
   } else {
     console.log('OTP verification failed:', otp, req.session.otp);
     req.session.message = 'Mã OTP không đúng';
-    return res.redirect('forgot-password/enter-otp');
+    return res.redirect('/AutoParts/forgot-password/enter-otp');
   }
 };
 
@@ -123,3 +174,5 @@ module.exports.updatePassword = async (req, res) => {
     return res.redirect('enter-password');
   }
 };
+
+
