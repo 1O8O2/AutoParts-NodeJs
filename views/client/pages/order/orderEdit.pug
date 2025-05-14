@@ -13,9 +13,9 @@ html(lang="en")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js")
     link(rel="stylesheet" href="/css/cart.css")
     link(rel="stylesheet" href="/css/base.css")
-
+    style.
       .cart-list .row.border-bottom:hover {
-        transform: translateY(-3px);
+        transform: translateY(-3px)
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       }
 
@@ -25,6 +25,15 @@ html(lang="en")
         color: #2c3e50;
         margin: 0;
         line-height: 1.4;
+      }
+
+      .btn-primary, .btn-primary:focus, .btn-primary:active {
+        background-color: #FF6F61 !important;
+        border-color: #FF6F61 !important;
+      }
+      .btn-primary:hover {
+        background-color: #ff543e !important;
+        border-color: #ff543e !important;
       }
 
       .btn-outline-primary {
@@ -88,19 +97,22 @@ html(lang="en")
                     input.price(type="hidden" value=item.product.salePrice)
                     +formatCurrency(item.product.salePrice)
                   .col.updateQTY
-                    button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)") -
-                    input.input-updateQTY.quantity(type="number" data-product-id=item.product.productId value=item.amount min="1" max=item.product.stock)
-                    button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)") +
+                      button.btn-updateQTY(onclick="updateQuantity(this.nextElementSibling, -1)")
+                        i.fas.fa-minus
+                      input.input-updateQTY.quantity(type="number" data-product-id=item.product.productId value=item.amount min="1" max=item.product.stock)
+                      button.btn-updateQTY(onclick="updateQuantity(this.previousElementSibling, 1)")
+                        i.fas.fa-plus
                   .col
-                    a.btn.btn-sm.btn-light(href=`/AutoParts/product/detail?productId=${item.product.productId}`)
-                      i.fas.fa-eye.me-2
-                      | Xem chi tiết
-                    form(action="/AutoParts/order/edit/remove-product" method="post" style="display: inline;")
-                      input(type="hidden" name="orderId" value=order.orderId)
-                      input(type="hidden" name="productId" value=item.product.productId)
-                      button.btn.btn-danger.btn-sm(type="submit" onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`)
-                        i.fa.fa-trash
-                        |  Xóa
+                    .d-flex
+                      a.btn.btn-sm.btn-light.mr-2(href=`/AutoParts/product/detail?productId=${item.product.productId}`)
+                        i.fas.fa-eye.me-2
+                        | Xem chi tiết
+                      form(action="/AutoParts/order/edit/remove-product" method="post" style="display: inline;")
+                        input(type="hidden" name="orderId" value=order.orderId)
+                        input(type="hidden" name="productId" value=item.product.productId)
+                        button.btn.btn-danger.btn-sm(type="submit" onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`)
+                          i.fa.fa-trash
+                          |  Xóa
           .cart-actions.d-flex.justify-content-between.align-items-center.mt-4
             a.btn.back-btn(href="/AutoParts/account/profile")
               i.fas.fa-arrow-left.me-2
@@ -135,7 +147,7 @@ html(lang="en")
             .col TỔNG TIỀN
             input.col.text-right#total(name="totalCost" value=order.totalCost readonly)
             |  ₫
-          button.btn.btn-primary LƯU THAY ĐỔI
+          button.btn.btn-primary.w-100 LƯU THAY ĐỔI
 
     script(type="text/javascript").
       document.addEventListener('DOMContentLoaded', function() {

@@ -72,6 +72,8 @@ Discount.getByCustomer = async (email) => {
           AND d.status = 'Active'
           AND d.usageLimit > 0
           AND d.deleted = 0
+          AND d.applyEndDate > GETDATE()
+          AND d.applyStartDate <= GETDATE()
       `;
 
       const discounts = await Discount.sequelize.query(sql, {
