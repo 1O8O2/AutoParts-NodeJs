@@ -15,7 +15,6 @@ block main
                 th Họ tên
                 th Email
                 th Số điện thoại
-                th Trạng thái
                 th Tin nhắn chưa đọc
                 th Thao tác
             tbody
@@ -25,9 +24,6 @@ block main
                     td= customer.fullName
                     td= customer.email
                     td= customer.phone
-                    td
-                      span(class="badge " + (customer.status === 'Active' ? 'badge-success' : 'badge-danger'))
-                        = customer.status
                     td
                       if customer.unreadCount > 0
                         span.badge.badge-danger= customer.unreadCount

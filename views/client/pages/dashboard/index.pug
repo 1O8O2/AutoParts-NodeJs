@@ -135,9 +135,10 @@ html
                 each item, index in productOrderMost.slice(1)
                   .bestseller-item
                     .bestseller-item-img
-                      img(src=item.imageUrls, alt=item.productName)
+                      +showImage(item.imageUrls)
                     .bestseller-item-info
-                      h4 #{item.productName}
+                      h4.product-title
+                        a(href=`/AutoParts/product/detail?productId=${item.productId}`) #{item.productName}
                       .bestseller-item-price 
                         +formatCurrency(item.salePrice)
                       .bestseller-item-rating
