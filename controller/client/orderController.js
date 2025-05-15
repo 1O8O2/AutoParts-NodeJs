@@ -13,11 +13,8 @@ const sequelize = require("../../configs/database");
 module.exports.createOrder = async (req, res) => {
     const t = await sequelize.transaction();
     try {
-        console.log('Creating order...');
-        
-
         let acc, cus, cart;
-        console.log(acc, cus, cart)
+
         if(req.cookies.tokenUser!=null)
         {
             acc = await Account.findOne({
@@ -25,7 +22,6 @@ module.exports.createOrder = async (req, res) => {
             });
 
             cus = await Customer.findByPk(acc.email);
-            //console.log(cus)
 
             cart = await Cart.findByPk(cus.cartId);
         }
@@ -46,8 +42,6 @@ module.exports.createOrder = async (req, res) => {
                 deleted: false
             };
 
-            console.log('Account created:', acc)
-
             cus ={
                 email: req.body.email,
                 cartId: null,
@@ -56,64 +50,49 @@ module.exports.createOrder = async (req, res) => {
                 address : req.body.shipAddress,
                 status: 'Guest'
             };
-            console.log('Customer created:', cus)
 
             cart = await Cart.findByPk(req.cookies.cartId);
         }
 
-        //console.log(acc, cus, cart)
         let query='/AutoParts/order?';
 
         // Get all products from cart (virtual field populated by afterFind hook)
         const productsInCart = cart.products || [];
-        console.log('Products in cart:', productsInCart);
-        //console.log(req.body)
         const selectedProducts = productsInCart.filter(item => req.body[item.product.productId]);
-        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         const updatedSelectedProducts = selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] }));
-        console.log('Updated selected products:', updatedSelectedProducts);
+
         for(const item of updatedSelectedProducts)
+        {   
+            const product = await Product.findByPk(item.productId);
+            if(item.amount > product.stock)
             {
-                if(item.amount> await Product.findByPk(item.productId).stock)
-                {
-                    console.log('Product out of stock:', item.productId);
-                    console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
-                    req.flash('error',  'Product out of stock:', item.productId);
-                    return res.redirect('back');
-                }
-                query+=item.productId+'='+item.amount+'&';
+                req.flash('error',  `Sản phẩm ${product.productName} đã hết`);
+                return res.redirect('back');
             }
-            query=query.slice(0,-1);
-            console.log(query)
+            query+=item.productId+'='+item.amount+'&';
+        }
+        query=query.slice(0,-1);
 
-        
-        //console.log('updatedSelectedProducts:', updatedSelectedProducts);
-        //console.log('Selected products:', selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] })));
-
-        const totalCost = parseFloat(req.body.totalCost) *1000;
-        console.log('Total cost:', totalCost);
+        const totalCost = parseFloat((req.body.totalCost).replace(/\./g, ''))
         const discountId = req.body.discountId || null;
         const shipAddress = req.body.shipAddress;
         let shippingType = req.body.shippingType;
-        console.log('Shipping type:', shippingType);
+
         switch (shippingType)
         {
             case '20000':
-            shippingType = 'Normal';
-            break;
+                shippingType = 'Normal';
+                break;
             case '50000':
-            shippingType = 'Express';
-            break;
+                shippingType = 'Express';
+                break;
             case '15000':
-            shippingType = 'Economy';
-            break;
+                shippingType = 'Economy';
+                break;
         }
 
-        console.log(discountId, shipAddress, shippingType, totalCost);
 
         if (!shippingType) {
-            console.log('Shipping type not selected');
-            console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
             req.flash('error',  res.locals.messages.BLANK_SHIPPING_TYPE);
             return res.redirect(query);
         }
@@ -121,7 +100,6 @@ module.exports.createOrder = async (req, res) => {
         const discount = await Discount.findByPk(discountId);
         if(discount && discount.usageLimit<=0)
         {
-            console.log('Discount usage limit exceeded');
             req.flash('error', res.locals.messages.DISCOUNT_QUANTITY_EXCEEDED);
             return res.redirect(query);
         }
@@ -142,9 +120,7 @@ module.exports.createOrder = async (req, res) => {
         if(req.cookies.tokenUser==null )
         {
             acc = await Account.create(acc);
-            console.log('Account created:', acc)
             cus = await Customer.create(cus);
-            console.log('Customer created:', cus)
         }
 
         // Create new order
@@ -171,13 +147,8 @@ module.exports.createOrder = async (req, res) => {
 
         // Create order details and update cart
         const updatedProductsInCart = productsInCart.filter(item => !req.body[item.product.productId]);
-        console.log('Updated products in cart:', updatedProductsInCart);
 
         for (const item of updatedSelectedProducts) {
-            console.log(item)
-            console.log(item.productId)
-            console.log(item.amount)
-
             const product = await Product.findByPk(item.productId);
 
             await OrderDetail.create({
@@ -195,9 +166,7 @@ module.exports.createOrder = async (req, res) => {
 
         // Update cart by setting new products (hooks will handle ProductsInCart)
         cart.products = updatedProductsInCart;
-        console.log('Updated cart products:', cart.products);
         await cart.save();
-        console.log('Cart updated successfully');
 
         const from = 'no-reply@autopart.com'
         const to = acc.email;

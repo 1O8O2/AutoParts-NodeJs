@@ -4,6 +4,7 @@ const Customer = require('../../models/Customer');
 const {Cart, ProductsInCart} = require('../../models/Cart');
 const Order = require('../../models/Order');
 const systemConfig = require('../../configs/system');
+const md5 = require('md5');
 
 // Helper
 const generate = require("../../helpers/generateToken");
@@ -19,7 +20,6 @@ module.exports.register = async (req, res) => {
     if( !email || !password || !repassword || !phone || !address || !fullName) {
         req.flash('error', res.locals.messages.REGISTER_ERROR);
         res.redirect('back');
-
     }
 
     if (password !== repassword) {
@@ -50,9 +50,10 @@ module.exports.register = async (req, res) => {
 
         // Create a new Account
         const token = generate.generateRandomString(20);
+        const encryptPass = md5(password);
         const newAccount = {
             email: email,
-            password,
+            password: encryptPass,
             token: token,
             permission: 'RG002', 
             status: 'Active',
@@ -144,7 +145,7 @@ module.exports.logIn = async (req, res) => {
         return res.redirect('back');
     }
 
-    if (password !== account.password) {
+    if (md5(password) !== account.password) {
         req.flash('error', res.locals.messages.PASSWORD_OR_EMAIL_INCORRECT_WARNING);
         return res.redirect('back');
     } 
@@ -264,7 +265,7 @@ module.exports.changePassword = async(req, res) => {
     }
     
     try {
-        const { pass, newpass ,confirmpass} = req.body;
+        const { pass, newpass ,confirmpass } = req.body;
         if (newpass !== confirmpass) {
             req.flash('error', res.locals.messages.NOT_MATCH_PASSWORD_WARNING);
             return res.redirect('back');
@@ -277,10 +278,10 @@ module.exports.changePassword = async(req, res) => {
             req.flash('error', res.locals.messages.NOT_DIFFERENT_PASSWORD_WARNING);
             return res.redirect('back');
         }
-        if (acc.password === pass) {
+        if (acc.password === md5(pass)) {
             await Account.update(
                 { 
-                    password: newpass 
+                    password: md5(newpass) 
                 },
                 { 
                     where: { 
