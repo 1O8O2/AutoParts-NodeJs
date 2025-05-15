@@ -66,7 +66,7 @@ module.exports.createOrder = async (req, res) => {
             const product = await Product.findByPk(item.productId);
             if(item.amount > product.stock)
             {
-                req.flash('error',  `Sản phẩm ${product.productName} đã hết`);
+                req.flash('error',  res.locals.messages.PRODUCT_OUT_OF_STOCK);
                 return res.redirect('back');
             }
             query+=item.productId+'='+item.amount+'&';
