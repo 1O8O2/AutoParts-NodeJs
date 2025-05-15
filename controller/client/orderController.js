@@ -35,7 +35,7 @@ module.exports.createOrder = async (req, res) => {
         {
             acc = {
                 email: req.body.email,
-                password: "randomPassword",
+                password: "1111",
                 token: null,
                 permission: 'RG002', 
                 status: 'Guest',
