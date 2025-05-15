@@ -100,6 +100,7 @@ module.exports.register = async (req, res) => {
         }
         
         if (success) {
+            res.cookie("cartId", newCart.cartId);
             req.flash('success', res.locals.messages.ACCOUNT_CREATE_SUCCESS);
             return res.redirect(systemConfig.prefixUrl+'/account/login');
         } else {
@@ -208,7 +209,7 @@ module.exports.accountEdit = async(req, res) => {
         return res.redirect("back");
     }
 
-    if (req.body.phone.length < 10) {
+    if (req.body.phone.length <= 10) {
         req.flash('error', res.locals.messages.INVALID_PHONE_WARNING);
         return res.redirect("back")
     }

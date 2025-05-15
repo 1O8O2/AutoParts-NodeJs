@@ -7,9 +7,11 @@ const Order = require('../../models/Order');
 const Account = require('../../models/Account');
 const messages = require('../../configs/messages.json'); // Adjust the path as needed
 const { mailSend } = require('../../helpers/mail');
+const sequelize = require("../../configs/database"); 
 
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
         console.log('Creating order...');
         
@@ -72,6 +74,13 @@ module.exports.createOrder = async (req, res) => {
         console.log('Updated selected products:', updatedSelectedProducts);
         for(const item of updatedSelectedProducts)
             {
+                if(item.amount> await Product.findByPk(item.productId).stock)
+                {
+                    console.log('Product out of stock:', item.productId);
+                    console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
+                    req.flash('error',  'Product out of stock:', item.productId);
+                    return res.redirect('back');
+                }
                 query+=item.productId+'='+item.amount+'&';
             }
             query=query.slice(0,-1);
@@ -210,9 +219,10 @@ module.exports.createOrder = async (req, res) => {
 
 
         await mailSend(from, to, subject, html);
-
+        await t.commit();
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
+        await t.rollback();
         req.flash('error', res.locals.messages.ORDER_CREATE_ERROR);
         return res.redirect('back');
     }

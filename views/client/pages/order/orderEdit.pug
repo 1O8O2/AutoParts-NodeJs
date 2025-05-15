@@ -90,7 +90,7 @@ html(lang="en")
           .cart-list
             each item in products
               .row.border-bottom.py-4
-                .row.main.align-items-center
+              .row.border-bottom.py-4.cart-item
                   .col-2
                     img.img-fluid(src=(item.product.imageUrl.startsWith("https") ? item.product.imageUrl : `/img/${item.product.imageUrl}`) alt=item.product.productName)
                   .col
@@ -112,7 +112,8 @@ html(lang="en")
                       form(action="/AutoParts/order/edit/remove-product" method="post" style="display: inline;")
                         input(type="hidden" name="orderId" value=order.orderId)
                         input(type="hidden" name="productId" value=item.product.productId)
-                        button.btn.btn-danger.btn-sm(type="submit" onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`)
+                        //- button.btn.btn-danger.btn-sm(type="submit" onclick=`return confirm('Bạn có chắc muốn xóa sản phẩm ${item.product.productName} khỏi đơn hàng?')`)
+                        button.btn.btn-danger.btn-sm(type="submit" onclick=`showDialog(this)`)
                           i.fa.fa-trash
                           |  Xóa
           .cart-actions.d-flex.justify-content-between.align-items-center.mt-4
@@ -276,9 +277,27 @@ html(lang="en")
         }
       }
 
+            // Disable delete button if only 1 product left
+      document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('.btn-danger.btn-sm');
+        if (quantityInputs.length === 1) {
+          deleteButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.title = 'Bạn không thể xóa sản phẩm duy nhất trong đơn hàng';
+          });
+        }
+      });
+
       function showDialog(input) {
-        if (confirm('Bạn có muốn xóa sản phẩm này khỏi đơn hàng?')) {
+        const cartItems = document.querySelectorAll('.cart-item');
+        if (confirm('Bạn có muốn xóa sản phẩm này khỏi đơn hàng?') && cartItems.length > 1) {
           input.closest('.cart-item').querySelector('form').submit();
+        }
+        else if (cartItems.length === 1) {
+          alert('Bạn không thể xóa sản phẩm này vì đây là sản phẩm duy nhất trong đơn hàng.');
+          return false;
+        } else {
+          input.value = 1;
         }
       }
 
