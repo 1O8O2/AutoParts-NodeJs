@@ -2,6 +2,7 @@ const Order = require('../../models/Order');
 const Product = require('../../models/Product');
 const ExcelJS = require('exceljs');
 const { Op } = require('sequelize');
+const moment = require("moment");
 
 // [GET] /admin/financial-report
 module.exports.index = async (req, res) => {
@@ -51,11 +52,11 @@ module.exports.index = async (req, res) => {
         const costDetails = [
             {
                 type: 'Giá vốn hàng bán',
-                amount: totalCostPrice
+                amount: parseInt(totalCostPrice)
             },
             {
                 type: 'Tổng doanh thu đơn hàng',
-                amount: totalRevenue
+                amount: parseInt(totalRevenue)
             },
             {
                 type: 'Chi phí khác',
@@ -111,9 +112,9 @@ module.exports.index = async (req, res) => {
 
         res.render('admin/pages/financial-report', {
             pageTitle: 'Báo cáo tài chính',
-            totalRevenue: totalRevenue,
-            totalCost: totalCost,
-            profit: profit,
+            totalRevenue: parseInt(totalRevenue),
+            totalCost: parseInt(totalCost),
+            profit: parseInt(profit),
             profitMargin: profitMargin,
             costDetails: costDetails,
             labels: days,
@@ -144,74 +145,126 @@ module.exports.exportReport = async (req, res) => {
             }
         });
 
-        // Calculate revenue
-        const totalRevenue = orders.reduce((sum, order) => {
-            return sum + order.details.reduce((detailSum, detail) => {
-                return detailSum + (detail.unitPrice * detail.amount);
-            }, 0);
-        }, 0);
-
-        // Calculate costs
-        const costDetails = [
-            {
-                type: 'Giá vốn hàng bán',
-                amount: orders.reduce((sum, order) => {
-                    return sum + order.details.reduce((detailSum, detail) => {
-                        return detailSum + ((detail.unitPrice || 0) * detail.amount);
-                    }, 0);
-                }, 0)
-            },
-            {
-                type: 'Chi phí vận chuyển',
-                amount: orders.reduce((sum, order) => sum + (order.totalCost || 0), 0)
-            },
-            {
-                type: 'Chi phí khác',
-                amount: 0 // Add other costs if needed
-            }
+        const productIds = [
+            ...new Set(
+                orders.flatMap(ord => ord.details.map(detail => detail.productId))
+            )
         ];
 
-        const totalCost = costDetails.reduce((sum, cost) => sum + cost.amount, 0);
-        const profit = totalRevenue - totalCost;
+        const productOrders = await Product.findAll({
+            attributes: ['productId', 'productName', 'costPrice'],
+            where: {
+                productId: { [Op.in]: productIds }
+            }
+        });
+
+        const totalRevenue = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
+        const totalCostPrice = orders.reduce((sum, order) => {
+            const orderCost = order.details.reduce((detailSum, detail) => {
+                const product = productOrders.find(pro => detail.productId === pro.productId);
+                const costPrice = product ? product.costPrice : 0;
+                return detailSum + (costPrice * (detail.amount || 0));
+            }, 0);
+            return sum + orderCost;
+        }, 0);
+
+        const profit = totalRevenue - totalCostPrice;
         const profitMargin = totalRevenue > 0 ? ((profit / totalRevenue) * 100).toFixed(2) : 0;
 
-        // Create a new workbook and worksheet
+        // ExcelJS workbook
+        const ExcelJS = require('exceljs');
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Financial Report');
 
-        // Add headers
+        // Define columns once at the top
         worksheet.columns = [
-            { header: 'Chỉ tiêu', key: 'type', width: 30 },
-            { header: 'Số tiền', key: 'amount', width: 20 }
+            { key: 'orderId', header: 'Mã Đơn Hàng', width: 15 },
+            { key: 'orderDate', header: 'Ngày Đặt Hàng', width: 15 },
+            { key: 'totalCost', header: 'Tổng Tiền Đơn', width: 15 },
+            { key: 'status', header: 'Trạng Thái', width: 15 },
+            { key: 'productId', header: 'Mã Sản Phẩm', width: 15 },
+            { key: 'productName', header: 'Tên Sản Phẩm', width: 30 },
+            { key: 'quantity', header: 'Số Lượng', width: 10 },
+            { key: 'unitPrice', header: 'Đơn Giá', width: 15 },
+            { key: 'costPrice', header: 'Giá Vốn', width: 15 },
+            { key: 'totalItemCost', header: 'Tổng Giá Vốn SP', width: 15 }
         ];
 
-        // Add summary rows
-        worksheet.addRow({ type: 'Tổng doanh thu', amount: totalRevenue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) });
-        worksheet.addRow({ type: 'Tổng chi phí', amount: totalCost.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) });
-        worksheet.addRow({ type: 'Lợi nhuận', amount: profit.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) });
-        worksheet.addRow({ type: 'Tỷ suất lợi nhuận', amount: `${profitMargin}%` });
+        const currencyFormat = '#,##0 "VNĐ";-#,##0 "VNĐ"';
 
-        // Add empty row
-        worksheet.addRow({});
+        // Title row
+        worksheet.mergeCells('A1:J1');
+        const titleCell = worksheet.getCell('A1');
+        titleCell.value = `Báo Cáo Tài Chính từ ${moment(fromDate).format("DD/MM/YYYY")} đến ${moment(toDate).format("DD/MM/YYYY")}`;
+        titleCell.font = { bold: true, size: 16 };
+        titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        // Add cost details
-        worksheet.addRow({ type: 'Chi tiết chi phí', amount: '' });
-        costDetails.forEach(cost => {
-            worksheet.addRow({
-                type: cost.type,
-                amount: cost.amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
-            });
+        // Summary Section
+        worksheet.addRow([]);
+        worksheet.addRow(['Tóm Tắt Tài Chính']);
+        worksheet.addRow(['Tổng doanh thu', totalRevenue]);
+        worksheet.addRow(['Tổng chi phí', totalCostPrice]);
+        worksheet.addRow(['Lợi nhuận', profit]);
+        worksheet.addRow(['Tỷ suất lợi nhuận', `${profitMargin}%`]);
+
+        // Apply number format for currency in summary
+        for (let i = 3; i <= 5; i++) {
+            const cell = worksheet.getCell(`B${i + 1}`);
+            if (typeof cell.value === 'number') {
+                cell.numFmt = currencyFormat;
+            }
+        }
+
+        worksheet.addRow([]);
+        worksheet.addRow(['Chi Tiết Đơn Hàng']);
+
+        // Add header row for details
+        worksheet.addRow(worksheet.columns.map(col => col.header));
+
+        // Populate data rows
+        orders.forEach(order => {
+            const orderId = order.orderId || 'N/A';
+            const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-GB') : '';
+            const totalCost = order.totalCost || 0;
+            const status = order.status === 'Completed' ? 'Hoàn thành' : '';
+
+            if (order.details && order.details.length > 0) {
+                order.details.forEach((detail, idx) => {
+                    const product = productOrders.find(p => p.productId === detail.productId) || {};
+                    const dataRow = {
+                        orderId: idx === 0 ? orderId : '',
+                        orderDate: idx === 0 ? orderDate : '',
+                        totalCost: idx === 0 ? totalCost : '',
+                        status: idx === 0 ? status : '',
+                        productId: detail.productId || '',
+                        productName: product.productName || detail.productName || '',
+                        quantity: detail.amount || 0,
+                        unitPrice: detail.unitPrice || 0,
+                        costPrice: product.costPrice || 0,
+                        totalItemCost: (detail.amount || 0) * (product.costPrice || 0)
+                    };
+
+                    const row = worksheet.addRow(dataRow);
+
+                    // Format currency cells
+                    ['totalCost', 'unitPrice', 'costPrice', 'totalItemCost'].forEach(key => {
+                        const cell = row.getCell(key);
+                        if (typeof cell.value === 'number') {
+                            cell.numFmt = currencyFormat;
+                        }
+                    });
+                });
+            }
         });
 
-        // Set response headers
+        // Set headers for download
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename=financial-report-${fromDate}-to-${toDate}.xlsx`);
-
-        // Write to response
         await workbook.xlsx.write(res);
         res.end();
+
     } catch (error) {
         console.error('Error exporting financial report:', error);
         res.status(500).send('Internal Server Error');
     }
-}; 
+};

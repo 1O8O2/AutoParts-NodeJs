@@ -1,6 +1,7 @@
 const Order = require('../../models/Order');
 const ExcelJS = require('exceljs');
 const { Op } = require('sequelize');
+const moment = require("moment");
 
 // [GET] /admin/order-report
 module.exports.index = async (req, res) => {
@@ -27,10 +28,14 @@ module.exports.index = async (req, res) => {
         });
 
         // Calculate statistics
+        // Calculate statistics
         const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
         const completedOrders = orders.filter(order => order.status === 'Completed').length;
         const cancelledOrders = orders.filter(order => order.status === 'Cancelled').length;
+        const totalRevenue = orders
+            .filter(order => order.status === 'Completed')
+            .reduce((sum, order) => sum + (order.totalCost || 0), 0);
+
 
         res.render('admin/pages/order-report', {
             pageTitle: 'Báo cáo đơn hàng',
@@ -73,11 +78,16 @@ module.exports.exportReport = async (req, res) => {
             order: [['orderDate', 'DESC']]
         });
 
-        // Create a new workbook and worksheet
+        // Tính doanh thu từ các đơn đã hoàn thành
+        const completedRevenue = orders
+            .filter(order => order.status === 'Completed')
+            .reduce((sum, order) => sum + (order.totalCost || 0), 0);
+
+        // Excel Workbook setup
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Order Report');
 
-        // Add headers
+        // Cột
         worksheet.columns = [
             { header: 'Mã đơn hàng', key: 'orderId', width: 15 },
             { header: 'Ngày đặt', key: 'orderDate', width: 20 },
@@ -86,26 +96,59 @@ module.exports.exportReport = async (req, res) => {
             { header: 'Trạng thái', key: 'status', width: 15 }
         ];
 
-        // Add rows
+        // Tiêu đề báo cáo
+        worksheet.mergeCells('A1:E1');
+        const titleCell = worksheet.getCell('A1');
+        titleCell.value = `BÁO CÁO ĐƠN HÀNG từ ${moment(fromDate).format("DD/MM/YYYY")} đến ${moment(toDate).format("DD/MM/YYYY")}`;
+        titleCell.font = { bold: true, size: 16 };
+        titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        // Dòng tổng doanh thu
+        worksheet.addRow([]);
+        worksheet.addRow(['Tổng doanh thu (đơn hoàn thành):', completedRevenue]);
+        worksheet.getCell('B3').numFmt = '#,##0 "VNĐ"';
+
+        // Header row (tự động format)
+        worksheet.addRow([]);
+        worksheet.addRow(worksheet.columns.map(col => col.header));
+        const headerRow = worksheet.lastRow;
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: 'center' };
+
+        // Dữ liệu
         orders.forEach(order => {
-            worksheet.addRow({
+            let status = ""; 
+            if (order.status == "Pending")
+                status = "Chờ xác nhận"
+            else if (order.status == "Processing")
+                status = "Chờ xử lý"
+            else if (order.status == "Shipping")
+                status = "Đang giao" 
+            else if (order.status == "Completed")
+                status = "Đã hoàn thành"
+            else if (order.status == "Cancelled")
+                status = "Đã hủy"
+            const row = worksheet.addRow({
                 orderId: order.orderId || '',
                 orderDate: order.orderDate ? new Date(order.orderDate).toLocaleDateString('vi-VN') : '',
                 userEmail: order.userEmail || '',
-                totalAmount: (order.totalAmount || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
-                status: order.status || ''
+                totalAmount: order.totalCost || 0,
+                status: status || ''
             });
+
+            // Định dạng tiền tệ
+            row.getCell('totalAmount').numFmt = '#,##0 "VNĐ"';
         });
 
-        // Set response headers
+        // Header xuất file
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename=order-report-${fromDate}-to-${toDate}.xlsx`);
 
-        // Write to response
+        // Xuất file
         await workbook.xlsx.write(res);
         res.end();
     } catch (error) {
         console.error('Error exporting order report:', error);
         res.status(500).send('Internal Server Error');
     }
-}; 
+};

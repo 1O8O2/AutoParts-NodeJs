@@ -309,10 +309,8 @@ module.exports.edit = async (req, res) => {
 
 // [PATCH] /AutoParts/admin/order/edit/:orderId
 module.exports.editPatch = async (req, res) => {
-    
     const transaction = await sequelize.transaction();
     try {
-
         const orderId = req.params.orderId; 
 
         const order = await Order.findByPk(orderId, { transaction });
@@ -325,30 +323,25 @@ module.exports.editPatch = async (req, res) => {
         const discount = await Discount.findByPk(discountId);
         const orderDiscount = await Discount.findByPk(order.discountId);
         let shippingType = req.body.shippingType;
-        console.log('Shipping type:', shippingType);
-        switch (shippingType)
-        {
+        
+        switch (shippingType) {
             case '20000':
-            shippingType = 'Normal';
-            break;
+                shippingType = 'Normal';
+                break;
             case '50000':
-            shippingType = 'Express';
-            break;
+                shippingType = 'Express';
+                break;
             case '15000':
-            shippingType = 'Economy';
-            break;
+                shippingType = 'Economy';
+                break;
         }
 
         if (!shippingType) {
-            console.log('Shipping type not selected');
-            console.log(res.locals.messages.BLANK_SHIPPING_TYPE)
             req.flash('error',  res.locals.messages.BLANK_SHIPPING_TYPE);
             return res.redirect('back');
         }
 
-        if(discount && discount.usageLimit<=0)
-        {
-            console.log('Discount usage limit exceeded');
+        if (discount && discount.usageLimit <= 0) {
             req.flash('error', res.locals.messages.DISCOUNT_QUANTITY_EXCEEDED);
             return res.redirect('back');
         }
@@ -386,9 +379,7 @@ module.exports.editPatch = async (req, res) => {
         //     );
         // }
 
-        if(discountId && findCusAcc.status === 'Guest')
-        {
-            console.log('Not a customer');
+        if (discountId && findCusAcc.status === 'Guest') {
             req.flash('error', 'Khách hàng không có khuyến mãi vì chưa có tài khoản!');
             return res.redirect('back');
         }
@@ -422,38 +413,27 @@ module.exports.editPatch = async (req, res) => {
             deleted: false
         };
 
-        if (discountId && !order.discountId) 
-                {
-                    // Case 2: No previous discount, apply new discount
-                    console.log(discount.usageLimit);
-                    await Discount.setUsedDiscount(findCusAcc.email, discountId);
-                    discount.usageLimit -= 1;
-                    await discount.save();
-                    console.log(discount.usageLimit);
-                } 
-                else if (!discountId && order.discountId) 
-                {
-                    // Case 3: Previous discount, remove discount
-                    console.log(orderDiscount.usageLimit);
-                    await Discount.deleteDiscountUsed(order.discountId, findCusAcc.email);
-                    orderDiscount.usageLimit += 1;
-                    await orderDiscount.save();
-                    console.log(orderDiscount.usageLimit);
-                } 
-                else if (discount && orderDiscount && discount.discountId !== orderDiscount.discountId) 
-                {
-                    // Case 4: Change discount
-                    console.log(discount.usageLimit);
-                    console.log(orderDiscount.usageLimit);
-                    await Discount.deleteDiscountUsed(order.discountId, findCusAcc.email);
-                    await Discount.setUsedDiscount(findCusAcc.email, discountId);
-                    discount.usageLimit -= 1;
-                    orderDiscount.usageLimit += 1;
-                    await discount.save();
-                    await orderDiscount.save(); 
-                    console.log(discount.usageLimit);
-                    console.log(orderDiscount.usageLimit);
-                }
+        if (discountId && !order.discountId) {
+            // Case 2: No previous discount, apply new discount
+            await Discount.setUsedDiscount(findCusAcc.email, discountId);
+            discount.usageLimit -= 1;
+            await discount.save();
+        } 
+        else if (!discountId && order.discountId) {
+            // Case 3: Previous discount, remove discount
+            await Discount.deleteDiscountUsed(order.discountId, findCusAcc.email);
+            orderDiscount.usageLimit += 1;
+            await orderDiscount.save();
+        } 
+        else if (discount && orderDiscount && discount.discountId !== orderDiscount.discountId) {
+            // Case 4: Change discount
+            await Discount.deleteDiscountUsed(order.discountId, findCusAcc.email);
+            await Discount.setUsedDiscount(findCusAcc.email, discountId);
+            discount.usageLimit -= 1;
+            orderDiscount.usageLimit += 1;
+            await discount.save();
+            await orderDiscount.save(); 
+        }
         
 
         await Order.update(orderData, {
@@ -473,9 +453,6 @@ module.exports.editPatch = async (req, res) => {
             orderId: orderId
         }));
         await OrderDetail.bulkCreate(orderDetailData, { transaction });
-
-
-
 
         // Commit transaction
         await transaction.commit();
@@ -533,9 +510,6 @@ module.exports.changeStatus = async (req, res) => {
         const orderId = req.body.orderId;
         const order = await Order.findByPk(orderId);
         const customerEmail = order.userEmail;	
-        console.log(customerEmail);
-        console.log(order);
-
 
         if (status === 'Pending') {
             await Order.update(
@@ -563,7 +537,6 @@ module.exports.changeStatus = async (req, res) => {
                 Trân trọng,<br>
                 Đội ngũ AutoPart
             `;
-            console.log(to);
             await mailSend(from, to, subject, html);
             req.flash('success', "Xác nhận đơn hàng thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/order/Processing`);
@@ -599,10 +572,10 @@ module.exports.changeStatus = async (req, res) => {
             req.flash('success', "Chuyển trạng thái giao hàng thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/order/Delivery`);
         }
-        else if (status === 'Cancelled' || status === 'Shipping') {
+        else if (status == "Shipping") {
             await Order.update(
                 { 
-                    status: (status === 'Cancelled' ? 'Cancelled' : 'Completed'),
+                    status: 'Completed',
                     updatedBy: res.locals.user.email
                 },
                 { 
@@ -612,39 +585,96 @@ module.exports.changeStatus = async (req, res) => {
 
             const from = 'no-reply@autopart.com'
             const to = customerEmail
-            const subject = 'Đơn hàng đang được giao';
-            let  html 
-            if (status === 'Cancelled') {
-                html = `
-                    Chào bạn,<br><br>
-                    Đơn hàng của bạn tại AutoPart đã bị hủy! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
-                    <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
-                    <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
-                    <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
-                    <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
-                    Đơn hàng của bạn đã bị hủy vì lý do không xác định. Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
-                    Trân trọng,<br>
-                    Đội ngũ AutoPart
-                `;
-            }
-            else {
-                html = `
-                    Chào bạn,<br><br>
-                    Đơn hàng của bạn tại AutoPart đã hoàn tất! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
-                    <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
-                    <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
-                    <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
-                    <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
-                    Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã mua sắm tại AutoPart!<br><br>
-                    Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
-                    Trân trọng,<br>
-                    Đội ngũ AutoPart
-                `;
-            }
+            const subject = 'Đơn hàng đã hoàn tất';
+            const html = `
+                Chào bạn,<br><br>
+                Đơn hàng của bạn tại AutoPart đã hoàn tất! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
+                <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+                <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+                <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+                <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+                Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã mua sắm tại AutoPart!<br><br>
+                Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+                Trân trọng,<br>
+                Đội ngũ AutoPart
+            `;
 
             await mailSend(from, to, subject, html);
 
             req.flash('success', "Thành công!");
+            return res.redirect(`${systemConfig.prefixAdmin}/order/History`);
+        }
+        else if (status == 'Cancelled') {
+            await sequelize.transaction(async (t) => {
+                const proOrders = await OrderDetail.findAll({
+                    attributes: ['productId', 'amount'],
+                    where: {
+                        orderId: orderId
+                    },
+                    include: [
+                        {
+                            model: Product,
+                            attributes: ['stock'],
+                            required: true
+                        }
+                    ],
+                    transaction: t
+                });
+            
+                // Kiểm tra dữ liệu trước khi cập nhật
+                for (const order of proOrders) {
+                    const proStock = order.Product?.stock;
+                    const detailAmount = order.amount;
+                    if (proStock == null) {
+                        throw new Error(`Product with ID ${order.productId} not found`);
+                    }
+                    if (proStock + detailAmount < 0) {
+                        throw new Error(`Stock for product ${order.productId} cannot be negative`);
+                    }
+                }
+            
+                // Cập nhật stock bằng một truy vấn SQL duy nhất
+                await Product.update(
+                    {
+                        stock: sequelize.literal(`stock + (SELECT amount FROM OrderDetail WHERE orderId = '${orderId}' AND productId = Product.productId)`)
+                    },
+                    {
+                        where: {
+                            productId: proOrders.map(order => order.productId)
+                        },
+                        transaction: t
+                    }
+                );
+            });
+            
+            await Order.update(
+                { 
+                    status: 'Cancelled',
+                    updatedBy: res.locals.user.email
+                },
+                { 
+                    where: { orderId: orderId }
+                }
+            );
+
+            const from = 'no-reply@autopart.com'
+            const to = customerEmail
+            const subject = 'Đơn hàng đã bị hủy';
+            const html = `
+                Chào bạn,<br><br>
+                Đơn hàng của bạn tại AutoPart đã bị hủy! Dưới đây là thông tin chi tiết về đơn hàng:<br><br>
+                <strong>Mã đơn hàng:</strong> ${order.orderId}<br>
+                <strong>Tổng tiền:</strong> ${order.totalCost.toLocaleString('vi-VN')} ₫<br>
+                <strong>Địa chỉ giao hàng:</strong> ${order.shipAddress}<br>
+                <strong>Loại vận chuyển:</strong> ${order.shippingType}<br><br>
+                Đơn hàng của bạn đã bị hủy vì lý do không xác định. Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
+                Trân trọng,<br>
+                Đội ngũ AutoPart
+            `;
+
+            await mailSend(from, to, subject, html);
+
+            req.flash('success', "Hủy đơn hàng thành công!");
             return res.redirect(`${systemConfig.prefixAdmin}/order/History`);
         }
     } catch (err) {

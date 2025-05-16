@@ -36,6 +36,16 @@ block main
                                         td.text-center
                                             input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="THONG_KE" checked=role.permissions.includes('THONG_KE'))
 
+                                //- Chat với khách hàng
+                                tr  
+                                    td(colspan=roleGroup.length + 1)
+                                        b Hỗ trợ 
+                                    tr(date-name="CHAT_XEM")
+                                        td Hỗ trợ khách hàng
+                                        each role in roleGroup 
+                                            td.text-center
+                                                input(type="checkbox" name=`permissions[${role.roleGroupId}]` value="CHAT_XEM" checked=role.permissions.includes('CHAT_XEM'))
+
                                 //- Phiếu nhập
                                 tr
                                     td(colspan=roleGroup.length + 1)
