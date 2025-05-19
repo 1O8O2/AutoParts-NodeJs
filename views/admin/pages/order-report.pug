@@ -1,6 +1,7 @@
 extends ../layouts/default.pug
 include ../mixins/alert.pug
 include ../mixins/currency.pug
+include ../mixins/moment.pug
 
 block main
     #alertContainer
@@ -92,7 +93,8 @@ block main
                         each order in orders
                             tr
                                 td #{order.orderId}
-                                td #{order.orderDate}
+                                td 
+                                    +formatDate(order.orderDate)
                                 td #{order.userEmail}
                                 td
                                     +formatCurrency(order.totalCost)
