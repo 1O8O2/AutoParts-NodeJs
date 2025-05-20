@@ -210,7 +210,7 @@ module.exports.accountEdit = async(req, res) => {
         return res.redirect("back");
     }
 
-    if (req.body.phone.length < 10) {
+    if (req.body.phone.length <= 10) {
         req.flash('error', res.locals.messages.INVALID_PHONE_WARNING);
         return res.redirect("back")
     }

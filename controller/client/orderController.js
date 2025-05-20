@@ -7,9 +7,11 @@ const Order = require('../../models/Order');
 const Account = require('../../models/Account');
 const messages = require('../../configs/messages.json'); // Adjust the path as needed
 const { mailSend } = require('../../helpers/mail');
+const sequelize = require("../../configs/database"); 
 
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
         let acc, cus, cart;
 
@@ -33,7 +35,7 @@ module.exports.createOrder = async (req, res) => {
         {
             acc = {
                 email: req.body.email,
-                password: "randomPassword",
+                password: "1111",
                 token: null,
                 permission: 'RG002', 
                 status: 'Guest',
@@ -64,7 +66,7 @@ module.exports.createOrder = async (req, res) => {
             const product = await Product.findByPk(item.productId);
             if(item.amount > product.stock)
             {
-                req.flash('error',  `Sản phẩm ${product.productName} đã hết`);
+                req.flash('error',  res.locals.messages.PRODUCT_OUT_OF_STOCK);
                 return res.redirect('back');
             }
             query+=item.productId+'='+item.amount+'&';
@@ -186,9 +188,10 @@ module.exports.createOrder = async (req, res) => {
 
 
         await mailSend(from, to, subject, html);
-
+        await t.commit();
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
+        await t.rollback();
         req.flash('error', res.locals.messages.ORDER_CREATE_ERROR);
         return res.redirect('back');
     }

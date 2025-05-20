@@ -3,6 +3,7 @@ const Account = require('../../models/Account');
 const Customer = require('../../models/Customer');
 
 const {mailSend} = require('../../helpers/mail');
+const OTPManager = require('../../helpers/otpManager');
 
 // [GET] forgot-password
 module.exports.showForgotPassword = async (req, res) => {
@@ -11,8 +12,7 @@ module.exports.showForgotPassword = async (req, res) => {
 
 // [POST] forgot-password
 module.exports.forgotPassword = async (req, res) => {
-  const  {email}  = req.body;
-  console.log(email)
+  const { email } = req.body;
 
   if (!email) {
     req.session.message = 'Email là bắt buộc';
@@ -27,8 +27,11 @@ module.exports.forgotPassword = async (req, res) => {
       return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const from = 'no-reply@autopart.com'
+    // Generate OTP
+    const otp = OTPManager.generateOTP();
+    
+    // Send OTP via email
+    const from = 'no-reply@autopart.com';
     const to = email;
     const subject = 'Khôi phục mật khẩu';
     const html = `
@@ -37,13 +40,12 @@ module.exports.forgotPassword = async (req, res) => {
         Vui lòng sử dụng mã này để đặt lại mật khẩu. Mã OTP có hiệu lực trong 5 phút.<br><br>
         Trân trọng,<br>
         Đội ngũ AutoPart
-      `
+    `;
+    
     await mailSend(from, to, subject, html);
-    //await transporter.sendMail(mailOptions);
-    res.cookie('otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: true }); // Expires in 5 minutes
-    res.cookie('recoveringMail', email, { maxAge: 60 * 60 * 1000, httpOnly: true }); // Expires in 1 hour
-    console.log('Current cookies:', req.cookies);
-
+    
+    // Store OTP in cookie
+    OTPManager.setOTPCookie(res, otp, email);
 
     req.session.message = null; // Clear message on success
     return res.redirect('forgot-password/enter-otp');
@@ -53,29 +55,18 @@ module.exports.forgotPassword = async (req, res) => {
   }
 };
 
-
-
-// [POST] ressend-otp
+// [POST] resend-otp
 module.exports.resendOtp = async (req, res) => {
-  console.log('resend-otp')
-  const  email  = req.cookies.recoveringMail;
-  console.log(email)
+  const email = req.cookies.otp_email;
 
-  // if (!email) {
-  //   req.session.message = 'Email là bắt buộc';
-  //   return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
-  // }
+  if (!email) {
+    req.session.message = 'Email không tồn tại trong phiên làm việc';
+    return res.redirect('/AutoParts/forgot-password');
+  }
 
-  // try {
-  //   const customer = await Customer.findOne({ where: { email } });
-
-  //   if (!customer) {
-  //     req.session.message = 'Email không đúng';
-  //     return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
-  //   }
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const from = 'no-reply@autopart.com'
+  try {
+    const otp = OTPManager.generateOTP();
+    const from = 'no-reply@autopart.com';
     const to = email;
     const subject = 'Khôi phục mật khẩu';
     const html = `
@@ -84,95 +75,103 @@ module.exports.resendOtp = async (req, res) => {
         Vui lòng sử dụng mã này để đặt lại mật khẩu. Mã OTP có hiệu lực trong 5 phút.<br><br>
         Trân trọng,<br>
         Đội ngũ AutoPart
-      `
+    `;
+    
     await mailSend(from, to, subject, html);
-    //await transporter.sendMail(mailOptions);
-    console.log(otp)
-    res.cookie('otp', otp, { maxAge: 5 * 60 * 1000, httpOnly: true }); // Expires in 5 minutes
-    res.cookie('message', '', { maxAge: 0 }); // Clear message cookie
-    console.log('Current cookies:', req.cookies);
+    
+    // Store new OTP in cookie
+    OTPManager.setOTPCookie(res, otp, email);
+    
+    req.session.message = null;
     return res.redirect('/AutoParts/forgot-password/enter-otp');
-
-
-    // req.session.message = null; // Clear message on success
-    // return res.redirect('forgot-password/enter-otp');
-  // } catch (error) {
-  //   console.error('Forgot password error:', error);
-  //   req.session.message = 'Đã có lỗi xảy ra, vui lòng thử lại!';
-  //   return res.render('client/pages/forgot-password/forgot-password', { message: req.session.message });
-  // }
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    req.session.message = 'Đã có lỗi xảy ra, vui lòng thử lại!';
+    return res.redirect('/AutoParts/forgot-password/enter-otp');
+  }
 };
 
 // [GET] enter-otp
 module.exports.showEnterOtp = async (req, res) => {
-    // req.session.otp = "766504";
-    // console.log(req.session.otp)
   res.render('client/pages/forgot-password/enter-otp', { message: req.session.message });
 };
 
 // [POST] otpVerify
 module.exports.otpVerify = async (req, res) => {
   const { otp } = req.body;
-    
+  
   if (!otp) {
     req.session.message = 'Mã OTP là bắt buộc';
-    return res.redirect('forgot-password/enter-otp');
-  }
-
-  if (otp === req.session.otp) {
-    req.session.message = null; // Clear message on success
-    return res.redirect('enter-password');
-  } else {
-    console.log('OTP verification failed:', otp, req.session.otp);
-    req.session.message = 'Mã OTP không đúng';
     return res.redirect('/AutoParts/forgot-password/enter-otp');
   }
+
+  const verification = OTPManager.verifyOTP(req, otp);
+  
+  if (!verification.isValid) {
+    req.session.message = verification.message;
+    return res.redirect('/AutoParts/forgot-password/enter-otp');
+  }
+
+  // Clear OTP cookies after successful verification
+  // OTPManager.clearOTPCookies(res);
+  
+  req.session.message = null;
+  return res.redirect('/AutoParts/forgot-password/enter-password');
 };
 
 // [GET] enter-password
 module.exports.showEnterPassword = async (req, res) => {
-    // req.session.recoveringMail = "mail";
-    // console.log(req.session.recoveringMail)
   res.render('client/pages/forgot-password/enter-password', { message: req.session.message });
 };
 
 // [POST] forgot-password/updatePassword
 module.exports.updatePassword = async (req, res) => {
-//   const { password, confirmPassword } = req.body;
-//   const email = req.session.recoveringMail;
+  
+    const { password, confirmPassword } = req.body;
+    const email = req.cookies.otp_email;
 
-//   if (!password || !confirmPassword) {
-//     req.session.message = 'Mật khẩu và xác nhận mật khẩu là bắt buộc';
-//     return res.redirect('enter-password');
-//   }
+    // Validate input
+    if (!password || !confirmPassword) {
+        req.session.message = 'Mật khẩu và xác nhận mật khẩu là bắt buộc';
+        return res.redirect('/AutoParts/forgot-password/enter-password');
+    }
 
-//   if (password !== confirmPassword) {
-//     req.session.message = 'Mật khẩu xác nhận không khớp';
-//     return res.redirect('enter-password');
-//   }
+    if (password.length < 6) {
+        req.session.message = 'Mật khẩu phải có ít nhất 6 ký tự';
+        return res.redirect('/AutoParts/forgot-password/enter-password');
+    }
 
-  try {
-//     const account = await Account.findOne({ where: { email } });
+    if (password !== confirmPassword) {
+        req.session.message = 'Mật khẩu xác nhận không khớp';
+        return res.redirect('/AutoParts/forgot-password/enter-password');
+    }
 
-//     if (!account) {
-//       req.session.message = 'Tài khoản không tồn tại';
-//       return res.redirect('enter-password');
-//     }
+    try {
+        // Find the account
+        const account = await Account.findOne({ where: { email } });
 
-//     await Account.update(
-//       { password },
-//       { where: { email } }
-//     );
+        if (!account) {
+            req.session.message = 'Tài khoản không tồn tại';
+            return res.redirect('/AutoParts/forgot-password/enter-password');
+        }
 
-    req.flash('success', 'Thay đổi mật khẩu thành công!');
-//     req.session.otp = null; // Clear OTP
-//     req.session.recoveringMail = null; // Clear email
-    return res.redirect('/AutoParts/account/login');
-  } catch (error) {
-    console.error('Update password error:', error);
-    req.session.message = 'Đã có lỗi xảy ra, vui lòng thử lại!';
-    return res.redirect('enter-password');
-  }
+        // Update password
+        const md5 = require('md5');
+        await Account.update(
+            { password: md5(password) },
+            { where: { email } }
+        );
+
+        // Clear any remaining OTP cookies
+        OTPManager.clearOTPCookies(res);
+
+        req.flash('success', 'Thay đổi mật khẩu thành công!');
+        return res.redirect('/AutoParts/account/login');
+    } catch (error) {
+        console.error('Update password error:', error);
+        req.session.message = 'Đã có lỗi xảy ra, vui lòng thử lại!';
+        return res.redirect('/AutoParts/forgot-password/enter-password');
+    }
 };
 
 
