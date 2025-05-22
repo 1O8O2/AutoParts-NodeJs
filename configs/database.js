@@ -60,8 +60,8 @@ class DatabaseSingleton {
 }
 
 // Export the Sequelize instance (for backward compatibility)
-const dbInstance = new DatabaseSingleton().getInstance().getSequelize();
+const dbInstance = new DatabaseSingleton().getInstance();
 module.exports = dbInstance;
 
 // Export the Database singleton class if needed elsewhere
-module.exports.DatabaseSingleton = DatabaseSingleton;
+// module.exports.DatabaseSingleton = DatabaseSingleton;

@@ -30,13 +30,25 @@
   "BLANK_CONFIRM_PASSWORD": "Mật khẩu xác nhận không được để trống!",
   "BLANK_INFORMATION": "Vui lòng nhập đầy đủ thông tin sản phẩm!",
   "BLANK_SHIPPING_TYPE": "Vui lòng chọn loại vận chuyển!",
+  "BLANK_REQUIRED_INFO": "Thiếu thông tin bắt buộc!",
 
   "DISCOUNT_NOT_EXIST": "Mã giảm giá không tồn tại!",
   "DISCOUNT_EXPIRED": "Mã giảm giá đã hết hạn!",
   "DISCOUNT_QUANTITY_EXCEEDED": "Mã giảm giá đã hết lượt sử dụng!",
+  "DISCOUNT_ADD_SUCCESS": "Thêm khuyến mãi thành công!",
+  "DISCOUNT_ADD_ERROR": "Thêm khuyến mãi thất bại!",
+  "DISCOUNT_UPDATE_SUCCESS": "Thay đổi thông tin khuyến mãi thành công!",
+  "DISCOUNT_UPDATE_ERROR": "Thay đổi thông khuyến mãi thất bại!",
+  "DISCOUNT_DELETE_SUCCESS": "Xóa khuyến mãi thành công!",
+  "DISCOUNT_DELETE_ERROR": "Xóa khuyến mãi thất bại!",
 
   "CREATE_ORDER_SUCCESS": "Đặt hàng thành công!",
   "CREATE_ORDER_ERROR": "Đặt hàng thất bại!",
+  "ORDER_UPDATE_SUCCESS": "Cập nhật đơn hàng thành công!",
+  "ORDER_UPDATE_ERROR": "Cập nhật đơn hàng thất bại!",
+  "ORDER_CONFIRM_SUCCESS": "Xác nhận đơn hàng thành công!",
+  "ORDER_STATUS_UPDATE_SUCCESS": "Chuyển trạng thái giao hàng thành công!",
+  "ORDER_CREATE_SUCCESS": "Tạo đơn hàng thành công!",
 
   "INVALID_PRODUCT_NUMBER": "Số lượng sản phẩm không hợp lệ!",
   "INVALID_PRODUCT_COST_PRICE": "Giá nhập sản phẩm không hợp lệ!",
@@ -50,6 +62,8 @@
   "IMPORT_NOT_EXIST": "Phiếu nhập không tồn tại!",
 
   "LOAD_ERROR": "Lỗi khi tải danh sách nhập hàng!",
+  "LOAD_PRODUCT_CATEGORY_ERROR": "Có lỗi xảy ra khi tải danh sách danh mục sản phẩm",
+  "LOAD_ADD_CATEGORY_ERROR": "Có lỗi xảy ra khi tải trang thêm danh mục",
 
   "CHOOSE_AT_LEAST_A_PRODUCT": "Vui lòng chọn ít nhất một sản phẩm!",
   "CREATE_PRODUCT_SUCCESS": "Thêm sản phẩm thành công!",
@@ -58,6 +72,14 @@
   "UPDATE_PRODUCT_ERROR": "Cập nhật sản phẩm thất bại!",
   "DELETE_PRODUCT_SUCCESS": "Xóa sản phẩm thành công!",
   "DELETE_PRODUCT_ERROR": "Xóa sản phẩm thất bại!",
+  "PRODUCT_CATEGORY_EXISTS": "Tên danh mục đã tồn tại!",
+  "PRODUCT_CATEGORY_ADD_SUCCESS": "Thêm danh mục sản phẩm thành công!",
+  "PRODUCT_CATEGORY_ADD_ERROR": "Thêm danh mục sản phẩm thất bại!",
+  "PRODUCT_CATEGORY_DELETE_SUCCESS": "Xóa danh mục sản phẩm thành công!",
+  "PRODUCT_CATEGORY_NOT_FOUND": "Không tìm thấy danh mục sản phẩm!",
+  "PRODUCT_CATEGORY_DELETE_ERROR": "Xóa danh mục sản phẩm thất bại!",
+  "PRODUCT_NOT_EXIST": "Sản phẩm không tồn tại!",
+
   "REGISTER_ERROR": "Đăng ký thất bại!",
   "EMAIL_REQUIRED_WARNING": "Email là bắt buộc!",
   "ACCOUNT_CREATE_SUCCESS": "Đăng ký tài khoản thành công!",
@@ -89,5 +111,11 @@
   "REMOVE_FROM_CART_FAILED": "Xóa sản phẩm khỏi giỏ hàng thất bại!",
   "NO_PRODUCT_SELECTED": "Vui lòng chọn sản phẩm!",
   "LOADING_ERROR": "Đã xảy ra lỗi khi tải dữ liệu!",
-  "CUSTOMER_NOT_FOUND_WARNING": "Không tìm thấy thông tin khách hàng!"
+  "CUSTOMER_NOT_FOUND_WARNING": "Không tìm thấy thông tin khách hàng!",
+  
+  "ROLE_ADD_SUCCESS": "Thêm nhóm quyền thành công!",
+  "ROLE_ADD_ERROR": "Thêm nhóm quyền thất bại!",
+  
+  "SUCCESS": "Thành công!",
+  "ERROR": "Thất bại!"
 }
