@@ -27,6 +27,10 @@ app.use(express.json());
 // Initialize session using the SessionManager singleton
 const sessionManager = require('./services/SessionManager');
 sessionManager.initialize(app);
+sessionManager.setCookieMaxAge(3600000*24); // Set cookie max age to 24 hours
+// Connect to use flash message
+const flash = require("express-flash");
+app.use(flash());
 
 // Set Pug as the view engine
 app.set('views', `${__dirname}/views`);
@@ -86,11 +90,8 @@ routeAdmin(app);
 //   })
 // });
 
-// Sequelize database setup
-const { DatabaseSingleton } = require('./configs/database');
-
 // Get the database instance
-const dbInstance = new DatabaseSingleton().getInstance();
+const dbInstance = require('./configs/database');
 const sequelize = dbInstance.getSequelize();
 
 // Test and sync the database connection

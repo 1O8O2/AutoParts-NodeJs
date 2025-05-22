@@ -1,6 +1,8 @@
 const Account = require("../../models/Account");
 
 const systemConfig = require("../../configs/system");
+const md5 = require('md5');
+
 
 // [GET] /AutoParts/admin/auth/login
 module.exports.login = async (req, res) => {
@@ -19,7 +21,7 @@ module.exports.loginPost = async (req, res) => {
       req.flash("error", res.locals.messages.ACCOUNT_NOT_FOUND);
       return res.redirect('back');
     }
-    if(account.password !== req.body.password) {
+    if(account.password !== md5(req.body.password)) {
       req.flash("error", res.locals.messages.PASSWORD_INCORRECT);
        return res.redirect('back');
     }
