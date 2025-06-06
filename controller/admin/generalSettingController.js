@@ -1,6 +1,5 @@
 const GeneralSetting = require("../../models/GeneralSettings");
 
-const systemConfig = require('../../configs/system');
 
 
 // [GET] /AutoParts/admin/generalSetting
@@ -41,10 +40,12 @@ module.exports.update = async (req, res) => {
     });
 
     req.flash('success', "Cập nhật các thông số chung thành công!");
+    console.log('General settings updated:', setting);
     res.redirect("back");
   } catch (err) {
     console.error('Error:', err);
     req.flash('error', "Cập nhật các thông số chung thất bại!");
+    console.error('Error updating general settings:', err);
     res.redirect("back");
   }
 };

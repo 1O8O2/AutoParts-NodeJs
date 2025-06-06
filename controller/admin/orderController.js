@@ -6,7 +6,7 @@ const Product = require("../../models/Product");
 const Discount = require("../../models/Discount");
 const Customer = require("../../models/Customer");
 const Account = require("../../models/Account");
-const sequelize = require("../../configs/database"); 
+const sequelize = require("../../configs/database").getSequelize(); 
 const { Op } = require('sequelize');
 
 const generateId = require("../../helpers/generateId");

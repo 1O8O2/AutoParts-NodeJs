@@ -7,7 +7,7 @@ const Order = require('../../models/Order');
 const Account = require('../../models/Account');
 const messages = require('../../configs/messages.json'); // Adjust the path as needed
 const { mailSend } = require('../../helpers/mail');
-const sequelize = require("../../configs/database"); 
+const sequelize = require("../../configs/database").getSequelize(); 
 
 // POST /order/create - Create a new order
 module.exports.createOrder = async (req, res) => {
