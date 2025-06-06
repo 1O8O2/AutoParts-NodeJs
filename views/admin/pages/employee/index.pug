@@ -74,7 +74,7 @@ block append scripts
                 const empStatus = $(this).data('emp-status');
                 
                 $.ajax({
-                    url: '#{prefixAdmin}/employee/changeStatus',
+                    url: `/Autoparts/admin/employee/changeStatus`,
                     type: 'POST',
                     data: { empEmail: empEmail },
                     success: function(response) {
