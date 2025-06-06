@@ -1,0 +1,39 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+include ../../mixins/currency.pug
+
+block main 
+    +alert-error(3000)
+    +alert-success(3000)
+
+    .col-lg-12
+        .card.mb-4
+            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                h6.m-0.font-weight-bold.text-primary Danh Sách Lịch Sử Đơn Hàng
+            .table-responsive.p-3
+                table#dataTable.table.align-items-center.table-flush
+                    thead.thead-light
+                        tr
+                            th Mã Đơn Hàng
+                            th Địa Chỉ Giao Hàng
+                            th Ngày Đặt Hàng
+                            th Tổng Tiền
+                            th Trạng Thái
+                            th Hoạt Động
+                    tbody
+                        each order in historyOrder
+                            tr.product-item
+                                td.align-middle #{order.orderId}
+                                td.align-middle #{order.shipAddress}
+                                td.align-middle 
+                                    +formatDate(order.orderDate)
+                                td.align-middle 
+                                    +formatCurrency(order.totalCost)
+                                td.align-middle
+                                    if order.status == 'Completed'
+                                        span.badge.badge-success Hoàn thành
+                                    else
+                                        span.badge.badge-danger Đã hủy
+                                td.align-middle
+                                    a.btn.btn-sm.btn-dark.mr-1(href=`${prefixAdmin}/order/detail/${order.orderId}`) Chi Tiết

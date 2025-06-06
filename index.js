@@ -28,9 +28,9 @@ app.use(express.json());
 const sessionManager = require('./services/SessionManager');
 sessionManager.initialize(app);
 sessionManager.setCookieMaxAge(3600000*24); // Set cookie max age to 24 hours
-// Connect to use flash message
-const flash = require("express-flash");
-app.use(flash());
+// // Connect to use flash message
+// const flash = require("express-flash");
+// app.use(flash());
 
 // Set Pug as the view engine
 app.set('views', `${__dirname}/views`);

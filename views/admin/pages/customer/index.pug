@@ -28,7 +28,8 @@ block main
                                         td.align-middle #{customer.email}
                                         td.align-middle #{customer.address}
                                         td.align-middle
-                                            a.btn.btn-sm.btn-dark.detail-btn(href="javascript:void(0);" data-customer-phone=customer.phone data-toggle="modal" data-target="#DetailModal") Chi tiết
+                                            a.btn.btn-sm.btn-primary.mr-2.detail-btn(href="javascript:void(0);" data-customer-email=customer.email data-toggle="modal" data-target="#DetailModal") Chi tiết
+                                            //- a.btn.btn-sm.btn-dark.history-order-btn(href=`${prefixAdmin}/customer/historyOrder?cusEmail=${customer.email}`) Lịch sử đơn hàng
                             else
                                 tr
                                     td(colspan="5" class="text-center") Không có khách hàng nào
@@ -55,12 +56,12 @@ block append scripts
         $(document).ready(function() {
             // Handle detail button click
             $('#dataTable').on('click', '.detail-btn', function() {
-                const cusPhone = $(this).data('customer-phone');
+                const cusEmail = $(this).data('customer-email');
                 
                 $.ajax({
                     url: '#{prefixAdmin}/customer/detail',
                     type: 'GET',
-                    data: { cusPhone: cusPhone },
+                    data: { cusEmail: cusEmail },
                     success: function(response) {
                         $('#detailModalBody').html(response);
                         $('#DetailModal').modal('show');
