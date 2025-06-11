@@ -214,7 +214,8 @@ module.exports.accountEdit = async(req, res) => {
         req.flash('error', res.locals.messages.INVALID_PHONE_WARNING);
         return res.redirect("back")
     }
-    if (req.body.fullName.length < 6) {
+    if ( req.body.fullName.length > 50 || !/^[\p{L}\s]+$/u.test(req.body.fullName)) {
+        // Check if fullName is between 4 and 50 characters and contains only vietnamese characters
         req.flash('error', res.locals.messages.INVALID_NAME_WARNING);
         return res.redirect("back")
     }
