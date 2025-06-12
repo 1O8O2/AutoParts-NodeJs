@@ -14,7 +14,22 @@ module.exports.createOrder = async (req, res) => {
     const t = await sequelize.transaction();
     try {
         let acc, cus, cart;
+        const phoneRegex = /^0\d{9}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+
+        if (!phoneRegex.test(req.body.phoneNumber)) {
+            req.flash('error',  res.locals.messages.INVALID_PHONE_WARNING);
+            return res.redirect('back');
+        }
+
+
+        if (!emailRegex.test(req.body.email)) {
+            req.flash('error',  res.locals.messages.INVALID_EMAIL_WARNING);
+            return res.redirect('back');
+        }
+      
+        
         if(req.cookies.tokenUser!=null)
         {
             acc = await Account.findOne({
@@ -70,8 +85,11 @@ module.exports.createOrder = async (req, res) => {
                 return res.redirect('back');
             }
             query+=item.productId+'='+item.amount+'&';
+            console.log(query)
+            console.log(item.productId, item.amount);
         }
         query=query.slice(0,-1);
+        console.log(query);
 
         const totalCost = parseFloat((req.body.totalCost).replace(/\./g, ''))
         const discountId = req.body.discountId || null;
@@ -94,6 +112,7 @@ module.exports.createOrder = async (req, res) => {
 
         if (!shippingType) {
             req.flash('error',  res.locals.messages.BLANK_SHIPPING_TYPE);
+            console.log(query)
             return res.redirect(query);
         }
 
@@ -267,9 +286,16 @@ module.exports.showCart = async (req, res) => {
 
         let productsInCart = cart.products || [];
 
+        console.log('Products in cart:', productsInCart);
         // Remove products that are not selected
-        const selectedProducts = productsInCart.filter(item => req.query[item.product.productId]);
-        console.log('Selected products:', selectedProducts.map(item => item.product.productId));
+        const selectedProducts = productsInCart
+        .filter(item => req.query[item.product.productId]) // Lọc các sản phẩm có trong query
+        .map(item => ({
+            product: item.product,
+            amount: parseInt(req.query[item.product.productId], 10) || item.amount // Lấy amount từ query hoặc giữ nguyên
+        }));
+        console.log('Selected products:', selectedProducts);
+
         //console.log('Selected products:', selectedProducts.map(item => item.product.productId));
         if (selectedProducts.length === 0) {
             req.flash('error', res.locals.messages.NO_PRODUCT_SELECTED);

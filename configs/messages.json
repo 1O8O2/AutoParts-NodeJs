@@ -97,12 +97,15 @@
   "INVALID_PASSWORD_WARNING": "Mật khẩu không hợp lệ!",
   "PRODUCT_NOT_FOUND": "Không tìm thấy sản phẩm!",
   "PRODUCT_OUT_OF_STOCK": "Số lượng sản phẩm đã hết!",
+  "PRODUCT_QUANTITY_EXCEEDED": "Số lượng không thể vượt quá số lượng trong kho.",
+
 
   "NO_LOGIN_FOUND": "Vui lòng đăng nhập để thực hiện chức năng này!",
   "CART_NOT_FOUND_WARNING": "Không tìm thấy giỏ hàng!",
   "PRODUCT_ADD_FAIL": "Thêm sản phẩm vào giỏ hàng thất bại!",
   "PRODUCT_ADD_SUCCESS": "Thêm sản phẩm vào giỏ hàng thành công!",
   "PRODUCT_REMOVE_FAIL": "Xóa sản phẩm khỏi giỏ hàng thất bại!",
+  "PRODUCT_REMOVE_CONFIRM": "Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?",
   "NOT_LOGIN_ERROR": "Vui lòng đăng nhập để thực hiện chức năng này!",
   "CART_NOT_FOUND": "Không tìm thấy giỏ hàng!",
   "ADD_TO_CART_SUCCESS": "Thêm sản phẩm vào giỏ hàng thành công!",
