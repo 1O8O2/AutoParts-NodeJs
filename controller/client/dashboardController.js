@@ -1,6 +1,7 @@
 // Sequelize database setup
 const { Sequelize } = require('sequelize');
-const sequelize = require('../../configs/database');
+const { getSequelize } = require('../../configs/database');
+const sequelize = getSequelize();
 const Product  = require('../../models/Product');
 const ProductGroup = require('../../models/ProductGroup');
 const OrderDetail = require('../../models/OrderDetail');

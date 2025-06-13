@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../configs/database').getSequelize();
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 const OrderDetail = require('./OrderDetail');
 const Discount = require('./Discount');
 const Customer = require('./Customer');

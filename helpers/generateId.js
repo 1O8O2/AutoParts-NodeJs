@@ -1,4 +1,5 @@
-const sequelize = require('../configs/database');
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 
 module.exports.generateNextBlogId = async () => {
     try {

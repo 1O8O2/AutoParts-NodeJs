@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../configs/database').getSequelize();
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 
 const ProductGroup = sequelize.define('ProductGroup', {
   productGroupId: {

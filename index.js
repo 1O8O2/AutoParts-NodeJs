@@ -68,6 +68,36 @@ io.on('connection', (socket) => {
     // Broadcast message to the room
     io.to(data.chatRoomId).emit('receive_message', data);
   });
+  // Listen for admin joining all customer rooms
+  socket.on('join_admin_rooms', async () => {
+    try {
+      const Chat = require('./models/Chat');
+      const uniqueChats = await Chat.findAll({
+        attributes: ['userEmail'],
+        where: {
+          deleted: false,
+          senderType: 'customer'
+        },
+        group: ['userEmail'],
+        raw: true
+      });
+
+      console.log(`Admin ${socket.id} joining ${uniqueChats.length} customer rooms`);
+
+      // Join all customer chat rooms
+      uniqueChats.forEach(chat => {
+        const roomId = `chat_${chat.userEmail}`;
+        socket.join(roomId);
+        console.log(`Admin ${socket.id} joined room: ${roomId}`);
+      });
+      
+      // Emit confirmation back to admin
+      socket.emit('admin_rooms_joined', { roomCount: uniqueChats.length });
+    } catch (error) {
+      console.error('Error joining admin rooms:', error);
+      socket.emit('admin_rooms_joined', { error: error.message });
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
@@ -92,22 +122,25 @@ routeAdmin(app);
 
 // Get the database instance
 const dbInstance = require('./configs/database');
-const sequelize = dbInstance.getSequelize();
 
 // Test and sync the database connection
 (async () => {
   try {
-    // Test connection
-    const isConnected = await dbInstance.testConnection();
-    if (isConnected) {
-      console.log('Database connection ready to use');
-      
-      // Sync database models
-      await sequelize.sync({ force: false });
-      console.log('Database models synced successfully');
+    // Use the improved sync handler with proper error handling
+    const syncSuccess = await dbInstance.syncDatabase({ 
+      force: false,  // Don't drop tables
+      alter: false   // Don't automatically alter tables (safer for production)
+    });
+    
+    if (syncSuccess) {
+      console.log('Database initialization completed successfully');
+    } else {
+      console.warn('Database synchronization failed, but server will continue running');
     }
   } catch (err) {
-    console.error('Database initialization error:', err);
+    console.error('Critical database initialization error:', err);
+    // In production, you might want to exit the process if database fails
+    // process.exit(1);
   }
 })();
 

@@ -1,3 +1,4 @@
+
 // filepath: c:\Users\hung\Documents\GitHub\AutoParts-NodeJs\controller\client\chatController.js
 const Chat = require("../../models/Chat");
 const Employee = require("../../models/Employee");
@@ -77,12 +78,10 @@ module.exports.sendMessage = async (req, res) => {
             senderType: 'customer',
             status: 'Unread',
             deleted: false
-        });
-
-        // Get the io instance
+        });        // Get the io instance
         const io = req.app.get('socketio');
         
-        // Emit the message to the chat room
+        // Emit the message to the chat room - ensure admin gets notified
         io.to(`chat_${res.locals.user.email}`).emit('receive_message', {
             messageId: chatMessage.messageId,
             userEmail: chatMessage.userEmail,
@@ -91,6 +90,12 @@ module.exports.sendMessage = async (req, res) => {
             senderType: chatMessage.senderType,
             createdAt: chatMessage.createdAt,
             status: chatMessage.status
+        });
+
+        // Also emit to all admin connections for notification purposes
+        io.emit('new_customer_message', {
+            customerEmail: res.locals.user.email,
+            messageCount: 1
         });
 
         return res.status(200).json({ success: true });
