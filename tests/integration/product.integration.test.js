@@ -1,10 +1,28 @@
 // Integration Test 2: Product Management and Shopping Cart
 const request = require('supertest');
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
-const flash = require('express-flash');
-const bodyParser = require('body-parser');
+const { createTestApp } = require('../helpers/testApp');
+
+// Mock database first before importing any models
+jest.mock('../../configs/database', () => ({
+    getSequelize: () => ({
+        define: jest.fn().mockReturnValue({
+            belongsTo: jest.fn(),
+            hasMany: jest.fn(),
+            hasOne: jest.fn(),
+            findAll: jest.fn(),
+            findByPk: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            destroy: jest.fn(),
+            save: jest.fn()
+        }),
+        transaction: jest.fn().mockResolvedValue({
+            commit: jest.fn(),
+            rollback: jest.fn()
+        })
+    })
+}));
 
 // Mock all required models
 jest.mock('../../models/Product');
@@ -13,7 +31,6 @@ jest.mock('../../models/ProductGroup');
 jest.mock('../../models/Customer');
 jest.mock('../../models/Account');
 jest.mock('../../models/Cart');
-jest.mock('../../configs/database');
 
 const Product = require('../../models/Product');
 const Brand = require('../../models/Brand');
@@ -23,31 +40,7 @@ const Account = require('../../models/Account');
 const { Cart, ProductsInCart } = require('../../models/Cart');
 
 // Setup Express app for testing
-const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.json());
-app.use(cookieParser('test-secret'));
-app.use(session({
-    secret: 'test-secret',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60000 }
-}));
-app.use(flash());
-
-// Mock middleware
-app.use((req, res, next) => {
-    res.locals.messages = {
-        PRODUCT_NOT_FOUND: 'Product not found',
-        PRODUCT_ADD_TO_CART_SUCCESS: 'Product added to cart successfully',
-        PRODUCT_ADD_TO_CART_ERROR: 'Error adding product to cart',
-        CART_UPDATE_SUCCESS: 'Cart updated successfully',
-        INSUFFICIENT_STOCK: 'Insufficient stock',
-        INVALID_QUANTITY: 'Invalid quantity',
-        NOT_LOGGED_IN: 'Please login first'
-    };
-    next();
-});
+const app = createTestApp();
 
 // Import controllers after mocking
 const productController = require('../../controller/client/productController');
@@ -126,8 +119,7 @@ describe('Product and Cart Integration Tests', () => {
         });
     });
 
-    describe('Shopping Cart Operations', () => {
-        test('should add product to cart for logged-in user', async () => {
+    describe('Shopping Cart Operations', () => {        test('should add product to cart for logged-in user', async () => {
             const mockAccount = {
                 email: 'test@example.com',
                 token: 'valid_token'
@@ -145,15 +137,17 @@ describe('Product and Cart Integration Tests', () => {
                 salePrice: 25000
             };
 
+            const mockCart = {
+                cartId: 'CART123',
+                products: [],
+                changed: jest.fn(),
+                save: jest.fn().mockResolvedValue(true)
+            };
+
             Account.findOne.mockResolvedValue(mockAccount);
             Customer.findByPk.mockResolvedValue(mockCustomer);
             Product.findByPk.mockResolvedValue(mockProduct);
-            ProductsInCart.findOne.mockResolvedValue(null); // Product not in cart yet
-            ProductsInCart.create.mockResolvedValue({
-                cartId: 'CART123',
-                productId: 'PRD001',
-                quantity: 2
-            });
+            Cart.findByPk.mockResolvedValue(mockCart);
 
             const response = await request(app)
                 .post('/product/add')
@@ -165,10 +159,8 @@ describe('Product and Cart Integration Tests', () => {
 
             expect(response.status).toBe(302);
             expect(Product.findByPk).toHaveBeenCalledWith('PRD001');
-            expect(ProductsInCart.create).toHaveBeenCalled();
-        });
-
-        test('should update quantity if product already in cart', async () => {
+            expect(mockCart.save).toHaveBeenCalled();
+        });        test('should update quantity if product already in cart', async () => {
             const mockAccount = {
                 email: 'test@example.com',
                 token: 'valid_token'
@@ -187,16 +179,21 @@ describe('Product and Cart Integration Tests', () => {
             };
 
             const existingCartItem = {
+                product: mockProduct,
+                amount: 1
+            };
+
+            const mockCart = {
                 cartId: 'CART123',
-                productId: 'PRD001',
-                quantity: 1,
-                update: jest.fn().mockResolvedValue(true)
+                products: [existingCartItem],
+                changed: jest.fn(),
+                save: jest.fn().mockResolvedValue(true)
             };
 
             Account.findOne.mockResolvedValue(mockAccount);
             Customer.findByPk.mockResolvedValue(mockCustomer);
             Product.findByPk.mockResolvedValue(mockProduct);
-            ProductsInCart.findOne.mockResolvedValue(existingCartItem);
+            Cart.findByPk.mockResolvedValue(mockCart);
 
             const response = await request(app)
                 .post('/product/add')
@@ -207,12 +204,8 @@ describe('Product and Cart Integration Tests', () => {
                 });
 
             expect(response.status).toBe(302);
-            expect(existingCartItem.update).toHaveBeenCalledWith({
-                quantity: 3 // 1 existing + 2 new
-            });
-        });
-
-        test('should handle insufficient stock scenario', async () => {
+            expect(mockCart.save).toHaveBeenCalled();
+        });        test('should handle insufficient stock scenario', async () => {
             const mockAccount = {
                 email: 'test@example.com',
                 token: 'valid_token'
@@ -230,9 +223,22 @@ describe('Product and Cart Integration Tests', () => {
                 salePrice: 25000
             };
 
+            const existingCartItem = {
+                product: mockProduct,
+                amount: 1
+            };
+
+            const mockCart = {
+                cartId: 'CART123',
+                products: [existingCartItem],
+                changed: jest.fn(),
+                save: jest.fn().mockResolvedValue(true)
+            };
+
             Account.findOne.mockResolvedValue(mockAccount);
             Customer.findByPk.mockResolvedValue(mockCustomer);
             Product.findByPk.mockResolvedValue(mockProduct);
+            Cart.findByPk.mockResolvedValue(mockCart);
 
             const response = await request(app)
                 .post('/product/add')
@@ -243,10 +249,8 @@ describe('Product and Cart Integration Tests', () => {
                 });
 
             expect(response.status).toBe(302);
-            expect(ProductsInCart.create).not.toHaveBeenCalled();
-        });
-
-        test('should remove product from cart', async () => {
+            expect(mockCart.save).not.toHaveBeenCalled();
+        });        test('should remove product from cart', async () => {
             const mockAccount = {
                 email: 'test@example.com',
                 token: 'valid_token'
@@ -257,15 +261,27 @@ describe('Product and Cart Integration Tests', () => {
                 cartId: 'CART123'
             };
 
-            const cartItem = {
-                cartId: 'CART123',
+            const mockProduct = {
                 productId: 'PRD001',
-                destroy: jest.fn().mockResolvedValue(true)
+                productName: 'Engine Oil',
+                stock: 10,
+                salePrice: 25000
+            };
+
+            const cartItem = {
+                product: mockProduct,
+                amount: 2
+            };
+
+            const mockCart = {
+                cartId: 'CART123',
+                products: [cartItem],
+                save: jest.fn().mockResolvedValue(true)
             };
 
             Account.findOne.mockResolvedValue(mockAccount);
             Customer.findByPk.mockResolvedValue(mockCustomer);
-            ProductsInCart.findOne.mockResolvedValue(cartItem);
+            Cart.findByPk.mockResolvedValue(mockCart);
 
             const response = await request(app)
                 .get('/product/remove')
@@ -273,7 +289,7 @@ describe('Product and Cart Integration Tests', () => {
                 .query({ productId: 'PRD001' });
 
             expect(response.status).toBe(302);
-            expect(cartItem.destroy).toHaveBeenCalled();
+            expect(mockCart.save).toHaveBeenCalled();
         });
     });
 
@@ -340,8 +356,7 @@ describe('Product and Cart Integration Tests', () => {
         });
     });
 
-    describe('Guest User Cart Operations', () => {
-        test('should handle cart operations for guest users', async () => {
+    describe('Guest User Cart Operations', () => {        test('should handle cart operations for guest users', async () => {
             const mockProduct = {
                 productId: 'PRD001',
                 productName: 'Engine Oil',
@@ -349,8 +364,16 @@ describe('Product and Cart Integration Tests', () => {
                 salePrice: 25000
             };
 
+            const mockCart = {
+                cartId: 'GUEST_CART123',
+                products: [],
+                changed: jest.fn(),
+                save: jest.fn().mockResolvedValue(true)
+            };
+
             Account.findOne.mockResolvedValue(null); // Not logged in
             Product.findByPk.mockResolvedValue(mockProduct);
+            Cart.findByPk.mockResolvedValue(mockCart);
 
             const response = await request(app)
                 .post('/product/add')

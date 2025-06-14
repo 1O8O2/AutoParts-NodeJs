@@ -1,5 +1,16 @@
+/**
+ * Unit Test: Logic Lọc Sản phẩm
+ * Mục đích: Kiểm thử logic lọc sản phẩm dựa trên các tiêu chí khác nhau.
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Lọc sản phẩm theo thương hiệu
+ * - Lọc sản phẩm theo danh mục
+ * - Lọc sản phẩm kết hợp nhiều tiêu chí (ví dụ: cả thương hiệu và danh mục)
+ * - Đảm bảo hiển thị tất cả sản phẩm khi không có tiêu chí lọc nào được áp dụng
+ */
+
 // Test the product filtering logic based on the client-side filter function
-describe('Product Filtering Logic', () => {
+describe('Unit Test: Logic Lọc Sản phẩm', () => {
     // Mock product data structure
     const createMockProduct = (brand, category, name = 'Test Product') => ({
         brand,
@@ -23,6 +34,10 @@ describe('Product Filtering Logic', () => {
 
     // Simulate the filtering logic from filterproduct.js
     function filterProducts(products, selectedBrand = '', selectedCategory = '') {
+        if (!Array.isArray(products)) {
+            throw new Error('Danh sách sản phẩm không hợp lệ');
+        }
+        
         return products.filter(product => {
             const productBrand = product.getAttribute('data-brand');
             const productCategory = product.getAttribute('data-category');
@@ -34,15 +49,15 @@ describe('Product Filtering Logic', () => {
         });
     }
 
-    describe('Brand filtering', () => {
-        test('should return all products when no brand filter is applied', () => {
+    describe('Chức năng lọc theo thương hiệu', () => {
+        test('[TC-FILTER-001] Hiển thị chính xác tất cả sản phẩm khi không có bộ lọc', () => {
             const result = filterProducts(mockProducts);
             
             expect(result).toHaveLength(6);
             expect(result).toEqual(mockProducts);
         });
 
-        test('should filter products by Toyota brand', () => {
+        test('[TC-FILTER-002] Lọc sản phẩm theo thương hiệu Toyota', () => {
             const result = filterProducts(mockProducts, 'Toyota');
             
             expect(result).toHaveLength(2);

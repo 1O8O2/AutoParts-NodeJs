@@ -144,7 +144,12 @@ const dbInstance = require('./configs/database');
   }
 })();
 
+// Only start the server if this file is run directly (not required by tests)
+if (require.main === module) {
+  server.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+  });
+}
 
-server.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+// Export the app for testing
+module.exports = app;

@@ -1,5 +1,17 @@
+/**
+ * Unit Test: Logic Tính toán Đơn hàng
+ * Mục đích: Kiểm thử logic tính toán các giá trị liên quan đến đơn hàng.
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Thêm/xóa sản phẩm vào đơn hàng
+ * - Cập nhật số lượng sản phẩm trong đơn hàng
+ * - Tính tổng tiền cơ bản của đơn hàng
+ * - Áp dụng giảm giá và tính phí vận chuyển vào tổng tiền cuối cùng
+ * - Xác thực số lượng và giá trị sản phẩm
+ */
+
 // Test order calculation logic based on the admin order form
-describe('Order Calculation Logic', () => {
+describe('Unit Test: Logic Tính toán Đơn hàng', () => {
     // Mock product data
     const createMockProduct = (productId, productName, salePrice, quantity = 1) => ({
         productId,
@@ -33,6 +45,10 @@ describe('Order Calculation Logic', () => {
         }
 
         updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                throw new Error('Số lượng sản phẩm phải lớn hơn 0');
+            }
+            
             const product = this.selectedProducts.find(p => p.productId === productId);
             if (product) {
                 product.quantity = parseInt(newQuantity) || 1;

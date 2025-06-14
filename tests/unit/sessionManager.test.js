@@ -1,14 +1,25 @@
+/**
+ * Unit Test: Quản lý Session & Cookies
+ * Mục đích: Kiểm thử module quản lý session và cookies của ứng dụng.
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Khởi tạo cookie parser
+ * - Cấu hình express session
+ * - Thiết lập và quản lý flash messages
+ * - Đảm bảo các cài đặt bảo mật cho session
+ */
+
 // Mock the required modules before importing SessionManager
 jest.mock('cookie-parser', () => jest.fn());
 jest.mock('express-session', () => jest.fn());
 jest.mock('express-flash', () => jest.fn());
 
-const SessionManager = require('../services/SessionManager');
+const SessionManager = require('../../services/SessionManager');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('express-flash');
 
-describe('SessionManager', () => {
+describe('Unit Test: Quản lý Session & Cookies', () => {
     let mockApp;
     let originalSessionConfig;
 
@@ -32,8 +43,8 @@ describe('SessionManager', () => {
         jest.clearAllMocks();
     });
 
-    describe('initialize', () => {
-        test('should initialize app with cookie parser, session and flash', () => {
+    describe('Chức năng khởi tạo ứng dụng', () => {
+        test('[TC-SESSION-001] Xác minh ứng dụng được khởi tạo với đầy đủ các middleware cần thiết', () => {
             const result = SessionManager.initialize(mockApp);
 
             expect(mockApp.use).toHaveBeenCalledTimes(3);
@@ -43,7 +54,7 @@ describe('SessionManager', () => {
             expect(result).toBe(mockApp);
         });
 
-        test('should call cookieParser with correct secret', () => {
+        test('[TC-SESSION-002] Kiểm tra cookie parser được cấu hình với secret key chính xác', () => {
             SessionManager.initialize(mockApp);
 
             expect(cookieParser).toHaveBeenCalledWith(
@@ -138,7 +149,7 @@ describe('SessionManager', () => {
         
         beforeAll(() => {
             // Reset singleton before tests
-            const SessionManagerModule = require('../services/SessionManager');
+            const SessionManagerModule = require('../../services/SessionManager');
             SessionManagerSingleton = SessionManagerModule.constructor;
         });
 
@@ -147,12 +158,10 @@ describe('SessionManager', () => {
             if (SessionManagerSingleton && SessionManagerSingleton.resetInstance) {
                 SessionManagerSingleton.resetInstance();
             }
-        });
-
-        test('should return the same instance on multiple calls to getInstance', () => {
+        });        test('should return the same instance on multiple calls to getInstance', () => {
             // Get fresh module để test
-            delete require.cache[require.resolve('../services/SessionManager')];
-            const SessionManagerModule = require('../services/SessionManager');
+            delete require.cache[require.resolve('../../services/SessionManager')];
+            const SessionManagerModule = require('../../services/SessionManager');
             
             // Mock SessionManagerSingleton.getInstance để test
             const originalGetInstance = Object.getPrototypeOf(SessionManagerModule.constructor).getInstance;
@@ -160,45 +169,40 @@ describe('SessionManager', () => {
                 const instance1 = originalGetInstance.call(SessionManagerModule.constructor);
                 const instance2 = originalGetInstance.call(SessionManagerModule.constructor);
                 expect(instance1).toBe(instance2);
-            } else {
-                // Fallback test với module exports
-                const SessionManager1 = require('../services/SessionManager');
-                delete require.cache[require.resolve('../services/SessionManager')];
-                const SessionManager2 = require('../services/SessionManager');
+            } else {                // Fallback test với module exports
+                const SessionManager1 = require('../../services/SessionManager');
+                delete require.cache[require.resolve('../../services/SessionManager')];
+                const SessionManager2 = require('../../services/SessionManager');
                 expect(SessionManager1).toBe(SessionManager2);
             }
         });
 
         test('should maintain state across multiple imports', () => {
             SessionManager.setCookieMaxAge(12345);
-            
-            // Clear cache and reimport
-            delete require.cache[require.resolve('../services/SessionManager')];
-            const NewSessionManager = require('../services/SessionManager');
+              // Clear cache and reimport
+            delete require.cache[require.resolve('../../services/SessionManager')];
+            const NewSessionManager = require('../../services/SessionManager');
             
             expect(NewSessionManager.getSessionConfig().cookie.maxAge).toBe(12345);
         });
 
-        test('should prevent direct instantiation of SessionManagerSingleton', () => {
-            // Test tính năng ngăn chặn tạo instance trực tiếp
+        test('should prevent direct instantiation of SessionManagerSingleton', () => {            // Test tính năng ngăn chặn tạo instance trực tiếp
             const SessionManagerFile = require('fs').readFileSync(
-                require.resolve('../services/SessionManager'), 
+                require.resolve('../../services/SessionManager'),
                 'utf8'
             );
             
             // Kiểm tra xem có throw error khi tạo instance trực tiếp không
             expect(SessionManagerFile).toContain('throw new Error');
             expect(SessionManagerFile).toContain('Use SessionManagerSingleton.getInstance()');
-        });
-
-        test('should handle concurrent access safely', async () => {
+        });        test('should handle concurrent access safely', async () => {
             // Simulate concurrent access
-            delete require.cache[require.resolve('../services/SessionManager')];
+            delete require.cache[require.resolve('../../services/SessionManager')];
             
             const promises = Array.from({ length: 10 }, () => {
                 return new Promise((resolve) => {
                     setImmediate(() => {
-                        const instance = require('../services/SessionManager');
+                        const instance = require('../../services/SessionManager');
                         resolve(instance);
                     });
                 });
@@ -210,11 +214,9 @@ describe('SessionManager', () => {
             instances.forEach(instance => {
                 expect(instance).toBe(instances[0]);
             });
-        });
-
-        test('should provide utility methods for singleton management', () => {
+        });        test('should provide utility methods for singleton management', () => {
             const SessionManagerFile = require('fs').readFileSync(
-                require.resolve('../services/SessionManager'), 
+                require.resolve('../../services/SessionManager'),
                 'utf8'
             );
             

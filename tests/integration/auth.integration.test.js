@@ -1,3 +1,14 @@
+/**
+ * Integration Test: Luồng Xác thực Người dùng
+ * Mục đích: Kiểm thử toàn bộ luồng xác thực người dùng, bao gồm đăng ký, đăng nhập và quản lý phiên.
+ * 
+ * Các luồng chính được kiểm thử:
+ * - Đăng ký người dùng: Bao gồm xác thực dữ liệu đầu vào, tạo tài khoản, thông tin khách hàng và giỏ hàng
+ * - Đăng nhập: Xác thực thông tin đăng nhập (credential) và tạo phiên (session) cho người dùng
+ * - Đăng xuất: Xóa cookies và phiên làm việc của người dùng
+ * - Bảo vệ route: Kiểm tra quyền truy cập vào các trang yêu cầu xác thực (ví dụ: trang profile)
+ */
+
 // Integration Test 1: Authentication Flow
 const request = require('supertest');
 const express = require('express');
@@ -95,7 +106,7 @@ app.post('/login', accountController.logIn);
 app.get('/logout', accountController.logOut);
 app.get('/profile', accountController.showProfile);
 
-describe('Authentication Integration Tests', () => {
+describe('Integration Test: Luồng Xác thực Người dùng', () => {
     beforeEach(() => {
         jest.clearAllMocks();
           // Setup mock implementations

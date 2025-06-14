@@ -1,3 +1,14 @@
+/**
+ * Functional Test: Hệ thống Tìm kiếm và Lọc Sản phẩm Nâng cao
+ * Mục đích: Kiểm thử toàn diện chức năng tìm kiếm và lọc sản phẩm với các tiêu chí nâng cao.
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Tìm kiếm sản phẩm theo từ khóa
+ * - Lọc sản phẩm theo thương hiệu và danh mục
+ * - Lọc sản phẩm theo khoảng giá và tình trạng tồn kho
+ * - Sắp xếp và phân trang kết quả tìm kiếm
+ */
+
 // Functional Test 2: Product Search and Filter System
 const request = require('supertest');
 const express = require('express');
@@ -47,24 +58,22 @@ app.use((req, res, next) => {
 const productController = require('../../controller/client/productController');
 
 // Setup routes
-app.get('/product/search', productController.showFilter);
-app.get('/product/detail', productController.showProduct);
+app.get('/AutoParts/product/search', productController.showFilter);
+app.get('/AutoParts/product/detail', productController.showProduct);
 
-describe('Product Search and Filter System Functional Tests', () => {
-    beforeEach(() => {
+describe('Product Search and Filter System Functional Tests', () => {    beforeEach(() => {
         jest.clearAllMocks();
         
         // Setup default mocks
         Product.findAll = jest.fn();
         Product.findByPk = jest.fn();
-        Brand.findAll = jest.fn();
+        Brand.findAll = jest.fn().mockResolvedValue([]);
         Brand.findByPk = jest.fn();
-        ProductGroup.findAll = jest.fn();
+        ProductGroup.findAll = jest.fn().mockResolvedValue([]);
         ProductGroup.findByPk = jest.fn();
     });
 
-    describe('Product Search by Keyword', () => {
-        test('should search products by keyword successfully', async () => {
+    describe('Product Search by Keyword', () => {        test('should search products by keyword successfully', async () => {
             const mockProducts = [
                 {
                     productId: 'PRD001',
@@ -89,27 +98,25 @@ describe('Product Search and Filter System Functional Tests', () => {
             ];
 
             Product.findAll.mockResolvedValue(mockProducts);
-
+            
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ keyword: 'oil' });
 
             expect(response.status).toBe(200);
             expect(Product.findAll).toHaveBeenCalled();
-        });
-
-        test('should handle empty search results', async () => {
+        });        test('should handle empty search results', async () => {
             Product.findAll.mockResolvedValue([]);
-
+            
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ keyword: 'nonexistent' });
 
             expect(response.status).toBe(200);
             expect(Product.findAll).toHaveBeenCalled();
-        });
-
-        test('should search with multiple keywords', async () => {
+        });        test('should search with multiple keywords', async () => {
             const mockProducts = [
                 {
                     productId: 'PRD001',
@@ -124,9 +131,10 @@ describe('Product Search and Filter System Functional Tests', () => {
             ];
 
             Product.findAll.mockResolvedValue(mockProducts);
-
+            
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ keyword: 'engine oil premium' });
 
             expect(response.status).toBe(200);
@@ -153,10 +161,9 @@ describe('Product Search and Filter System Functional Tests', () => {
 
             for (const keyword of testKeywords) {
                 jest.clearAllMocks();
-                Product.findAll.mockResolvedValue(mockProducts);
-
-                const response = await request(app)
-                    .get('/product/search')
+                Product.findAll.mockResolvedValue(mockProducts);                const response = await request(app)
+                    .get('/AutoParts/product/search')
+                    .set('Accept', 'application/json')
                     .query({ keyword });
 
                 expect(response.status).toBe(200);
@@ -190,10 +197,9 @@ describe('Product Search and Filter System Functional Tests', () => {
                 }
             ];
 
-            Product.findAll.mockResolvedValue(mockProducts);
-
-            const response = await request(app)
-                .get('/product/search')
+            Product.findAll.mockResolvedValue(mockProducts);            const response = await request(app)
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ brand: 'Toyota' });
 
             expect(response.status).toBe(200);
@@ -219,7 +225,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ brand: ['Toyota', 'Honda'] });
 
             expect(response.status).toBe(200);
@@ -247,7 +254,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ category: 'Brake System' });
 
             expect(response.status).toBe(200);
@@ -273,7 +281,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ category: ['Brake System', 'Engine'] });
 
             expect(response.status).toBe(200);
@@ -298,7 +307,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ 
                     keyword: 'oil',
                     brand: 'Toyota',
@@ -313,7 +323,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue([]);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ 
                     keyword: 'brake',
                     brand: 'Toyota',
@@ -345,7 +356,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ 
                     minPrice: 150000,
                     maxPrice: 250000
@@ -368,7 +380,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ minPrice: 300000 });
 
             expect(response.status).toBe(200);
@@ -388,7 +401,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ maxPrice: 200000 });
 
             expect(response.status).toBe(200);
@@ -422,10 +436,9 @@ describe('Product Search and Filter System Functional Tests', () => {
 
             Product.findByPk.mockResolvedValue(mockProduct);
             Brand.findByPk.mockResolvedValue(mockBrand);
-            ProductGroup.findByPk.mockResolvedValue(mockGroup);
-
-            const response = await request(app)
-                .get('/product/detail')
+            ProductGroup.findByPk.mockResolvedValue(mockGroup);            const response = await request(app)
+                .get('/AutoParts/product/detail')
+                .set('Accept', 'application/json')
                 .query({ productId: 'PRD001' });
 
             expect(response.status).toBe(200);
@@ -435,10 +448,9 @@ describe('Product Search and Filter System Functional Tests', () => {
         });
 
         test('should handle product not found', async () => {
-            Product.findByPk.mockResolvedValue(null);
-
-            const response = await request(app)
-                .get('/product/detail')
+            Product.findByPk.mockResolvedValue(null);            const response = await request(app)
+                .get('/AutoParts/product/detail')
+                .set('Accept', 'application/json')
                 .query({ productId: 'INVALID' });
 
             expect(response.status).toBe(200); // Should render error page
@@ -447,7 +459,8 @@ describe('Product Search and Filter System Functional Tests', () => {
 
         test('should handle missing product ID', async () => {
             const response = await request(app)
-                .get('/product/detail');
+                .get('/AutoParts/product/detail')
+                .set('Accept', 'application/json');
 
             expect(response.status).toBe(200); // Should render error page
             expect(Product.findByPk).not.toHaveBeenCalled();
@@ -464,7 +477,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ sortBy: 'price_asc' });
 
             expect(response.status).toBe(200);
@@ -480,7 +494,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ sortBy: 'price_desc' });
 
             expect(response.status).toBe(200);
@@ -496,7 +511,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ sortBy: 'name_asc' });
 
             expect(response.status).toBe(200);
@@ -513,7 +529,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ 
                     page: 2,
                     limit: 8
@@ -538,7 +555,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ inStock: 'true' });
 
             expect(response.status).toBe(200);
@@ -564,7 +582,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockResolvedValue(mockProducts);
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ inStock: 'false' });
 
             expect(response.status).toBe(200);
@@ -577,7 +596,8 @@ describe('Product Search and Filter System Functional Tests', () => {
             Product.findAll.mockRejectedValue(new Error('Database connection failed'));
 
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ keyword: 'test' });
 
             expect(response.status).toBe(500);
@@ -585,7 +605,8 @@ describe('Product Search and Filter System Functional Tests', () => {
 
         test('should handle invalid filter parameters', async () => {
             const response = await request(app)
-                .get('/product/search')
+                .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
                 .query({ 
                     minPrice: 'invalid',
                     maxPrice: 'also_invalid',
@@ -608,8 +629,9 @@ describe('Product Search and Filter System Functional Tests', () => {
 
             for (const input of maliciousInputs) {
                 const response = await request(app)
-                    .get('/product/search')
-                    .query({ keyword: input });
+                    .get('/AutoParts/product/search')
+                .set('Accept', 'application/json')
+                .query({ keyword: input });
 
                 expect(response.status).toBe(200);
                 expect(Product.findAll).toHaveBeenCalled();

@@ -1,5 +1,18 @@
+/**
+ * Unit Test: Module Quản lý Tài khoản & Xác thực
+ * Mục đích: Kiểm thử controller chịu trách nhiệm quản lý tài khoản người dùng và các luồng liên quan đến xác thực.
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Hiển thị trang đăng ký (showRegister)
+ * - Hiển thị trang đăng nhập (showLogIn)
+ * - Xử lý logic đăng ký người dùng mới
+ * - Xử lý logic đăng nhập tài khoản
+ * - Quản lý session và cookies sau khi đăng nhập/đăng ký
+ * - Xử lý quá trình đăng xuất
+ */
+
 // Mock all model dependencies to avoid Sequelize relationship issues
-jest.mock('../models/Account', () => ({
+jest.mock('../../models/Account', () => ({
     findOne: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -7,14 +20,14 @@ jest.mock('../models/Account', () => ({
     findByPk: jest.fn()
 }));
 
-jest.mock('../models/Customer', () => ({
+jest.mock('../../models/Customer', () => ({
     findOne: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     findByPk: jest.fn()
 }));
 
-jest.mock('../models/Cart', () => ({
+jest.mock('../../models/Cart', () => ({
     Cart: {
         create: jest.fn(),
         findByPk: jest.fn()
@@ -25,30 +38,30 @@ jest.mock('../models/Cart', () => ({
     }
 }));
 
-jest.mock('../models/Order', () => ({
+jest.mock('../../models/Order', () => ({
     findAll: jest.fn(),
     create: jest.fn()
 }));
 
-jest.mock('../configs/system', () => ({
+jest.mock('../../configs/system', () => ({
     prefixUrl: '/client'
 }));
 
 jest.mock('md5', () => jest.fn());
 
-jest.mock('../helpers/generateToken', () => ({
+jest.mock('../../helpers/generateToken', () => ({
     generateRandomString: jest.fn()
 }));
 
 // Import after mocking
-const accountController = require('../controller/client/accountController');
-const Account = require('../models/Account');
-const Customer = require('../models/Customer');
-const { Cart } = require('../models/Cart');
+const accountController = require('../../controller/client/accountController');
+const Account = require('../../models/Account');
+const Customer = require('../../models/Customer');
+const { Cart } = require('../../models/Cart');
 const md5 = require('md5');
-const generate = require('../helpers/generateToken');
+const generate = require('../../helpers/generateToken');
 
-describe('Account Controller Tests', () => {
+describe('Unit Test: Module Quản lý Tài khoản & Xác thực', () => {
     let req, res;
 
     beforeEach(() => {
@@ -82,8 +95,8 @@ describe('Account Controller Tests', () => {
         console.error = jest.fn();
     });
 
-    describe('showRegister function', () => {
-        test('should render register page successfully', async () => {
+    describe('Chức năng hiển thị trang đăng ký (showRegister)', () => {
+        test('[TC-AUTH-001] Render trang đăng ký thành công', async () => {
             await accountController.showRegister(req, res);
             expect(res.render).toHaveBeenCalledWith('client/pages/user/register');
         });

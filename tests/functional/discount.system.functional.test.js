@@ -1,3 +1,14 @@
+/**
+ * Functional Test: Hệ thống Quản lý Mã giảm giá & Coupon
+ * Mục đích: Kiểm thử hệ thống quản lý và áp dụng mã giảm giá, coupon trong quá trình đặt hàng.
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Xác thực mã giảm giá
+ * - Tính toán giá trị giảm giá (theo phần trăm/số tiền cố định)
+ * - Quản lý mã giảm giá riêng cho từng khách hàng
+ * - Theo dõi giới hạn sử dụng và thời gian hết hạn của mã giảm giá
+ */
+
 // Functional Test 5: Discount System and Coupon Management
 const request = require('supertest');
 const express = require('express');
@@ -55,10 +66,19 @@ app.use((req, res, next) => {
 });
 
 // Mock routes for testing
-app.post('/discount/apply', async (req, res) => {
+app.post('/AutoParts/discount/apply', async (req, res) => {
     // Mock discount application logic
     try {
-        const { discountCode, orderTotal, userEmail } = req.body;
+        const { discountCode, orderTotal, userEmail, existingDiscount } = req.body;
+        
+        // Check for discount stacking - prevent multiple discounts
+        if (existingDiscount) {
+            return res.status(200).json({ 
+                success: false, 
+                message: 'Cannot apply multiple discounts to the same order',
+                allowStacking: false
+            });
+        }
         
         const discount = await Discount.findByPk(discountCode);
         if (!discount) {
@@ -78,17 +98,18 @@ app.post('/discount/apply', async (req, res) => {
 
         if (new Date() > new Date(discount.expiryDate)) {
             return res.status(400).json({ message: res.locals.messages.DISCOUNT_EXPIRED });
-        }
-
-        let discountAmount = 0;
+        }        let discountAmount = 0;
         if (discount.discountType === 'percentage') {
-            discountAmount = (orderTotal * discount.discountValue) / 100;
+            discountAmount = Math.round((orderTotal * discount.discountValue) / 100);
             if (discount.maxDiscountAmount && discountAmount > discount.maxDiscountAmount) {
                 discountAmount = discount.maxDiscountAmount;
             }
         } else {
             discountAmount = Math.min(discount.discountValue, orderTotal);
         }
+
+        // Ensure discount doesn't exceed order total
+        discountAmount = Math.min(discountAmount, orderTotal);
 
         res.json({
             success: true,
@@ -110,7 +131,7 @@ app.get('/discount/available/:email', async (req, res) => {
     }
 });
 
-app.post('/admin/discount/create', async (req, res) => {
+app.post('/AutoParts/admin/discount/create', async (req, res) => {
     try {
         const discount = await Discount.create(req.body);
         res.status(201).json({ discount });
@@ -141,12 +162,11 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             const mockDiscount = {
                 discountId: 'SAVE10',
                 discountName: '10% Off',
-                discountType: 'percentage',
-                discountValue: 10,
+                discountType: 'percentage',                discountValue: 10,
                 minimumOrderValue: 100000,
                 maxDiscountAmount: 50000,
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -154,7 +174,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'SAVE10',
                     orderTotal: 500000,
@@ -171,7 +191,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.findByPk.mockResolvedValue(null);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'INVALID',
                     orderTotal: 500000,
@@ -197,7 +217,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'EXPIRED10',
                     orderTotal: 500000,
@@ -215,7 +235,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 10,
                 minimumOrderValue: 0,
                 usageLimit: 0, // No usage left
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -223,7 +243,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([]); // Not available for this customer
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'USED10',
                     orderTotal: 500000,
@@ -241,7 +261,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 10,
                 minimumOrderValue: 1000000, // 1M VND minimum
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -249,7 +269,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'MIN100',
                     orderTotal: 500000, // Below minimum
@@ -270,7 +290,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 minimumOrderValue: 0,
                 maxDiscountAmount: null,
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -278,7 +298,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'PERCENT15',
                     orderTotal: 800000,
@@ -298,7 +318,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 minimumOrderValue: 0,
                 maxDiscountAmount: 100000, // Cap at 100k
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -306,7 +326,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'CAPPED20',
                     orderTotal: 1000000, // 20% would be 200k, but capped at 100k
@@ -327,7 +347,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 50000,
                 minimumOrderValue: 200000,
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -335,7 +355,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'FIXED50K',
                     orderTotal: 300000,
@@ -354,7 +374,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 500000,
                 minimumOrderValue: 0,
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
@@ -362,7 +382,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'BIGFIXED',
                     orderTotal: 300000, // Less than discount value
@@ -384,7 +404,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                     discountType: 'percentage',
                     discountValue: 10,
                     minimumOrderValue: 100000,
-                    expiryDate: '2024-12-31'
+                    expiryDate: '2025-12-31'
                 },
                 {
                     discountId: 'FIRST20',
@@ -392,7 +412,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                     discountType: 'percentage',
                     discountValue: 20,
                     minimumOrderValue: 0,
-                    expiryDate: '2024-12-31'
+                    expiryDate: '2025-12-31'
                 }
             ];
 
@@ -428,14 +448,14 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 minimumOrderValue: 500000,
                 maxDiscountAmount: 200000,
                 usageLimit: 1000,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 status: 'Active'
             };
 
             Discount.create.mockResolvedValue(newDiscount);
 
             const response = await request(app)
-                .post('/admin/discount/create')
+                .post('/AutoParts/admin/discount/create')
                 .send(newDiscount);
 
             expect(response.status).toBe(201);
@@ -456,7 +476,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.create.mockRejectedValue(new Error('Validation error'));
 
             const response = await request(app)
-                .post('/admin/discount/create')
+                .post('/AutoParts/admin/discount/create')
                 .send(invalidDiscount);
 
             expect(response.status).toBe(500);
@@ -505,27 +525,23 @@ describe('Discount System and Coupon Management Functional Tests', () => {
         });
     });
 
-    describe('Multiple Discount Scenarios', () => {
-        test('should handle discount code changes in order', async () => {
+    describe('Multiple Discount Scenarios', () => {        test('should handle discount code changes in order', async () => {
             const oldDiscount = {
                 discountId: 'OLD10',
                 usageLimit: 50,
                 save: jest.fn()
-            };
-
-            const newDiscount = {
+            };            const newDiscount = {
                 discountId: 'NEW15',
                 discountType: 'percentage',
                 discountValue: 15,
                 minimumOrderValue: 0,
                 usageLimit: 100,
-                expiryDate: '2024-12-31',
+                expiryDate: '2025-12-31',
                 save: jest.fn()
             };
 
-            Discount.findByPk
-                .mockResolvedValueOnce(oldDiscount)
-                .mockResolvedValueOnce(newDiscount);
+            // Mock to return the new discount when looking for NEW15
+            Discount.findByPk.mockResolvedValue(newDiscount);
             Discount.getByCustomer.mockResolvedValue([newDiscount]);
             Discount.deleteDiscountUsed.mockResolvedValue(true);
             Discount.setUsedDiscount.mockResolvedValue(true);
@@ -537,7 +553,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
 
             // Then apply new discount
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'NEW15',
                     orderTotal: 400000,
@@ -550,22 +566,21 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             expect(response.body.discountAmount).toBe(60000); // 15% of 400000
         });
 
-        test('should prevent stacking of discount codes', async () => {
-            // This test would ensure only one discount can be applied per order
+        test('should prevent stacking of discount codes', async () => {            // This test would ensure only one discount can be applied per order
             const mockDiscount1 = {
                 discountId: 'FIRST10',
                 discountType: 'percentage',
                 discountValue: 10,
                 minimumOrderValue: 0,
                 usageLimit: 100,
-                expiryDate: '2024-12-31'
+                expiryDate: '2025-12-31'
             };
 
             Discount.findByPk.mockResolvedValue(mockDiscount1);
             Discount.getByCustomer.mockResolvedValue([mockDiscount1]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'FIRST10',
                     orderTotal: 500000,
@@ -586,14 +601,14 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 10,
                 minimumOrderValue: 0,
                 usageLimit: 100,
-                expiryDate: '2024-12-31'
+                expiryDate: '2025-12-31'
             };
 
             Discount.findByPk.mockResolvedValue(mockDiscount);
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'ZERO10',
                     orderTotal: 0,
@@ -609,7 +624,7 @@ describe('Discount System and Coupon Management Functional Tests', () => {
             Discount.findByPk.mockRejectedValue(new Error('Database connection failed'));
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'ERROR10',
                     orderTotal: 500000,
@@ -627,14 +642,14 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 10,
                 minimumOrderValue: 0,
                 usageLimit: 100,
-                expiryDate: '2024-12-31'
+                expiryDate: '2025-12-31'
             };
 
             Discount.findByPk.mockResolvedValue(mockDiscount);
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'INVALID',
                     orderTotal: 500000,
@@ -652,14 +667,14 @@ describe('Discount System and Coupon Management Functional Tests', () => {
                 discountValue: 99999, // Extremely large percentage
                 minimumOrderValue: 0,
                 usageLimit: 100,
-                expiryDate: '2024-12-31'
+                expiryDate: '2025-12-31'
             };
 
             Discount.findByPk.mockResolvedValue(mockDiscount);
             Discount.getByCustomer.mockResolvedValue([mockDiscount]);
 
             const response = await request(app)
-                .post('/discount/apply')
+                .post('/AutoParts/discount/apply')
                 .send({
                     discountCode: 'HUGE',
                     orderTotal: 500000,

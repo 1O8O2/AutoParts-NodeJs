@@ -1,21 +1,32 @@
-const OTPManager = require('../helpers/otpManager');
+/**
+ * Unit Test: Quản lý Mã OTP
+ * Mục đích: Kiểm thử module quản lý Mã xác thực một lần (OTP - One-Time Password).
+ * 
+ * Chức năng chính được kiểm thử:
+ * - Tạo mã OTP với độ dài tùy chỉnh
+ * - Xác thực mã OTP do người dùng nhập
+ * - Lưu trữ mã OTP trong cookies
+ * - Quản lý thời gian hết hạn của OTP
+ */
+
+const OTPManager = require('../../helpers/otpManager');
 
 // Mock the generateToken module
-jest.mock('../helpers/generateToken', () => ({
+jest.mock('../../helpers/generateToken', () => ({
     generateRandomNumber: jest.fn().mockReturnValue('123456')
 }));
 
-describe('OTPManager', () => {
-    describe('generateOTP', () => {
-        test('should generate OTP with default length 6', () => {
+describe('Unit Test: Quản lý Mã OTP', () => {
+    describe('Chức năng tạo mã OTP', () => {
+        test('[TC-OTP-001] Tạo OTP với độ dài mặc định (6 chữ số)', () => {
             const otp = OTPManager.generateOTP();
             
             expect(otp).toBe('123456');
             expect(otp.length).toBe(6);
         });
 
-        test('should generate OTP with custom length', () => {
-            const { generateRandomNumber } = require('../helpers/generateToken');
+        test('[TC-OTP-002] Tạo OTP với độ dài tùy chỉnh theo yêu cầu', () => {
+            const { generateRandomNumber } = require('../../helpers/generateToken');
             generateRandomNumber.mockReturnValue('12345');
             
             const otp = OTPManager.generateOTP(5);
@@ -25,8 +36,8 @@ describe('OTPManager', () => {
         });
     });
 
-    describe('verifyOTP', () => {
-        test('should return valid result when OTP matches', () => {
+    describe('Chức năng xác thực mã OTP', () => {
+        test('[TC-OTP-003] Xác thực thành công khi OTP nhập vào trùng khớp', () => {
             const mockReq = {
                 cookies: {
                     otp: '123456',
@@ -41,7 +52,7 @@ describe('OTPManager', () => {
             expect(result.message).toBeUndefined();
         });
 
-        test('should return invalid result when OTP does not match', () => {
+        test('[TC-OTP-004] Xác thực thất bại khi OTP nhập vào sai', () => {
             const mockReq = {
                 cookies: {
                     otp: '123456',
