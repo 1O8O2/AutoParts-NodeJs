@@ -32,6 +32,7 @@ module.exports.createOrder = async (req, res) => {
         
         if(req.cookies.tokenUser!=null)
         {
+            console.log('Token user exists:', req.cookies.tokenUser);
             acc = await Account.findOne({
                 where: { token: req.cookies.tokenUser }
             });
@@ -42,12 +43,22 @@ module.exports.createOrder = async (req, res) => {
         }
         else if(req.cookies.tokenUser==null && await Account.findOne({where: { email: req.body.email }}) !=null)
         {
+            console.log('Token user does not exist, but account found by email:', req.body.email);
             acc = await Account.findOne({where: { email: req.body.email }})
             cus = await Customer.findByPk(acc.email);
             cart = await Cart.findByPk(req.cookies.cartId);
+            if (!cus) {
+                req.flash('error', res.locals.messages.CUSTOMER_NOT_FOUND);
+                return res.redirect('/AutoParts/account/login');
+            }
+            if (!cart) {
+                req.flash('error', res.locals.messages.CART_NOT_FOUND);
+                return res.render('client/pages/order/order', { message: 'Cart not found' });
+            }
         }
         else
         {
+            console.log('No token user, creating new account and customer');
             acc = {
                 email: req.body.email,
                 password: "1111",
@@ -63,15 +74,10 @@ module.exports.createOrder = async (req, res) => {
                 fullName: req.body.customerName,
                 phone : req.body.phoneNumber,
                 address : req.body.shipAddress,
-                status: 'Guest'
-            };
-
-            cart = await Cart.findByPk(req.cookies.cartId);
+                status: 'Guest'            };            cart = await Cart.findByPk(req.cookies.cartId);
         }
 
-        let query='/AutoParts/order?';
-
-        // Get all products from cart (virtual field populated by afterFind hook)
+        let query='/AutoParts/order?';        // Get all products from cart (virtual field populated by afterFind hook)
         const productsInCart = cart.products || [];
         const selectedProducts = productsInCart.filter(item => req.body[item.product.productId]);
         const updatedSelectedProducts = selectedProducts.map(item => ({ productId: item.product.productId, amount: req.body[item.product.productId] }));
@@ -85,16 +91,12 @@ module.exports.createOrder = async (req, res) => {
                 return res.redirect('back');
             }
             query+=item.productId+'='+item.amount+'&';
-            console.log(query)
-            console.log(item.productId, item.amount);
-        }
-        query=query.slice(0,-1);
-        console.log(query);
-
-        const totalCost = parseFloat((req.body.totalCost).replace(/\./g, ''))
+        }        query=query.slice(0,-1);
+        console.log(query);        const totalCost = parseFloat((req.body.totalCost).replace(/\./g, ''))
         const discountId = req.body.discountId || null;
         const shipAddress = req.body.shipAddress;
         let shippingType = req.body.shippingType;
+        console.log('Shipping type:', shippingType , 'Total cost:', totalCost, 'Discount ID:', discountId, 'Ship address:', shipAddress);
 
         switch (shippingType)
         {
@@ -134,13 +136,12 @@ module.exports.createOrder = async (req, res) => {
         let orderId = 'ORD' + Date.now().toString().substring(6);
         if (typeof Order.generateOrderId === 'function') {
             orderId = await Order.generateOrderId();
-        }
-
-        if(req.cookies.tokenUser==null )
+        }         if(req.cookies.tokenUser==null && await Account.findOne({where: { email: req.body.email }}) == null)
         {
             acc = await Account.create(acc);
             cus = await Customer.create(cus);
         }
+        console.log('Account:', acc, 'Customer:', cus);
 
         // Create new order
         const newOrder = await Order.create({
@@ -202,12 +203,10 @@ module.exports.createOrder = async (req, res) => {
             Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất và thông báo khi hàng được giao. Bạn có thể theo dõi trạng thái đơn hàng trong phần "Tài khoản" trên website của chúng tôi.<br><br>
             Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline.<br><br>
             Trân trọng,<br>
-            Đội ngũ AutoPart
-        `;
-
-
+            Đội ngũ AutoPart        `;
+        
         await mailSend(from, to, subject, html);
-        await t.commit();
+        await t.commit();        
         return res.render('client/pages/order/success'); // Render success page
     } catch (error) {
         await t.rollback();
@@ -266,25 +265,21 @@ module.exports.showCart = async (req, res) => {
             acc = await Account.findOne({
                 where: { token: req.cookies.tokenUser }
             });
-        }
-         
-        if(acc)
-        {
+        }         
+        if(acc)        {
             cus = await Customer.findByPk(acc.email);
-            //console.log(cus)
         }
-        
-        if (cus) {
-            // return res.render('client/pages/order/order', { message: 'Cart not found' });
+          if (cus && cus.cartId) {
             cart = await Cart.findByPk(cus.cartId);
+        }
+        else if (req.cookies.cartId)
+        {
+            cart = await Cart.findByPk(req.cookies.cartId);
         }
         else
         {
-            cart = await Cart.findByPk(req.cookies.cartId);
-            //console.log(cart)
-        }
-
-        let productsInCart = cart.products || [];
+            cart = null;
+        }        let productsInCart = cart ? cart.products || [] : [];
 
         console.log('Products in cart:', productsInCart);
         // Remove products that are not selected

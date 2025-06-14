@@ -1,3 +1,4 @@
+
 // client-chat.js - Handles client-side Socket.IO connections for customer chat
 document.addEventListener('DOMContentLoaded', function() {
     // Get chat room ID from the page
@@ -7,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chatRoomId || !userEmail) {
         console.error('Missing chat room ID or user email');
         return;
-    }
-
-    // Connect to Socket.IO server
+    }    // Connect to Socket.IO server
     const socket = io();
+
+    console.log(`Client connecting to chat room: ${chatRoomId}`);
 
     // Join the chat room
     socket.emit('join_room', chatRoomId);
@@ -29,12 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             sendMessage();
         }
-    });
-
-    // Function to send message
+    });    // Function to send message
     function sendMessage() {
         const messageText = messageInput.value.trim();
         if (!messageText) return;
+
+        console.log('Sending message:', messageText);
 
         // Clear input
         messageInput.value = '';
@@ -48,6 +49,12 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({ message: messageText }),
         })
         .then(response => response.json())
+        .then(data => {
+            console.log('Message sent response:', data);
+            if (!data.success) {
+                console.error('Failed to send message:', data.message);
+            }
+        })
         .catch(error => {
             console.error('Error sending message:', error);
         });

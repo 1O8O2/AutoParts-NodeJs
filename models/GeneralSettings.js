@@ -1,5 +1,6 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../configs/database').getSequelize();
+const { Sequelize, DataTypes } = require('sequelize');
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 
 const GeneralSettings = sequelize.define('GeneralSettings', {
   websiteName: {
@@ -26,16 +27,15 @@ const GeneralSettings = sequelize.define('GeneralSettings', {
   copyright: {
     type: DataTypes.STRING(255),
     allowNull: true
-  },
-  createdAt: {
+  },  createdAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: Sequelize.fn('GETDATE')
   },
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: Sequelize.fn('GETDATE')
   },
   deleted: {
     type: DataTypes.BOOLEAN,

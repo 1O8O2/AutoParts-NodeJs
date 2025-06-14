@@ -1,3 +1,4 @@
+
 // admin-chat.js - Handles admin-side Socket.IO connections for chat with customers
 document.addEventListener('DOMContentLoaded', function() {
     // Get chat room ID and admin email from the page
@@ -7,13 +8,25 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chatRoomId || !adminEmail) {
         console.error('Missing chat room ID or admin email');
         return;
-    }
-
-    // Connect to Socket.IO server
+    }    // Connect to Socket.IO server
     const socket = io();
 
-    // Join the chat room
+    console.log(`Admin connecting to chat room: ${chatRoomId}`);
+
+    // Join the specific chat room for this customer
     socket.emit('join_room', chatRoomId);
+    
+    // Also join all customer rooms for notifications
+    socket.emit('join_admin_rooms');
+    
+    // Listen for confirmation that rooms were joined
+    socket.on('admin_rooms_joined', function(data) {
+        if (data.error) {
+            console.error('Error joining admin rooms:', data.error);
+        } else {
+            console.log(`Successfully joined ${data.roomCount} customer rooms for notifications`);
+        }
+    });
 
     // Elements
     const messageInput = document.getElementById('message-input');
@@ -30,12 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             sendMessage();
         }
-    });
-
-    // Function to send message
+    });    // Function to send message
     function sendMessage() {
         const messageText = messageInput.value.trim();
         if (!messageText) return;
+
+        console.log('Admin sending message:', messageText);
 
         // Clear input
         messageInput.value = '';
@@ -52,18 +65,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }),
         })
         .then(response => response.json())
+        .then(data => {
+            console.log('Admin message sent response:', data);
+            if (!data.success) {
+                console.error('Failed to send message:', data.message);
+            }
+        })
         .catch(error => {
             console.error('Error sending message:', error);
         });
-    }
-
-    // Listen for incoming messages
+    }// Listen for incoming messages
     socket.on('receive_message', function(data) {
-        // Add message to the chat
-        appendMessage(data);
+        console.log('Received message:', data);
         
-        // Scroll to bottom
-        scrollToBottom();
+        // Only show messages for the current chat room
+        if (data.chatRoomId === chatRoomId) {
+            // Add message to the chat
+            appendMessage(data);
+            
+            // Scroll to bottom
+            scrollToBottom();
+            
+            // Mark message as read if it's from customer and we're viewing this chat
+            if (data.senderType === 'customer') {
+                // Automatically mark as read by fetching messages
+                setTimeout(() => {
+                    fetchMessages();
+                }, 500);
+            }
+        }
     });
 
     // Append message to the chat
