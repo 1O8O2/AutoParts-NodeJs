@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controller/admin/generalSettingController');
+const validateAuth = require('../../middlewares/admin/validate.middleware');
+
 const multer = require('multer');
 const path = require('path');
 
@@ -24,7 +26,7 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-router.get('/', controller.index);
-router.post('/update', upload.single('logoFile'), controller.update);
+router.get('/', validateAuth.checkPermission('CAI_DAT_CHUNG_XEM'), controller.index);
+router.post('/update', validateAuth.checkPermission('CAI_DAT_CHUNG_SUA'), upload.single('logoFile'), controller.update);
 
 module.exports = router;
