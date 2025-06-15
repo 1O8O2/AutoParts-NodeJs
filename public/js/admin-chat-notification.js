@@ -1,5 +1,50 @@
 // filepath: c:\Users\hung\Documents\GitHub\AutoParts-NodeJs\public\js\admin-chat-notification.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {    // Connect to Socket.IO server to receive real-time notifications
+    const socket = io();
+    
+    // Join all customer chat rooms for real-time notifications
+    console.log('Admin requesting to join all customer rooms...');
+    socket.emit('join_admin_rooms');
+    
+    // Listen for confirmation that rooms were joined
+    socket.on('admin_rooms_joined', function(data) {
+        if (data.error) {
+            console.error('Error joining admin rooms:', data.error);
+        } else {
+            console.log(`Successfully joined ${data.roomCount} customer rooms`);
+        }
+    });
+      // Listen for new messages from any customer
+    socket.on('receive_message', function(data) {
+        console.log('Admin notification received message:', data);
+        if (data.senderType === 'customer') {
+            // Show notification for new customer message
+            showNotification(1);
+            
+            // Update chat icon if it exists
+            const chatIcon = document.querySelector('.chat-notification-icon');
+            if (chatIcon) {
+                chatIcon.style.display = 'inline-block';
+                const currentCount = parseInt(chatIcon.textContent) || 0;
+                chatIcon.textContent = currentCount + 1;
+            }
+        }
+    });
+
+    // Listen for general new customer message events
+    socket.on('new_customer_message', function(data) {
+        console.log('New customer message notification:', data);
+        showNotification(data.messageCount);
+        
+        // Update chat icon if it exists
+        const chatIcon = document.querySelector('.chat-notification-icon');
+        if (chatIcon) {
+            chatIcon.style.display = 'inline-block';
+            const currentCount = parseInt(chatIcon.textContent) || 0;
+            chatIcon.textContent = currentCount + data.messageCount;
+        }
+    });
+
     // Check for new messages every 60 seconds
     function checkForNewMessages() {
         fetch('/AutoParts/admin/chat/check-new-messages')

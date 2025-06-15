@@ -99,8 +99,7 @@ module.exports.register = async (req, res) => {
             success = await Customer.create(newCustomer);
             console.log(success)
         }
-        
-        if (success) {
+          if (success) {
             res.cookie("cartId", newCart.cartId);
             req.flash('success', res.locals.messages.ACCOUNT_CREATE_SUCCESS);
             return res.redirect(systemConfig.prefixUrl+'/account/login');
@@ -112,8 +111,10 @@ module.exports.register = async (req, res) => {
         }
     } catch (error) {
         console.error("Registration error:", error);
-        req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
-        return res.redirect('back');
+        if (!res.headersSent) {
+            req.flash('error', res.locals.messages.ACCOUNT_CREATE_ERROR);
+            return res.redirect('back');
+        }
     }
 }
 
@@ -167,10 +168,9 @@ module.exports.logIn = async (req, res) => {
 module.exports.showProfile = async (req, res) => {
     const tokenUser = req.cookies.tokenUser;
 
-    try {
-        const acc = await Account.findOne({ where: { token: tokenUser } });
+    try {        const acc = await Account.findOne({ where: { token: tokenUser } });
         if (!acc) {
-            return res.redirect(systemConfig.prefixUrl+'account/login');
+            return res.redirect(systemConfig.prefixUrl + '/account/login');
         }
         
         const customer = await Customer.findByPk(acc.email);
@@ -199,26 +199,23 @@ module.exports.accountEdit = async(req, res) => {
     
     const acc = await Account.findOne({
         where: { token: req.cookies.tokenUser }
-    });
-    if (!acc) {
+    });    if (!acc) {
         req.flash('error', res.locals.messages.ACCOUNT_NOT_FOUND_WARNING);
-        return res.redirect(systemConfig.prefixUrl+'account/login');
+        return res.redirect(systemConfig.prefixUrl + '/account/login');
     }
     console.log(req.body)
     if( !acc ||!req.body.phone || !req.body.fullName || !req.body.address ||!req.body.status|| !req.body.email) {
         req.flash('error', res.locals.messages.EDIT_PROFILE_ERROR);
         return res.redirect("back");
-    }
-
-    if (req.body.phone.length < 10 || req.body.phone.length >= 11 || isNaN(req.body.phone)) {
+    }    if (req.body.phone.length < 10 || req.body.phone.length >= 11 || isNaN(req.body.phone) || !req.body.phone.startsWith('0')) {
         req.flash('error', res.locals.messages.INVALID_PHONE_WARNING);
         return res.redirect("back")
     }
-    if (req.body.fullName.length < 6) {
+    if ( req.body.fullName.length > 50 || !/^[\p{L}\s]+$/u.test(req.body.fullName)) {
+        // Check if fullName is between 4 and 50 characters and contains only vietnamese characters
         req.flash('error', res.locals.messages.INVALID_NAME_WARNING);
         return res.redirect("back")
-    }
-    if (req.body.address.length < 6) {
+    }    if (req.body.address.length < 6 || req.body.address.trim() === '' || req.body.address.length > 255) {
         req.flash('error', res.locals.messages.INVALID_ADDRESS_WARNING);
         return res.redirect("back")
     }

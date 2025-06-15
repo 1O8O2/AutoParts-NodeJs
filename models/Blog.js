@@ -1,5 +1,6 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../configs/database').getSequelize();
+const { Sequelize, DataTypes } = require('sequelize');
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 const BlogGroup = require('./BlogGroup');
 const Employee = require('./Employee');
 
@@ -37,16 +38,15 @@ const Blog = sequelize.define('Blog', {
   deletedAt: {
     type: DataTypes.DATE,
     allowNull: true
-  },
-  createdAt: {
+  },  createdAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: Sequelize.fn('GETDATE')
   },
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: Sequelize.fn('GETDATE')
   },
   deleted: {
     type: DataTypes.BOOLEAN,

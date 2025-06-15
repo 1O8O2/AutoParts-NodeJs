@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../configs/database').getSequelize();
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 
 const RoleGroup = sequelize.define('RoleGroup', {
     roleGroupId: {

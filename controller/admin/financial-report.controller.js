@@ -1,4 +1,5 @@
 const Order = require('../../models/Order');
+const OrderDetail = require('../../models/OrderDetail');
 const Product = require('../../models/Product');
 const ExcelJS = require('exceljs');
 const { Op } = require('sequelize');
@@ -6,8 +7,7 @@ const moment = require("moment");
 
 // [GET] /admin/financial-report
 module.exports.index = async (req, res) => {
-    try {
-        const fromDate = req.query.fromDate || new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0];
+    try {        const fromDate = req.query.fromDate || new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0];
         const toDate = req.query.toDate || new Date().toISOString().split('T')[0];
 
         // Get completed orders within date range
@@ -17,31 +17,35 @@ module.exports.index = async (req, res) => {
                 orderDate: {
                     [Op.between]: [new Date(fromDate), new Date(toDate + 'T23:59:59')]
                 }
-            }
-        });
-
-        const productIds = [
+            },
+            include: [{
+                model: OrderDetail,
+                required: false
+            }]
+        });        const productIds = [
             ...new Set(
                 orders.flatMap(ord => 
-                    ord.details.map(detail => detail.productId)
+                    (ord.details || []).map(detail => detail.productId).filter(id => id)
                 )
             )
         ];
-        const productOrders = await Product.findAll({
-            attributes: ['productId', 'costPrice'],
-            required: true,
-            where: {
-                productId: {
-                    [Op.in]: productIds
-                }
-            }
-        })
 
-        // Calculate revenue
+        let productOrders = [];
+        if (productIds.length > 0) {
+            productOrders = await Product.findAll({
+                attributes: ['productId', 'costPrice'],
+                where: {
+                    productId: {
+                        [Op.in]: productIds
+                    }
+                }
+            });
+        }// Calculate revenue
         const totalRevenue = orders.reduce((sum, order) => sum + order.totalCost, 0);
         const totalCostPrice = orders.reduce((sum, order) => {
-            const orderCost = order.details.reduce((detailSum, detail) => {
-                const costPrice = productOrders.find(pro => detail.productId == pro.productId).costPrice;
+            const orderCost = (order.details || []).reduce((detailSum, detail) => {
+                const product = productOrders.find(pro => detail.productId == pro.productId);
+                const costPrice = product ? product.costPrice : 0;
                 const itemCost = costPrice * detail.amount;
                 return detailSum + itemCost;
             }, 0);
@@ -93,12 +97,11 @@ module.exports.index = async (req, res) => {
             const dailyRevenue = dailyOrders.reduce((sum, order) => {
                 return sum + order.totalCost;
             }, 0);
-            revenueData.push(dailyRevenue);
-
-            // Calculate daily costs
+            revenueData.push(dailyRevenue);            // Calculate daily costs
             const dailyCost = dailyOrders.reduce((sum, order) => {
-                const orderCost = order.details.reduce((detailSum, detail) => {
-                    const costPrice = productOrders.find(pro => detail.productId == pro.productId).costPrice;
+                const orderCost = (order.details || []).reduce((detailSum, detail) => {
+                    const product = productOrders.find(pro => detail.productId == pro.productId);
+                    const costPrice = product ? product.costPrice : 0;
                     const itemCost = costPrice * detail.amount;
                     return detailSum + itemCost;
                 }, 0);
@@ -133,34 +136,35 @@ module.exports.index = async (req, res) => {
 module.exports.exportReport = async (req, res) => {
     try {
         const fromDate = req.query.fromDate || new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0];
-        const toDate = req.query.toDate || new Date().toISOString().split('T')[0];
-
-        // Get completed orders within date range
+        const toDate = req.query.toDate || new Date().toISOString().split('T')[0];        // Get completed orders within date range
         const orders = await Order.findAll({
             where: {
                 status: 'Completed',
                 orderDate: {
                     [Op.between]: [new Date(fromDate), new Date(toDate + 'T23:59:59')]
                 }
-            }
-        });
-
-        const productIds = [
+            },
+            include: [{
+                model: OrderDetail,
+                required: false
+            }]
+        });        const productIds = [
             ...new Set(
-                orders.flatMap(ord => ord.details.map(detail => detail.productId))
+                orders.flatMap(ord => (ord.details || []).map(detail => detail.productId).filter(id => id))
             )
         ];
 
-        const productOrders = await Product.findAll({
-            attributes: ['productId', 'productName', 'costPrice'],
-            where: {
-                productId: { [Op.in]: productIds }
-            }
-        });
-
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
+        let productOrders = [];
+        if (productIds.length > 0) {
+            productOrders = await Product.findAll({
+                attributes: ['productId', 'productName', 'costPrice'],
+                where: {
+                    productId: { [Op.in]: productIds }
+                }
+            });
+        }const totalRevenue = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
         const totalCostPrice = orders.reduce((sum, order) => {
-            const orderCost = order.details.reduce((detailSum, detail) => {
+            const orderCost = (order.details || []).reduce((detailSum, detail) => {
                 const product = productOrders.find(pro => detail.productId === pro.productId);
                 const costPrice = product ? product.costPrice : 0;
                 return detailSum + (costPrice * (detail.amount || 0));

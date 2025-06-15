@@ -1,5 +1,6 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../configs/database').getSequelize();
+const { Sequelize, DataTypes } = require('sequelize');
+const { getSequelize } = require('../configs/database');
+const sequelize = getSequelize();
 
 const Discount = sequelize.define('Discount', {
   discountId: {
@@ -35,16 +36,15 @@ const Discount = sequelize.define('Discount', {
     type: DataTypes.STRING(50),
     defaultValue: 'Active',
     allowNull: true
-  },
-  createdAt: {
+  },  createdAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: Sequelize.fn('GETDATE')
   },
   updatedAt: {
     type: DataTypes.DATE,
     allowNull: true,
-    defaultValue: sequelize.fn('GETDATE')
+    defaultValue: Sequelize.fn('GETDATE')
   },
   deleted: {
     type: DataTypes.BOOLEAN,

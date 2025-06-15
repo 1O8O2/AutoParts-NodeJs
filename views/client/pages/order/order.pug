@@ -76,7 +76,7 @@ html(lang="en")
             input#phoneNumber(type="tel" name="phoneNumber" placeholder="Số điện thoại" required value=user && user.phone ? user.phone : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_PHONE}')` oninput=`this.setCustomValidity('')`)
           .form-group
             label(for="email") Email
-            input#email(type="email" name="email" placeholder="Email" required value=user && user.email ? user.email : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_EMAIL}')` oninput=`this.setCustomValidity('')`)
+            input#email(type="email" name="email" placeholder="Email" required value=user && user.email ? user.email : '' oninvalid=`this.setCustomValidity('${messageList.INVALID_EMAIL_WARNING}')` oninput=`this.setCustomValidity('')`)
           .form-group
             label(for="shipAddress") Địa chỉ giao hàng
             input#shipAddress(type="text" name="shipAddress" placeholder="Địa chỉ" required value=user && user.address ? user.address : '' oninvalid=`this.setCustomValidity('${messageList.BLANK_ADDRESS}')` oninput=`this.setCustomValidity('')`)
@@ -129,6 +129,7 @@ html(lang="en")
       let discountSelect = document.getElementById("discountId");
       let shippingSelect = document.getElementById("shippingType");
       console.log(!{JSON.stringify(messageList)});
+      const messageList = !{JSON.stringify(messageList)};
 
       const discounts = [
         !{discounts.map((discount, index) => `{ id: "${discount.discountId}", code: "${discount.discountDesc.replace(/"/g, '\\"')}", amount: ${discount.discountAmount}, minOrderValue: ${discount.minimumAmount} }${index < discounts.length - 1 ? ',' : ''}`).join('')}
@@ -205,12 +206,12 @@ html(lang="en")
       function updateQuantity(input, delta) {
         let value = parseInt(input.value) + delta;
         if (value < 1) {
-          if (confirm("Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?")) {
+          if (confirm(messageList.PRODUCT_REMOVE_CONFIRM)) {
             input.closest('.row.border-bottom').remove();
             updateCost();
           }
         } else if (value > parseInt(input.max)) {
-          alert("Số lượng không thể vượt quá số lượng trong kho.");
+          alert(messageList.PRODUCT_QUANTITY_EXCEEDED);
         } else {
           input.value = value;
           const productId = input.dataset.productId;

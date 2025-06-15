@@ -8,53 +8,53 @@ const systemConfig = require("../../configs/system");
 module.exports.index = async (req, res) => {
     try {
         // Get unique customer emails who have chats
-        const uniqueCustomers = await Chat.findAll({
-            attributes: [
-                [literal('DISTINCT userEmail'), 'userEmail']
-            ],
+        const uniqueChats = await Chat.findAll({
+            attributes: ['userEmail'],
             where: {
                 deleted: false,
                 senderType: 'customer' // Only get customers who have sent messages
             },
-            include: [{
-                model: Account,
-                attributes: [],  // Don't select Account.email in the main query
-                where: {
-                    permission: 'RG002' // Customer permission
-                }
-            }],
+            group: ['userEmail'],
             raw: true
         });
+        console.log('Unique customer chats:', uniqueChats);        // Get customer details and verify they are actual customers
+        const customers = [];
+        for (const chat of uniqueChats) {
+            // Check if this userEmail has an account (any permission level)
+            const account = await Account.findOne({
+                where: {
+                    email: chat.userEmail,
+                    deleted: false
+                }
+            });
 
-        // Get customer details
-        const customers = await Promise.all(
-            uniqueCustomers.map(async chat => {
+            if (account) {
                 const customer = await Customer.findByPk(chat.userEmail);
                 
-                // Count unread messages from this customer
-                const unreadCount = await Chat.count({
-                    where: {
-                        chatRoomId: `chat_${chat.userEmail}`,
-                        senderType: 'customer',
-                        status: 'Unread',
-                        deleted: false
-                    }
-                });
-                
                 if (customer) {
+                    // Count unread messages from this customer
+                    const unreadCount = await Chat.count({
+                        where: {
+                            chatRoomId: `chat_${chat.userEmail}`,
+                            senderType: 'customer',
+                            status: 'Unread',
+                            deleted: false
+                        }
+                    });
+                    
                     customer.unreadCount = unreadCount;
+                    customer.accountPermission = account.permission; // Add permission info for debugging
+                    customers.push(customer);
                 }
-                
-                return customer;
-            })
-        );
+            }
+        }
 
         res.render('admin/pages/chat/index', {
             pageTitle: "Chat với khách hàng",
-            customers: customers.filter(customer => customer !== null)
+            customers: customers
         });
     } catch (err) {
-        console.error(err);
+        console.error('Error in admin chat index:', err);
         res.status(500).send('Server error');
     }
 };
@@ -63,7 +63,7 @@ module.exports.index = async (req, res) => {
 module.exports.chatRoom = async (req, res) => {
     try {
         const customerEmail = req.params.customerEmail;
-        
+        console.log('Accessing chat room for customer:', customerEmail);
         // Find customer details
         const customer = await Customer.findByPk(customerEmail);
         if (!customer) {
@@ -194,28 +194,38 @@ module.exports.getMessages = async (req, res) => {
 module.exports.checkNewMessages = async (req, res) => {
     try {
         // Find all customer messages where status is "Unread"
+        // We need to check the userEmail against Account table to ensure it's a customer
         const unreadMessages = await Chat.findAll({
             where: {
                 status: 'Unread',
                 senderType: 'customer',
                 deleted: false
-            },
-            include: [{
-                model: Account,
-                attributes: ['email'],
+            }
+        });        // Filter messages from users with valid accounts (any permission)
+        const customerMessages = [];
+        for (const message of unreadMessages) {
+            const account = await Account.findOne({
                 where: {
-                    permission: 'RG002' // Customer permission
+                    email: message.userEmail,
+                    deleted: false
                 }
-            }]
-        });
+            });
+            
+            // Also check if they have a Customer profile
+            const customer = await Customer.findByPk(message.userEmail);
+            
+            if (account && customer) {
+                customerMessages.push(message);
+            }
+        }
 
         return res.status(200).json({
             success: true,
-            hasNewMessages: unreadMessages.length > 0,
-            count: unreadMessages.length
+            hasNewMessages: customerMessages.length > 0,
+            count: customerMessages.length
         });
     } catch (err) {
-        console.error(err);
+        console.error('Error in checkNewMessages:', err);
         return res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
