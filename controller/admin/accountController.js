@@ -79,6 +79,8 @@ module.exports.edit = async (req, res) => {
 
 // [PATCH] /AutoParts/admin/account/edit/:accEmail
 module.exports.editPatch = async (req, res) => {
+    console.log('accEmail', req.params.accEmail);
+    console.log('req.body', req.body);
     try {
         const accEmail = req.params.accEmail;
         

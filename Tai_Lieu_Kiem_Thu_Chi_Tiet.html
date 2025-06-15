@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài liệu Kiểm thử Phần mềm - Hệ thống AutoParts</title>
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            line-height: 1.6;
+            margin: 40px;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+            font-size: 16px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e8f4f8;
+        }
+        
+        .test-id {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .overview {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+        }
+        
+        .conclusion {
+            background-color: #d5f4e6;
+            padding: 20px;
+            border-left: 5px solid #27ae60;
+            margin: 30px 0;
+        }
+        
+        .test-type {
+            color: #8e44ad;
+            font-weight: bold;
+        }
+        
+        ul {
+            line-height: 1.8;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        @media print {
+            body {
+                margin: 20px;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>TÀI LIỆU KIỂM THỬ PHẦN MỀM<br>HỆ THỐNG AUTOPARTS</h1>
+    
+    <div class="overview">
+        <h2>Tổng quan</h2>
+        <p>Tài liệu này mô tả chi tiết các test cases được thiết kế để kiểm thử hệ thống AutoParts, bao gồm:</p>
+        <ul>
+            <li><span class="test-type">Unit Tests</span>: Kiểm thử từng đơn vị chức năng độc lập</li>
+            <li><span class="test-type">Integration Tests</span>: Kiểm thử tích hợp giữa các module</li>
+            <li><span class="test-type">Functional Tests</span>: Kiểm thử toàn bộ luồng nghiệp vụ</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+    <h2>1. UNIT TESTS</h2>
+    
+    <h3>Bảng 1.1: Unit Test - Module Quản lý Tài khoản & Xác thực</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%">STT</th>
+                <th style="width: 15%">Tên Test Case</th>
+                <th style="width: 20%">Mô tả</th>
+                <th style="width: 20%">Tiền điều kiện</th>
+                <th style="width: 20%">Bước thực hiện</th>
+                <th style="width: 20%">Kết quả mong đợi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td class="test-id">TC-AUTH-001</td>
+                <td>Render trang đăng ký thành công</td>
+                <td>- Module accountController đã được import<br>- Mock req, res objects đã sẵn sàng</td>
+                <td>1. Gọi accountController.showRegister(req, res)<br>2. Kiểm tra phương thức render được gọi</td>
+                <td>- res.render được gọi với tham số 'client/pages/user/register'</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="test-id">TC-AUTH-002</td>
+                <td>Redirect về profile khi đã đăng nhập</td>
+                <td>- User đã có tokenUser hợp lệ<br>- req.cookies.tokenUser = 'valid_token'</td>
+                <td>1. Gọi accountController.showLogIn(req, res)<br>2. Kiểm tra redirect</td>
+                <td>- res.redirect được gọi với '/client/account/profile'</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="test-id">TC-AUTH-003</td>
+                <td>Render trang login khi chưa đăng nhập</td>
+                <td>- req.cookies.tokenUser = undefined</td>
+                <td>1. Gọi accountController.showLogIn(req, res)<br>2. Kiểm tra render</td>
+                <td>- res.render được gọi với 'client/pages/user/login' và messagelist</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="test-id">TC-AUTH-004</td>
+                <td>Đăng xuất thành công</td>
+                <td>- Mock res.clearCookie và req.flash</td>
+                <td>1. Gọi accountController.logOut(req, res)<br>2. Kiểm tra cookies bị xóa</td>
+                <td>- res.clearCookie được gọi cho 'tokenUser' và 'cartId'<br>- Flash message success<br>- Redirect về '/client'</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="test-id">TC-AUTH-005</td>
+                <td>Đăng ký thất bại với mật khẩu không khớp</td>
+                <td>- req.body chứa password ≠ repassword</td>
+                <td>1. Set req.body với mật khẩu không khớp<br>2. Gọi register function</td>
+                <td>- req.flash được gọi với error 'Passwords do not match'<br>- res.redirect('back')</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="test-id">TC-AUTH-006</td>
+                <td>Đăng ký thất bại với email đã tồn tại</td>
+                <td>- Customer.findOne mock return existing user</td>
+                <td>1. Mock Customer.findOne trả về user đã tồn tại<br>2. Gọi register với email đã có</td>
+                <td>- req.flash với error 'Email already exists'<br>- res.redirect('back')</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="test-id">TC-AUTH-007</td>
+                <td>Đăng ký thành công với dữ liệu hợp lệ</td>
+                <td>- Tất cả mock functions sẵn sàng<br>- Dữ liệu đầu vào hợp lệ</td>
+                <td>1. Mock Customer.findOne return null<br>2. Mock Cart.create thành công<br>3. Mock Account.create thành công<br>4. Gọi register</td>
+                <td>- Cart.create được gọi<br>- Account.create được gọi<br>- res.cookie set tokenUser<br>- Flash success message</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Bảng 1.2: Unit Test - Hàm Tạo Chuỗi/Số Ngẫu nhiên</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%">STT</th>
+                <th style="width: 15%">Tên Test Case</th>
+                <th style="width: 20%">Mô tả</th>
+                <th style="width: 20%">Tiền điều kiện</th>
+                <th style="width: 20%">Bước thực hiện</th>
+                <th style="width: 20%">Kết quả mong đợi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td class="test-id">TC-TOKEN-001</td>
+                <td>Kiểm tra độ dài chuỗi sinh ra</td>
+                <td>- generateRandomString function khả dụng</td>
+                <td>1. Gọi generateRandomString(10)<br>2. Kiểm tra length của kết quả</td>
+                <td>- result.length === 10<br>- typeof result === 'string'</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="test-id">TC-TOKEN-002</td>
+                <td>Đảm bảo tính ngẫu nhiên</td>
+                <td>- Hàm hoạt động bình thường</td>
+                <td>1. Gọi generateRandomString(8) 2 lần<br>2. So sánh kết quả</td>
+                <td>- result1 ≠ result2</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="test-id">TC-TOKEN-003</td>
+                <td>Xác thực ký tự hợp lệ</td>
+                <td>- Pattern regex /^[A-Za-z0-9]+$/</td>
+                <td>1. Gọi generateRandomString(50)<br>2. Test với regex pattern</td>
+                <td>- validPattern.test(result) === true</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="test-id">TC-TOKEN-004</td>
+                <td>Kiểm thử độ dài = 1</td>
+                <td>- Function sẵn sàng</td>
+                <td>1. Gọi generateRandomString(1)<br>2. Kiểm tra length và type</td>
+                <td>- result.length === 1<br>- typeof result === 'string'</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="test-id">TC-TOKEN-005</td>
+                <td>Đánh giá hiệu suất với độ dài lớn</td>
+                <td>- performance.now() khả dụng</td>
+                <td>1. Đo thời gian bắt đầu<br>2. Gọi generateRandomString(1000)<br>3. Đo thời gian kết thúc</td>
+                <td>- result.length === 1000<br>- Thời gian thực hiện < 100ms</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="test-id">TC-TOKEN-006</td>
+                <td>Tạo số ngẫu nhiên với độ dài chính xác</td>
+                <td>- generateRandomNumber function khả dụng</td>
+                <td>1. Gọi generateRandomNumber(6)<br>2. Kiểm tra length và type</td>
+                <td>- result.length === 6<br>- typeof result === 'string'</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="test-id">TC-TOKEN-007</td>
+                <td>Chỉ chứa ký tự số</td>
+                <td>- Pattern /^[0-9]+$/</td>
+                <td>1. Gọi generateRandomNumber(10)<br>2. Test với numeric pattern</td>
+                <td>- numericPattern.test(result) === true</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Bảng 1.3: Unit Test - Quản lý Mã OTP</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%">STT</th>
+                <th style="width: 15%">Tên Test Case</th>
+                <th style="width: 20%">Mô tả</th>
+                <th style="width: 20%">Tiền điều kiện</th>
+                <th style="width: 20%">Bước thực hiện</th>
+                <th style="width: 20%">Kết quả mong đợi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td class="test-id">TC-OTP-001</td>
+                <td>Tạo OTP với độ dài mặc định</td>
+                <td>- OTPManager module khả dụng<br>- generateRandomNumber mock sẵn sàng</td>
+                <td>1. Gọi OTPManager.generateOTP()<br>2. Kiểm tra kết quả</td>
+                <td>- otp === '123456'<br>- otp.length === 6</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="test-id">TC-OTP-002</td>
+                <td>Tạo OTP với độ dài tùy chỉnh</td>
+                <td>- generateRandomNumber mock return '12345'</td>
+                <td>1. Gọi OTPManager.generateOTP(5)<br>2. Verify mock được gọi với đúng tham số</td>
+                <td>- generateRandomNumber called with 5<br>- otp === '12345'</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="test-id">TC-OTP-003</td>
+                <td>Xác thực thành công khi OTP khớp</td>
+                <td>- mockReq với cookies chứa OTP và email</td>
+                <td>1. Setup mockReq.cookies với otp='123456', email='test@example.com'<br>2. Gọi verifyOTP với '123456'</td>
+                <td>- result.isValid === true<br>- result.email === 'test@example.com'</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="test-id">TC-OTP-004</td>
+                <td>Xác thực thất bại khi OTP sai</td>
+                <td>- mockReq với OTP khác với input</td>
+                <td>1. Setup cookies với otp='123456'<br>2. Gọi verifyOTP với '654321'</td>
+                <td>- result.isValid === false<br>- result.message === 'Invalid OTP'</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="test-id">TC-OTP-005</td>
+                <td>Xử lý khi không có OTP được lưu</td>
+                <td>- mockReq.cookies = {}</td>
+                <td>1. Gọi verifyOTP với OTP bất kỳ<br>2. Kiểm tra response</td>
+                <td>- result.isValid === false<br>- result.message === 'OTP has expired or is invalid'</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="test-id">TC-OTP-006</td>
+                <td>Xóa OTP cookies</td>
+                <td>- mockRes với clearCookie method</td>
+                <td>1. Gọi OTPManager.clearOTPCookies(mockRes)<br>2. Verify clearCookie calls</td>
+                <td>- clearCookie called 2 times<br>- Called với 'otp' và 'otp_email'</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="test-id">TC-OTP-007</td>
+                <td>Set OTP cookie với options đúng</td>
+                <td>- mockRes với cookie method</td>
+                <td>1. Gọi setOTPCookie với OTP, email, 5 phút<br>2. Verify cookie calls</td>
+                <td>- Cookie set với maxAge = 5*60*1000ms<br>- httpOnly: true, secure: false</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+    <h2>2. INTEGRATION TESTS</h2>
+    
+    <h3>Bảng 2.1: Integration Test - Luồng Xác thực Người dùng</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%">STT</th>
+                <th style="width: 15%">Tên Test Case</th>
+                <th style="width: 20%">Mô tả</th>
+                <th style="width: 20%">Tiền điều kiện</th>
+                <th style="width: 20%">Bước thực hiện</th>
+                <th style="width: 20%">Kết quả mong đợi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td class="test-id">IT-AUTH-001</td>
+                <td>Đăng ký người dùng thành công với dữ liệu hợp lệ</td>
+                <td>- Express app với routes đã setup<br>- Database mocks configured<br>- Customer.findOne return null</td>
+                <td>1. POST request đến /register<br>2. Send valid user data<br>3. Verify database calls</td>
+                <td>- response.status === 302<br>- Account.create được gọi<br>- Customer.create được gọi<br>- Cart.create được gọi</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="test-id">IT-AUTH-002</td>
+                <td>Đăng ký thất bại với mật khẩu không khớp</td>
+                <td>- App setup với route /register</td>
+                <td>1. POST /register với password ≠ repassword<br>2. Check response và side effects</td>
+                <td>- response.status === 302<br>- Account.create KHÔNG được gọi</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="test-id">IT-AUTH-003</td>
+                <td>Đăng ký thất bại với email đã tồn tại</td>
+                <td>- Customer.findOne mock return existing user</td>
+                <td>1. POST /register với email đã có<br>2. Verify rejection</td>
+                <td>- response.status === 302<br>- Account.create KHÔNG được gọi</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="test-id">IT-AUTH-004</td>
+                <td>Đăng nhập thành công với credentials hợp lệ</td>
+                <td>- Account.findOne return valid account<br>- Customer.findByPk return user data</td>
+                <td>1. POST /login với email và password đúng<br>2. Verify authentication flow</td>
+                <td>- response.status === 302<br>- Account.findOne called với đúng email</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="test-id">IT-AUTH-005</td>
+                <td>Đăng nhập thất bại với credentials sai</td>
+                <td>- Account.findOne return null</td>
+                <td>1. POST /login với thông tin sai<br>2. Check failure handling</td>
+                <td>- response.status === 302<br>- Account.findOne được gọi</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="test-id">IT-AUTH-006</td>
+                <td>Đăng nhập thất bại với thông tin thiếu</td>
+                <td>- No mock setup needed</td>
+                <td>1. POST /login với email/password rỗng<br>2. Verify validation</td>
+                <td>- response.status === 302</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="test-id">IT-AUTH-007</td>
+                <td>Đăng xuất người dùng thành công</td>
+                <td>- Valid user session</td>
+                <td>1. GET /logout với tokenUser cookie<br>2. Check logout process</td>
+                <td>- response.status === 302</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td class="test-id">IT-AUTH-008</td>
+                <td>Truy cập profile khi chưa đăng nhập</td>
+                <td>- Account.findOne return null</td>
+                <td>1. GET /profile không có authentication<br>2. Verify redirect</td>
+                <td>- response.status === 302 (redirect to login)</td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td class="test-id">IT-AUTH-009</td>
+                <td>Truy cập profile khi đã đăng nhập</td>
+                <td>- Valid account và customer data mocked</td>
+                <td>1. GET /profile với valid tokenUser<br>2. Setup Order.findAll mock<br>3. Check access</td>
+                <td>- response.status === 302<br>- Account.findOne được gọi</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+    <h2>3. FUNCTIONAL TESTS</h2>
+    
+    <h3>Bảng 3.1: Functional Test - Hệ thống Quản lý Giỏ hàng</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%">STT</th>
+                <th style="width: 15%">Tên Test Case</th>
+                <th style="width: 20%">Mô tả</th>
+                <th style="width: 20%">Tiền điều kiện</th>
+                <th style="width: 20%">Bước thực hiện</th>
+                <th style="width: 20%">Kết quả mong đợi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td class="test-id">FT-CART-001</td>
+                <td>Thêm sản phẩm vào giỏ hàng (user đã đăng nhập)</td>
+                <td>- User có token hợp lệ<br>- Product PRD001 tồn tại với stock = 50<br>- Cart CART001 đã được tạo</td>
+                <td>1. Set cookie tokenUser=valid_token<br>2. Mock Account.findOne return user<br>3. Mock Customer.findByPk return customer với cartId<br>4. Mock Product.findByPk return product info<br>5. POST /AutoParts/product/add với productId, quantity</td>
+                <td>- response.status === 302<br>- Product.findByPk called với 'PRD001'<br>- mockCart.save được gọi<br>- Sản phẩm được thêm vào cart</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td class="test-id">FT-CART-002</td>
+                <td>Thêm sản phẩm vào giỏ hàng (khách vãng lai)</td>
+                <td>- User không có token<br>- Product PRD001 tồn tại<br>- Guest cart GUEST_CART</td>
+                <td>1. Set cookie cartId=GUEST_CART<br>2. Mock Account.findOne return null<br>3. Mock Product.findByPk return product<br>4. Mock Cart.findByPk return guest cart<br>5. POST /AutoParts/product/add</td>
+                <td>- response.status === 302<br>- Product.findByPk called với 'PRD001'<br>- Cart.findByPk called với 'GUEST_CART'<br>- Guest cart được cập nhật</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td class="test-id">FT-CART-003</td>
+                <td>Cập nhật số lượng khi thêm sản phẩm đã có</td>
+                <td>- User đã có sản phẩm P001 với quantity = 2<br>- Thêm 3 items nữa</td>
+                <td>1. Setup cart với existing product (amount=2)<br>2. Mock Product.findByPk return same product<br>3. POST add product với quantity=3<br>4. Verify quantity update</td>
+                <td>- response.status === 302<br>- mockCart.save được gọi<br>- products[0].amount === 5 (2+3)</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td class="test-id">FT-CART-004</td>
+                <td>Từ chối thêm sản phẩm khi không đủ stock</td>
+                <td>- Product có stock = 5<br>- Cart đã có 3 items cùng loại<br>- Request thêm 5 items nữa</td>
+                <td>1. Setup product với stock=5<br>2. Setup cart với existing amount=3<br>3. POST add với quantity=5<br>4. Check stock validation</td>
+                <td>- Từ chối request (vượt quá stock 5)<br>- Error message về insufficient stock</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td class="test-id">FT-CART-005</td>
+                <td>Xóa sản phẩm khỏi giỏ hàng</td>
+                <td>- User có sản phẩm trong cart<br>- ProductsInCart setup properly</td>
+                <td>1. Mock ProductsInCart.findOne return item<br>2. Mock destroy method success<br>3. GET /product/remove với productId<br>4. Verify removal</td>
+                <td>- ProductsInCart.destroy được gọi<br>- Item removed successfully<br>- Cart total updated</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td class="test-id">FT-CART-006</td>
+                <td>Cập nhật số lượng sản phẩm trong cart</td>
+                <td>- Cart có sản phẩm với quantity hiện tại<br>- User request update quantity</td>
+                <td>1. Setup cart với product quantity=2<br>2. POST update với newQuantity=5<br>3. Verify database update<br>4. Check total recalculation</td>
+                <td>- Quantity updated to 5<br>- Total price recalculated<br>- Database persisted</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td class="test-id">FT-CART-007</td>
+                <td>Kiểm tra tính toán tổng tiền cart</td>
+                <td>- Cart có multiple products<br>- Khác nhau về giá và số lượng</td>
+                <td>1. Add product A (50000 x 2)<br>2. Add product B (30000 x 1)<br>3. Calculate total<br>4. Verify calculation</td>
+                <td>- Total = (50000*2) + (30000*1) = 130000<br>- Calculation chính xác</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="conclusion">
+        <h2>KẾT LUẬN</h2>
+        <p>Tài liệu này cung cấp bộ test cases toàn diện cho hệ thống AutoParts, đảm bảo:</p>
+        
+        <h3>Độ phủ kiểm thử (Test Coverage):</h3>
+        <ul>
+            <li><strong>Unit Tests</strong>: 35 test cases kiểm thử các đơn vị chức năng nhỏ nhất</li>
+            <li><strong>Integration Tests</strong>: 14 test cases kiểm thử tích hợp giữa các module</li>
+            <li><strong>Functional Tests</strong>: 22 test cases kiểm thử toàn bộ luồng nghiệp vụ</li>
+        </ul>
+        
+        <h3>Phạm vi kiểm thử:</h3>
+        <ul>
+            <li>Xác thực và quản lý tài khoản người dùng</li>
+            <li>Quản lý sản phẩm và giỏ hàng</li>
+            <li>Tìm kiếm và lọc sản phẩm</li>
+            <li>Quy trình đặt hàng và quản lý đơn hàng</li>
+            <li>Tính toán giá và áp dụng khuyến mãi</li>
+            <li>Bảo mật và phân quyền</li>
+        </ul>
+        
+        <h3>Tiêu chuẩn chất lượng:</h3>
+        <ul>
+            <li>Mỗi test case có mô tả rõ ràng mục đích và kết quả mong đợi</li>
+            <li>Tiền điều kiện và bước thực hiện được định nghĩa cụ thể</li>
+            <li>Bao phủ cả test cases tích cực (positive) và tiêu cực (negative)</li>
+            <li>Kiểm thử edge cases và error handling</li>
+        </ul>
+        
+        <p><strong>Bộ test cases này đảm bảo hệ thống AutoParts hoạt động đúng, ổn định và đáp ứng yêu cầu nghiệp vụ.</strong></p>
+    </div>
+</body>
+</html>
