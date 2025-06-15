@@ -10,7 +10,7 @@ let backBtn = document.querySelector("#back")
 function editAccount(){
 	if(!inputs[0].classList.contains("active")){
 		for(let i =0;i< inputs.length;i++){
-			if(inputs[i].name=="phone"){
+			if(inputs[i].name=="email"){
 				continue;
 			}
 			inputs[i].removeAttribute('readonly');

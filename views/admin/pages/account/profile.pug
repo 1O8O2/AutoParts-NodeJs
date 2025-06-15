@@ -20,7 +20,7 @@ block main
                     i.fa-solid.fa-unlock-keyhole
                     |  Đổi mật khẩu
 
-            form.user-form(action=`${prefixAdmin}/dashboard/profile/edit/${user.phone}` method="post")
+            form.user-form(action=`${prefixAdmin}/dashboard/profile/edit/${user.email}` method="post")
                 .form-group
                     label(for="fullName") Họ và tên :
                     input#fullName.form-input(name="fullName" readonly placeholder="Họ và tên" value=user.fullName)

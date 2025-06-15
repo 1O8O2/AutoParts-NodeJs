@@ -77,6 +77,7 @@ module.exports.statistic = async (req, res) => {
 
     // Get total products sold in the period
     const totalProducts = orders.reduce((sum, order) => {
+      console.log("Tong tien",sum);
       return sum + order.OrderDetails.reduce((detailSum, detail) => {
         return detailSum + parseInt(detail.amount || 0);
       }, 0);
@@ -165,6 +166,7 @@ module.exports.profile = async (req, res) => {
 
 // [POST] /AutoParts/admin/dashboard/profile/edit/:userPhone
 module.exports.editProfile = async (req, res) => {
+  console.log(req.body);
   try {
     const userPhone = req.params.userPhone;
 
@@ -172,7 +174,7 @@ module.exports.editProfile = async (req, res) => {
       req.body,
       { 
         where: { 
-            phone: userPhone
+            email: userPhone
         } 
       }
     );
@@ -181,6 +183,31 @@ module.exports.editProfile = async (req, res) => {
     res.redirect("back");
   } catch (err) {
     req.flash('error', "Thay đổi thông tin thất bại!");
-    res.status(500).send('Server error');
+    res.redirect("back");
+  }
+};
+
+// [POST] /AutoParts/admin/dashboard/profile/changepass/:email
+module.exports.changePass = async (req, res) => {
+  console.log(req.body);
+  try {
+    const email = req.params.email;
+
+    await Employee.update(
+      { 
+        password: req.body.newpass 
+      },
+      { 
+        where: { 
+            email: email
+        } 
+      }
+    );
+
+    req.flash('success', "Thay đổi mật khẩu thành công!");
+    res.redirect("back");
+  } catch (err) {
+    req.flash('error', "Thay đổi thông tin thất bại!");
+    res.redirect("back");
   }
 };
