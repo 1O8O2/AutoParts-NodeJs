@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const employeeController = require('../../controller/admin/employeeController');
-const userMiddleware = require('../../middlewares/admin/user.middleware');
+const validateAuth = require('../../middlewares/admin/validate.middleware');
 
-router.get('/', userMiddleware.infoUser, employeeController.index);
-router.get('/detail', userMiddleware.infoUser, employeeController.detail);
-router.get('/add', userMiddleware.infoUser, employeeController.add);
-router.post('/add', userMiddleware.infoUser, employeeController.addPost);
-router.get('/edit', userMiddleware.infoUser, employeeController.edit);
-router.post('/edit', userMiddleware.infoUser, employeeController.editPatch);
-router.post('/changeStatus', userMiddleware.infoUser, employeeController.changeStatus);
+
+router.get('/', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_XEM'), employeeController.index);
+router.get('/detail', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_XEM'), employeeController.detail);
+router.get('/add', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_THEM'), employeeController.add);
+router.post('/add', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_THEM'), employeeController.addPost);
+router.get('/edit', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_SUA'), employeeController.edit);
+router.post('/edit', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_SUA'), employeeController.editPatch);
+router.post('/changeStatus', validateAuth.checkPermission('DANH_SACH_NHAN_VIEN_SUA'), employeeController.changeStatus);
 
 module.exports = router; 

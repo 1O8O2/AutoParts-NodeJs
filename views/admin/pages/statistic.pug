@@ -1,6 +1,7 @@
 extends ../layouts/default.pug
 include ../mixins/alert.pug
 include ../mixins/currency.pug
+include ../mixins/moment.pug
 
 block main
     #alertContainer
@@ -154,7 +155,8 @@ block main
                                 tr
                                     td
                                         a(href="#") #{order.orderId}
-                                    td #{order.orderDate}
+                                    td 
+                                        +formatDate(order.orderDate)
                                     td #{order.userEmail}
                                     td
                                         case order.status

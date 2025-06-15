@@ -20,7 +20,7 @@ block main
                     i.fa-solid.fa-unlock-keyhole
                     |  Đổi mật khẩu
 
-            form.user-form(action=`${prefixAdmin}/dashboard/profile/edit/${user.phone}` method="post")
+            form.user-form(action=`${prefixAdmin}/dashboard/profile/edit/${user.email}` method="post")
                 .form-group
                     label(for="fullName") Họ và tên :
                     input#fullName.form-input(name="fullName" readonly placeholder="Họ và tên" value=user.fullName)
@@ -45,7 +45,7 @@ block main
                     label(for="educationLevel") Trình độ giáo dục :
                     input#educationLevel.form-input(name="educationLevel" readonly value=user.educationLevel placeholder="Trình độ giáo dục")
 
-            form.pass-form#passForm(method="post" action=`${prefixAdmin}/profile/changepass`)
+            form.pass-form#passForm(method="post" action=`${prefixAdmin}/dashboard/profile/changePass/${user.email}`)
                 h2 Đổi mật khẩu
                 .pass-inputs
                     input#pass(type="password" name="pass" placeholder="Nhập mật khẩu hiện tại" required)

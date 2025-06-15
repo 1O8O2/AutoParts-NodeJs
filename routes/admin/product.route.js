@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../../controller/admin/productController');
+const validateAuth = require('../../middlewares/admin/validate.middleware');
+
 const multer = require('multer');
 const path = require('path');
 
@@ -26,20 +28,20 @@ const upload = multer({
 });
 
 // Product routes
-router.get('/', productController.index);
-router.get('/add', productController.add);
-router.post('/add', upload.array('imageFiles'), productController.addPost);
-router.get('/edit', productController.edit);
-router.post('/edit', upload.array('imageFiles'), productController.editPost);
-router.delete('/delete/:productId', productController.delete);
-router.get('/detail', productController.detail);
-router.post('/changeStatus', productController.changeStatus);
+router.get('/', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_XEM'), productController.index);
+router.get('/add', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_THEM'), productController.add);
+router.post('/add', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_THEM'), upload.array('imageFiles'), productController.addPost);
+router.get('/edit', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_SUA'), productController.edit);
+router.post('/edit', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_SUA'), upload.array('imageFiles'), productController.editPost);
+router.delete('/delete/:productId', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_XOA'), productController.delete);
+router.get('/detail', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_XEM'), productController.detail);
+router.post('/changeStatus', validateAuth.checkPermission('QUAN_LY_SAN_PHAM_SUA'), productController.changeStatus);
 
 
 // Import routes
-router.get('/import', productController.import);
-router.get('/import/add', productController.importAdd);
-router.post('/import/add', productController.importAddPost);
-router.get('/import/detail/:importId', productController.importDetail);
+router.get('/import', validateAuth.checkPermission('PHIEU_NHAP_XEM'), productController.import);
+router.get('/import/add', validateAuth.checkPermission('PHIEU_NHAP_THEM'), productController.importAdd);
+router.post('/import/add', validateAuth.checkPermission('PHIEU_NHAP_THEM'), productController.importAddPost);
+router.get('/import/detail/:importId', validateAuth.checkPermission('PHIEU_NHAP_XEM'), productController.importDetail);
 
 module.exports = router; 

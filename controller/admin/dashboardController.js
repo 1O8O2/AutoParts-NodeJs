@@ -4,6 +4,7 @@ const Order = require("../../models/Order");
 const OrderDetail = require("../../models/OrderDetail");
 const Product = require("../../models/Product");
 const { Op, literal } = require('sequelize');
+const md5 = require('md5');
 
 // [GET] /AutoParts/admin/statistic
 module.exports.statistic = async (req, res) => {
@@ -93,7 +94,8 @@ module.exports.statistic = async (req, res) => {
             literal(`CAST('${formatDateForSQL(toDate)}' AS DATETIME)`)
           ]
         }
-      }
+      },
+      order: [['orderDate', 'DESC']]
     });
 
     // Get accounts created within date range
@@ -163,16 +165,53 @@ module.exports.profile = async (req, res) => {
   }
 };
 
-// [POST] /AutoParts/admin/dashboard/profile/edit/:userPhone
+// [POST] /AutoParts/admin/dashboard/profile/edit/:userEmail
 module.exports.editProfile = async (req, res) => {
   try {
-    const userPhone = req.params.userPhone;
+    const userEmail = req.params.userEmail;
 
     await Employee.update(
       req.body,
       { 
         where: { 
-            phone: userPhone
+          email: userEmail
+        } 
+      }
+    );
+
+    req.flash('success', "Thay đổi thông tin thành công!");
+    res.redirect("back");
+  } catch (err) {
+    req.flash('error', "Thay đổi thông tin thất bại!");
+    res.status(500).send('Server error');
+  }
+};
+
+// [POST] /AutoParts/admin/dashboard/profile/changePass/:userEmail
+module.exports.changePass = async (req, res) => {
+  try {
+    const userEmail = req.params.userEmail;
+    const { pass, newpass } = req.body;
+
+    const verifyAccount = await Account.findOne({
+      where: {
+        email: userEmail,
+        status: "Active"
+      }
+    });
+
+    if (verifyAccount.password != md5(pass)) {
+      req.flash('error', "Thay đổi mật khẩu thất bại!");
+      return res.redirect("back");
+    } 
+    
+    await Account.update(
+      {
+        password: md5(newpass)
+      },
+      { 
+        where: { 
+          email: userEmail
         } 
       }
     );

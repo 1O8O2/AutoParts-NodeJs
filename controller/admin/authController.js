@@ -17,6 +17,7 @@ module.exports.login = async (req, res) => {
 module.exports.loginPost = async (req, res) => {
   try {
     const account = await Account.findByPk(req.body.email);
+
     if(!account) {
       req.flash("error", res.locals.messages.ACCOUNT_NOT_FOUND);
       return res.redirect('back');
@@ -29,6 +30,7 @@ module.exports.loginPost = async (req, res) => {
       req.flash("error", res.locals.messages.LOGIN_ERROR);
       return res.redirect('back');
     }
+    
     res.cookie("token", account.token);
     req.flash("success", res.locals.messages.LOGIN_SUCCESS)
     return res.redirect(`${systemConfig.prefixAdmin}/dashboard/profile`);

@@ -14,16 +14,17 @@ module.exports.infoUser = async (req, res, next) => {
         });
 
         if (account) {
-            const user = await Employee.findOne({
-                where: { email: account.email }
-            });
-            res.locals.user = user;
-
             const permission = await RoleGroup.findOne({
                 where: {
                     roleGroupId: account.permission
                 }
-            })
+            });
+
+            const user = await Employee.findOne({
+                where: { email: account.email }
+            });
+            
+            res.locals.user = user;
             res.locals.permission = permission.permissions;
 
             next();

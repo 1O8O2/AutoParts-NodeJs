@@ -1,50 +1,47 @@
-const sequelize = require('../configs/database');
+const db = require('../configs/database');         
+const sequelize = db.getSequelize();               
+const { QueryTypes } = require('sequelize');
 
 module.exports.generateNextBlogId = async () => {
     try {
-        const [results] = await sequelize.query(
+        const [result] = await sequelize.query(
             "SELECT MAX(blogId) AS maxId FROM Blog WHERE blogId LIKE 'BLOG%'",
-            { type: sequelize.QueryTypes.SELECT }
+            { type: QueryTypes.SELECT }
         );
 
-        const maxId = results ? results.maxId : null;
+        const maxId = result?.maxId;
+        if (!maxId) return 'BLOG001';
 
-        if (!maxId) {
-            return 'BLOG001'; 
-        }
-        
         const currentNum = parseInt(maxId.substring(4), 10);
         return `BLOG${String(currentNum + 1).padStart(3, '0')}`;
     } catch (error) {
-        return 'BLOG001'; 
+        console.error('Error generating blogId:', error);
+        return 'BLOG001';
     }
-}
-
+};
 module.exports.generateNextDiscountId = async () => {
     try {
-        const [results] = await sequelize.query(
+        const [result] = await sequelize.query(
             "SELECT MAX(discountId) AS maxId FROM Discount WHERE discountId LIKE 'DIS%'",
-            { type: sequelize.QueryTypes.SELECT }
+            { type: QueryTypes.SELECT }
         );
 
-        const maxId = results ? results.maxId : null;
+        const maxId = result?.maxId;
+        if (!maxId) return 'DIS001';
 
-        if (!maxId) {
-            return 'DIS001'; 
-        }
-        
         const currentNum = parseInt(maxId.substring(3), 10);
-        return `DIS${String(currentNum + 1).padStart(2, '0')}`;
+        return `DIS${String(currentNum + 1).padStart(3, '0')}`;
     } catch (error) {
-        return 'DIS001'; 
+        console.error('Error generating discountId:', error);
+        return 'DIS001';
     }
-}
+};
 
 module.exports.generateNextOrderId = async () => {
     try {
         const now = new Date();
         const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng từ 0-11, cộng 1 và thêm số 0 nếu cần
+        const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -52,26 +49,29 @@ module.exports.generateNextOrderId = async () => {
 
         return `ORD${year}${month}${day}${hours}${minutes}${seconds}`;
     } catch (error) {
-        return 'ORD0000'; 
+        console.error('Error generating orderId:', error);
+        return 'ORD000000000000';
     }
-}
+};
 
 module.exports.generateNextRoleGroupId = async () => {
     try {
-        const [results] = await sequelize.query(
+        const [rows] = await sequelize.query(
             "SELECT MAX(roleGroupId) AS maxId FROM RoleGroup WHERE roleGroupId LIKE 'RG%'",
-            { type: sequelize.QueryTypes.SELECT }
+            { type: QueryTypes.SELECT }
         );
 
-        const maxId = results ? results.maxId : null;
+        const maxId = rows?.maxId;
+        console.log(maxId)
 
         if (!maxId) {
-            return 'RG001'; 
+            return 'RG001';
         }
-        
+
         const currentNum = parseInt(maxId.substring(2), 10);
         return `RG${String(currentNum + 1).padStart(3, '0')}`;
     } catch (error) {
-        return 'RG001'; 
+        console.error('Error generating next roleGroupId:', error);
+        return 'RG001';
     }
 }

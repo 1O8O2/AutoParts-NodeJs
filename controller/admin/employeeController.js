@@ -3,6 +3,8 @@ const Account = require('../../models/Account');
 const {RoleGroup,RoleGroupPermissions} = require('../../models/RoleGroup');
 
 const systemConfig = require('../../configs/system');
+const generateToken = require('../../helpers/generateToken');
+const md5 = require('md5');
 
 module.exports.index = async (req, res) => {
     try {
@@ -56,7 +58,12 @@ module.exports.detail = async (req, res) => {
 
 module.exports.add = async (req, res) => {
     try {
-        const roleGroups = await RoleGroup.findAll();
+        const roleGroups = await RoleGroup.findAll({
+            where: {
+                deleted: false,
+                status: "Active"
+            }
+        });
         res.render('admin/pages/employee/add', {
             pageTitle: "Thêm nhân viên",
             roleGroups: roleGroups
@@ -70,14 +77,15 @@ module.exports.add = async (req, res) => {
 module.exports.addPost = async (req, res) => {
     try {
         const employeeData = req.body;
-        employeeData.status = employeeData.status || "Inactive";
+        employeeData.status = employeeData.status || "Inactive"; 
         employeeData.deleted = false;
 
         // Create associated account
         const accountData = {
             email: employeeData.email,
-            password: "1111", // Default password
+            password: md5("1111"), // Default password
             permission: employeeData.permission,
+            token: generateToken.generateRandomString(24),
             status: employeeData.status,
             deleted: false
         };
@@ -111,7 +119,12 @@ module.exports.edit = async (req, res) => {
                 }
             ]
         });
-        const roleGroups = await RoleGroup.findAll();
+        const roleGroups = await RoleGroup.findAll({
+            where: {
+                deleted: false,
+                status: "Active"
+            }
+        });
 
         if (!employee) {
             return res.status(404).send("Employee not found");
